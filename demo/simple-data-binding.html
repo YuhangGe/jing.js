@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Simple Data Binding Demo</title>
+    <script type="text/javascript" src="../bower_components/jquery/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="../src/jing.js"></script>
+    <script type="text/javascript">
+        jing.controller("TestCtrl", function($ctrl) {
+            $ctrl.declare({
+               'message' : 'Hello, World!'
+            });
+            $ctrl.declare("test", function() {
+                alert($ctrl.message);
+                console.log(this.message); //this 即 $ctrl
+                $ctrl.message = "Hello, Jing!";
+            });
+        });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            jing.drive(document.body);
+        });
+
+    </script>
+</head>
+<body>
+    <div j-ctrl="TestCtrl">
+        <div>
+            <p>Message: {{message}}</p>
+            <input j-model="message" />
+        </div>
+        <div>
+            <input type="button" value="Click Me" j-click="test">
+        </div>
+    </div>
+</body>
+</html>

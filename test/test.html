@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Test</title>
+    <script type="text/javascript" src="../bower_components/jquery/dist/jquery.min.js"></script>
+    <script type="text/javascript">
+        function log() {
+            console.log.apply(console, arguments);
+        }
+
+        var obj = {};
+        obj['b'] = 344;
+        obj.c = function() {
+
+        };
+
+        Object.defineProperty(obj, "a", {
+            get : function() {
+                return 10;
+            },
+            set : function(val) {
+
+            }
+        });
+
+        function $map(arr, func) {
+            var map_arr = new Array(arr.length);
+            for(var i=0;i<arr.length;i++) {
+                map_arr[i] = func(arr[i]);
+            }
+            return map_arr;
+        }
+
+        function $each(arr, func) {
+            for(var i=0;i<arr.length;i++) {
+                if(func(arr[i], i) === false) {
+                    return;
+                }
+            }
+        }
+
+        function $wrap(arr) {
+            var AM = ['push', 'pop', 'reverse', 'shift', 'sort', 'unshift', 'splice'];
+            var AProto = Array.prototype;
+            $each(AM, function(item) {
+                arr[item] = function() {
+                    var rtn = AProto[item].apply(this, arguments);
+                    log('change');
+                    return rtn;
+                }
+            });
+            return arr;
+        }
+
+        $(function() {
+            log(obj.hasOwnProperty('a'));
+            log(obj.hasOwnProperty('b'));
+            log(obj.hasOwnProperty('c'));
+            var tp = typeof obj['c'];
+            log(tp);
+        });
+    </script>
+</head>
+<body>
+
+</body>
+</html>

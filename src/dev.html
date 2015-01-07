@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>jing.js develop html file</title>
+    <script type="text/javascript" src="../bower_components/jquery/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="dev.js"></script>
+
+</head>
+<body>
+<div j-ctrl="TestCtrl">
+    <div>
+        <p>Message: {{message}}</p>
+        <input j-model="message" />
+    </div>
+    <div>
+        <input type="button" value="Click Me" j-click="test">
+    </div>
+    <div>
+        <ul>
+            <li id="liii">First Boy</li>
+            <li j-repeat="boys" j-click="say">
+                <p>{{boy}}</p>
+            </li>
+            <li>Last Boy</li>
+        </ul>
+    </div>
+</div>
+</body>
+</html>

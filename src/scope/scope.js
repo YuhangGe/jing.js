@@ -90,7 +90,7 @@ function scope_create(name, module, parent) {
             if(['declare', 'watch'].indexOf(var_name) >= 0) {
                 log('can not use "' + var_name + '" in declare.');
             } else {
-                __scope[var_name] = $bind(__scope, var_value);
+                $defineProperty(__scope, var_name, var_value, true, true);
             }
         }
     }
@@ -121,12 +121,16 @@ function scope_create(name, module, parent) {
         });
     }
 
-    __scope.$declare = declare;
-    __scope.$watch = watch;
-    __scope.$require = function(name) {
+    $defineProperty(__scope, '$declare', function(var_name, var_value) {
+        declare(var_name, var_value);
+    });
+    $defineProperty(__scope, '$watch', function(var_name, callback, data) {
+        watch(var_name, callback, data);
+    });
+    $defineProperty(__scope, '$require', function(name) {
         return module_require(name, this.$module);
-    };
-    __scope.$child = function(name) {
+    });
+    $defineProperty(__scope, '$child', function(name) {
         if(!name) {
             name = 'jing.scope.' + __scope_counter++;
         }
@@ -138,8 +142,8 @@ function scope_create(name, module, parent) {
             cd[name] = cs;
             return cs;
         }
-    };
-    __scope.$get = function(var_name) {
+    });
+    $defineProperty(__scope, '$get', function(var_name) {
         if(this.hasOwnProperty(var_name)) {
             return this[var_name];
         } else if(this.$parent) {
@@ -147,8 +151,9 @@ function scope_create(name, module, parent) {
         } else {
             throw 'scope does not have declare var:' + var_name;
         }
-    };
-    __scope.$set = function(var_name, value) {
+    });
+
+    $defineProperty(__scope, '$set', function(var_name, value) {
         if(this.hasOwnProperty(var_name)) {
             this[var_name] = value;
         } else if(this.$parent) {
@@ -156,7 +161,7 @@ function scope_create(name, module, parent) {
         } else {
             throw 'scope does not have declare var:' + var_name;
         }
-    };
+    });
 
     return __scope;
 }

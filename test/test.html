@@ -9,56 +9,35 @@
             console.log.apply(console, arguments);
         }
 
-        var obj = {};
-        obj['b'] = 344;
-        obj.c = function() {
+        function cm(name, parent) {
+            var __m = {};
 
-        };
+            Object.defineProperty(__m, 'name', {
+                writable: false,
+                value : name
+            });
 
-        Object.defineProperty(obj, "a", {
-            get : function() {
-                return 10;
-            },
-            set : function(val) {
-
-            }
-        });
-
-        function $map(arr, func) {
-            var map_arr = new Array(arr.length);
-            for(var i=0;i<arr.length;i++) {
-                map_arr[i] = func(arr[i]);
-            }
-            return map_arr;
-        }
-
-        function $each(arr, func) {
-            for(var i=0;i<arr.length;i++) {
-                if(func(arr[i], i) === false) {
-                    return;
-                }
-            }
-        }
-
-        function $wrap(arr) {
-            var AM = ['push', 'pop', 'reverse', 'shift', 'sort', 'unshift', 'splice'];
-            var AProto = Array.prototype;
-            $each(AM, function(item) {
-                arr[item] = function() {
-                    var rtn = AProto[item].apply(this, arguments);
-                    log('change');
-                    return rtn;
+            Object.defineProperty(__m, 'parent', {
+                writable : false,
+                value : parent ? parent : null
+            });
+            Object.defineProperty(__m, 'root', {
+                get : function() {
+                    return this.parent ? this.parent.root : this;
                 }
             });
-            return arr;
+
+            return __m;
         }
 
+
         $(function() {
-            log(obj.hasOwnProperty('a'));
-            log(obj.hasOwnProperty('b'));
-            log(obj.hasOwnProperty('c'));
-            var tp = typeof obj['c'];
-            log(tp);
+            var m1 = cm('1');
+            var m2 = cm('2', m1);
+            var m3 = cm('3', m2);
+
+            log(m3.root.name);
+
         });
     </script>
 </head>

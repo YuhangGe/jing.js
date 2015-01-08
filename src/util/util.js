@@ -34,11 +34,39 @@ function $data(ele, data) {
 }
 function $each(arr, func) {
     for(var i=0;i<arr.length;i++) {
-        if(func.call(arr[i], arr[i], i)===false) {
+        if(func(arr[i], arr[i], i)===false) {
             return;
         }
     }
 }
+function $in(obj, func) {
+    for(var kn in obj) {
+        if(func(obj[kn], kn) === false) {
+            return;
+        }
+    }
+}
+function $defineProperty(obj, prop, value, writable, enumerable) {
+    Object.defineProperty(obj, prop, {
+        value : value,
+        writable : writable ? true : false,
+        enumerable : enumerable ? true : false
+    });
+}
+function $defineGetterSetter(obj, prop, getter, setter, configurable, enumerable) {
+    var desc = {
+        configurable : configurable ? true : false,
+        enumerable : enumerable ? true : false
+    };
+    if(getter) {
+        desc['get'] = getter;
+    }
+    if(setter) {
+        desc['set'] = setter;
+    }
+    Object.defineProperty(obj, prop, desc);
+}
+
 function $on(ele, event_name, event_handler) {
     ele.addEventListener(event_name, event_handler);
 }
@@ -50,4 +78,8 @@ function log() {
 }
 function $(id) {
     return document.getElementById(id);
+}
+
+function directive_register() {
+
 }

@@ -1,5 +1,4 @@
-function directive_parse(ele) {
-    var $cur_scope = scope_last();
+function drive_parse(ele, $module, $scope) {
     var cn = ele.childNodes;
     if(cn.length === 0) {
         return;
@@ -10,13 +9,19 @@ function directive_parse(ele) {
         }
         var txt = cn[i].textContent;
         var m = txt.match(/\{\{\s*([\w\d_]+)\s*\}\}/);
-        if(!m || !$cur_scope.hasOwnProperty(m[1])) {
+        if(!m) {
             continue;
         }
-        cn[i].textContent = txt.replace(m[0], $cur_scope[m[1]]);
+
+        var val = $scope.$get(m[1]);
+        if(!val) {
+            console.log('"'+m[1]+'" not found in scope: ' + $scope.$name);
+            continue;
+        }
+        cn[i].textContent = txt.replace(m[0], val);
         var template = txt.replace(m[0], "{{0}}");
 
-        $cur_scope.watch(m[1], function(var_name, new_value, data) {
+        $scope.$watch(m[1], function(var_name, new_value, data) {
             data.ele.textContent = data.tem.replace("{{0}}", new_value);
         }, {
             ele : cn[i],

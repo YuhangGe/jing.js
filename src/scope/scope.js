@@ -1,17 +1,19 @@
-
-var __scope_table = {};
-var __scope_stack = [];
-
-__scope_table['0'] = scope_create();
-__scope_stack.push(__scope_table['0']);
-
 var __AM = ['push', 'pop', 'reverse', 'shift', 'sort', 'unshift', 'splice'];
 var __AProto = Array.prototype;
 
-function scope_create() {
+function scope_create(name, module, parent) {
     var __props = {};
     var __scope = {};
     var __watch = {};
+
+    $defineProperty(__scope, '$name', name);
+    $defineProperty(__scope, '$children', {});
+    $defineProperty(__scope, '$parent', parent ? parent : null);
+    $defineProperty(__scope, '$module', module);
+    $defineGetterSetter(__scope, '$root', function() {
+        return this.$module.$root.$scope;
+    });
+
 
     function declare_variables(var_name, var_value) {
         if(var_value instanceof Array) {
@@ -35,20 +37,30 @@ function scope_create() {
         __props[var_name] = var_value;
 
         //if(Object.defineProperty) {
-            Object.defineProperty(__scope, var_name, {
-                enumerable : true,
-                configurable : true,
-                get : function() {
-                    return __props[var_name];
-                },
-                set : function(val) {
-                    if(__props[var_name] === val) {
-                        return;
-                    }
-                    __props[var_name] = val;
-                    emit(var_name);
-                }
-            });
+        $defineGetterSetter(__scope, var_name, function() {
+            return __props[var_name];
+        }, function(val) {
+            if(__props[var_name] === val) {
+                return;
+            }
+            __props[var_name] = val;
+            emit(var_name);
+        }, true, true);
+
+            //Object.defineProperty(__scope, var_name, {
+            //    enumerable : true,
+            //    configurable : true,
+            //    get : function() {
+            //        return __props[var_name];
+            //    },
+            //    set : function(val) {
+            //        if(__props[var_name] === val) {
+            //            return;
+            //        }
+            //        __props[var_name] = val;
+            //        emit(var_name);
+            //    }
+            //});
         //} else {
         //    alert('browser not support!');
         //    throw 'browser not support!'
@@ -109,29 +121,43 @@ function scope_create() {
         });
     }
 
-    __scope.declare = declare;
-    __scope.watch = watch;
+    __scope.$declare = declare;
+    __scope.$watch = watch;
+    __scope.$require = function(name) {
+        return module_require(name, this.$module);
+    };
+    __scope.$child = function(name) {
+        if(!name) {
+            name = 'jing.scope.' + __scope_counter++;
+        }
+        var cd = this.$children;
+        if(cd.hasOwnProperty(name)) {
+            return cd[name];
+        } else {
+            var cs = scope_create(name, this.$module, this);
+            cd[name] = cs;
+            return cs;
+        }
+    };
+    __scope.$get = function(var_name) {
+        if(this.hasOwnProperty(var_name)) {
+            return this[var_name];
+        } else if(this.$parent) {
+            return this.$parent.$get(var_name);
+        } else {
+            throw 'scope does not have declare var:' + var_name;
+        }
+    };
+    __scope.$set = function(var_name, value) {
+        if(this.hasOwnProperty(var_name)) {
+            this[var_name] = value;
+        } else if(this.$parent) {
+            this.$parent.set(var_name, value);
+        } else {
+            throw 'scope does not have declare var:' + var_name;
+        }
+    };
+
     return __scope;
 }
 
-function scope_exists(scope_name) {
-    return __scope_table.hasOwnProperty(scope_name);
-}
-function scope_push(scope_name) {
-    var scope = __scope_table[scope_name];
-    if(typeof scope !== 'undefined') {
-        __scope_stack.push(scope);
-        return true;
-    } else {
-        return false;
-    }
-}
-function scope_pop() {
-    return __scope_stack.pop();
-}
-function scope_last() {
-    return __scope_stack[__scope_stack.length-1];
-}
-function scope_add(scope_name, scope) {
-    __scope_table[scope_name] = scope;
-}

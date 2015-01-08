@@ -82,6 +82,7 @@ function run() {
              * var SA = require('A')
              * 注意这里不能有这行代码。不允许循环依赖。
              */
+            var SA = $scope.$require('A');
             var CC = $scope.$require('Service3.ChildS1.ChildS2.CC');
             var name = 'Alibaba';
             return {

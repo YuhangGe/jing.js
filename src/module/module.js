@@ -116,7 +116,7 @@ function module_register(name, parent) {
                 fac.inst = fac.func(__module.$scope, __module);
                 fac.state = 1;
             } else if(fac.state === 999) {
-                throw 'factory is loading.';
+                throw 'factory "'+name+'" of Module "'+__module.$name +'" is loading. 可能的原因是产生了循环依赖。';
             }
             return fac.inst;
         } else {

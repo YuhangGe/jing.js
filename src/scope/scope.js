@@ -12,7 +12,7 @@ function Scope(name, parent) {
      */
     var __ = {};
     $defineProperty(this, '__', __);
-    $defineProperty(__, 'watch', []);
+    $defineProperty(__, 'watch', {});
 
     $defineProperty(this, '$$', {});
 
@@ -76,7 +76,7 @@ $defineProperty(__scope_prototype, '$watch', function(var_name, callback, data) 
         return;
     }
     var __watch = this.__.watch;
-    if(!$hasProperty(var_name)) {
+    if(!$hasProperty(__watch, var_name)) {
         __watch[var_name] = [];
     }
     __watch[var_name].push({

@@ -3,7 +3,5 @@ jing.js
 
 Flexible javascript MVW framework
 
-todo
-=====
-
-* 不需要在每个数据发生改变时都更新UI，应该在某一个周期结束后。
+当前项目还处于探索阶段！
+------

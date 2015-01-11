@@ -1,3 +1,8 @@
+/**
+ * 由于当前项目还处于探索阶段，因此Gruntfile.js只是预留的。
+ * 实际上为了简单起见先手写了下面的代码。
+ * 直接执行 'node Gruntfile.js'就可以了。
+ */
 var FS = require('fs');
 var UglifyJS = require("uglify-js");
 

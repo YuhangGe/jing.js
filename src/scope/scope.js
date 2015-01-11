@@ -66,14 +66,22 @@ $defineProperty(__scope_prototype, '$declare', function(var_name, var_value) {
             $me.$emit(var_name);
         }, true, true);
 
-    } else {
-        $defineProperty($me, var_name, var_value, true, true);
     }
 });
+
 $defineProperty(__scope_prototype, '$watch', function(var_name, callback, data) {
     if(typeof callback !== 'function') {
         log('$watch need function');
         return;
+    }
+    if(!$hasProperty(this.$$, var_name)) {
+        if(!$hasProperty(this, var_name)) {
+            log('"'+var_name+'" of scope:' + this.name + ' not found!');
+            return;
+        }
+        var val = this[var_name];
+        delete this[var_name];
+        this.$declare(var_name, val);
     }
     var __watch = this.__.watch;
     if(!$hasProperty(__watch, var_name)) {

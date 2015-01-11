@@ -158,17 +158,21 @@ function run() {
             log(rootScope.rootMessage);
             log(rootScope.oooo);
 
-            scope.$declare({
-                'message': 'Hello, World!',
-                'boys': [1, 2, 3, 4]
-            });
-            scope.$declare("test", function (event) {
+            scope.message = 'Hello, World!';
+            scope.boys = [1, 2, 3, 4];
+            scope.test = function (event) {
                 log(event);
                 alert(scope.message);
                 log(this.message); //this 即 scope
                 scope.message = "Hello, Jing!";
                 this.boys.push(6);
                 log(scope.boys);
+            };
+            scope.$watch('boys', function(var_name, new_value, data) {
+                log('boys changed to ', new_value);
+                log(data);
+            }, {
+                info : '额外的数据'
             });
         })
         .initialize(function(module, rootScope) {

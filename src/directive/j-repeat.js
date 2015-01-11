@@ -1,27 +1,25 @@
-directive_create('j-repeat', __SCOPE_TYPE_CREATE, function() {
+directive_create('j-repeat', function() {
 
-    return function(ele, $scope, $value, $var_name) {
+    return function(drive_module, directive_module, scope, element, attr_value) {
 
         /**
-         * todo
+         * todo 还有很多问题需要解决。
          * 1. 使用更高效率的createDocumentFragment一类的函数。避免多次appendChild和removeChild。
          * 2. parse
          */
-
-        if(!$value instanceof Array) {
+        var scope_value = scope[attr_value];
+        if(!scope_value instanceof Array) {
             log('j-repeat need Array!');
             return;
         }
-        $css(ele, 'display', 'none');
-        $data(ele, []);
+        $css(element, 'display', 'none');
+        $data(element, []);
 
-        setTimeout(function() {
-            render(ele, $value);
-        }, 0);
+        render(element, scope_value);
 
-        $scope.watch($var_name, function(var_name, new_value, element) {
+        scope.$watch(attr_value, function(var_name, new_value, element) {
             update(element, new_value);
-        }, ele);
+        }, element);
 
         function render(element, array) {
             var pn = element.parentNode, ne,
@@ -29,6 +27,7 @@ directive_create('j-repeat', __SCOPE_TYPE_CREATE, function() {
             for(var i=0;i<array.length;i++) {
                 ne = element.cloneNode(true);
                 $css(ne, 'display', 'block');
+                ne.removeAttribute('j-repeat');
                 pn.appendChild(ne);
                 e_arr.push(ne);
             }

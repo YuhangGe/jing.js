@@ -1,6 +1,3 @@
-function global_component(name, type) {
-
-}
 
 jing = {};
 
@@ -9,6 +6,8 @@ jing.scope_types = {
     CREATE : __SCOPE_TYPE_CREATE,
     PARENT : __SCOPE_TYPE_PARENT
 };
+
+jing.$on = $on;
 
 jing.module = module_create;
 jing.require = module_require;

@@ -1,15 +1,15 @@
 directive_create('j-model', function() {
-    return function(ele, $scope, $value, $var_name) {
-        if(ele.nodeName !== 'INPUT') {
+    return function(drive_module, directive_module, scope, element, attr_value) {
+        if(element.nodeName !== 'INPUT') {
             return;
         }
-        $data(ele, $scope);
-        $on(ele, 'input', function() {
+        $data(element, scope);
+        $on(element, 'input', function() {
             $data(this)[$attr(this, 'j-model')] = this.value;
         });
-        ele.value = $value;
-        $scope.$watch($var_name, function(var_name, new_value, input_ele) {
+        element.value = scope[attr_value];
+        scope.$watch(attr_value, function(var_name, new_value, input_ele) {
             input_ele.value = new_value;
-        }, ele);
+        }, element);
     };
 });

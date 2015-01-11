@@ -3,6 +3,9 @@ var __directive_full_table = {};
 
 
 function directive_initialize(dire) {
+    if(!dire) {
+        debugger;
+    }
     if(dire.state === 0) {
         dire.state = 999;
         var df = dire.func(dire.module);

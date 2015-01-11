@@ -11,9 +11,9 @@
 <div j-ctrl="TestCtrl">
     <div>
         <p>Message: {{message}}</p>
-        <input j-model="message | toUpperCase | trim | substring(3, 5)" />
+        <input j-model="message" />
     </div>
-    <p j-directive="me.xiaoge.DatePicker|"></p>
+    <!--<p j-directive-name="me.xiaoge.DatePicker"></p>-->
     <div>
         <input type="button" value="Click Me" j-click="test">
     </div>

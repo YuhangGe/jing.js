@@ -58,16 +58,24 @@
 
 function run() {
     jing.module('Service')
-        .factory('A', function($scope) {
+        .factory('A', function(module) {
+
             /*
-             * 以下三行代码等价。
-             * var SB2 = $module.require('B');
-             * var SB3 = $scope.module.require('B');
+             * 获取rootScope的标准方法是通过任意一个scope来调用scope.$root.
+             *   通常情况下，factory中不应该直接访问rootScope.
+             *   但是，如果一定想要得到rootScope，
+             *   可以使用 jing.scope(module.path)
+             *      但当该module没有drive任何html元素，这个函数返回空值。
              *
-             * factory会被传入当前module : $module, 当前module的rootScope : $scope.
-             * 而scope的属性module又返回该module。
+             * 从软件工程角度讲，两个模块之间应该是松耦合的，
+             *   不同模块的factory不应该直接去访问其它模块的rootScope,
+             *   如果一定要访问，使用下面的方法。
+             * 注意，如果jing.scope传入的module没有drive任何html元素，则返回为空值。
              */
-            var SeB = $scope.$require('B');
+            var rootScope = jing.scope(jing.module('MyApp').path); // return rootScope of app.
+            var rootScope2 = jing.scope(jing.module('Service3.ChildS1.ChildS2').path); //return undefined/null
+
+            var SeB = module.require('B');
             var arr = [];
             for(var i=0; i<10;i++) {
                 arr.push(SeB.func());
@@ -80,18 +88,14 @@ function run() {
                 }
             }
         })
-        .factory('B', function($scope) {
-            var otherRootScope = jing.module('MyApp').$scope;
-            otherRootScope.$declare({
-                'oooo' : 323
-            });
+        .factory('B', function(module) {
 
             /*
-             * var SA = require('A')
-             * 注意这里不能有这行代码。不允许循环依赖。
+             * 如果下面这行代码取消注释，则会抛出循环依赖的异常。
+             *
              */
-            var SA = $scope.$require('A');
-            var CC = $scope.$require('Service3.ChildS1.ChildS2.CC');
+            //var SA = module.require('A');  //throw circular require exception, because factory A has required B.
+            var CC = module.require('Service3.ChildS1.ChildS2.CC');
             var name = 'Alibaba';
             return {
                 func : function() {
@@ -109,12 +113,7 @@ function run() {
         .factory('CC', 8888);
 
     jing.module('MyApp')
-        .factory('MyService', function(scope) {
-            var rootScope = scope.$root;
-            rootScope.$declare({
-                'message' : 'message from MyApp.MyService to root'
-            });
-
+        .factory('MyService', function() {
             var _ = {};
             var n = 1;
             Object.defineProperty(_, 'tick', {
@@ -142,6 +141,14 @@ function run() {
              * var CS = jing.require('Service3.ChildS1.ChildS2.CC');
              */
 
+            /*
+             * 获取rootScope的标准方法是通过任意一个scope来调用scope.$root.
+             *   通常情况下，factory中不应该直接访问rootScope.
+             *   但是，如果一定想要得到rootScope，
+             *   可以使用 jing.scope(module.path)
+             *      但当该module没有drive任何html元素，这个函数返回空值。
+             */
+            //var rootScope = jing.scope(module.path)
             var rootScope = scope.$root;
 
             log(ServiceA.array);
@@ -164,11 +171,11 @@ function run() {
                 log(scope.boys);
             });
         })
-        .drive(document.body)
         .initialize(function(module, rootScope) {
-            var CC = module.require('Service3.ChildS1.ChildS2');
+            var CC = module.require('Service3.ChildS1.ChildS2.CC');
             rootScope.$declare({
                 'rootMessage' : 'root message: ' + CC
             });
-        });
+        })
+        .drive(document.body);
 }

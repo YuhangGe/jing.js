@@ -60,26 +60,24 @@ function module_create(name) {
         child_module = module_array[ns[i]];
         if(!child_module) {
             child_module = new Module(ns[i], parent_module);
-            if(parent_module) {
-                $defineProperty(parent_module.children, ns[i], child_module);
-            }
+            $defineProperty(module_array, ns[i], child_module, false, true);
         }
         module_array = child_module.children;
+        parent_module = child_module;
     }
+
     var ln = ns[ns.length-1];
     if($hasProperty(module_array, ln)) {
         return module_array[ln];
     } else {
         child_module = new Module(ln, parent_module);
-        if(parent_module) {
-            $defineProperty(parent_module.children, ln, child_module);
-        }
+        $defineProperty(module_array, ln, child_module);
         return child_module;
     }
 }
 
 function module_get(name, include_last) {
-    var ns = name.split('.');
+    var ns = name.trim().split('.');
     if(!include_last && ns.length <= 1) {
         return null;
     }
@@ -184,21 +182,10 @@ $defineProperty(__module_prototype, 'initialize', function(func) {
     }
     return this;
 });
-$defineProperty(__module_prototype, 'controller', function controller(name, func) {
-    var ctrl;
+$defineProperty(__module_prototype, 'controller', function(name, func) {
     var $controllers = this.__.controllers;
     if(!func) {
-        ctrl = $controllers[name];
-        if(!ctrl) {
-            log(name, ': controller not found.');
-            return null;
-        }
-        if(ctrl.state === 0) {
-            ctrl.state = 999;
-            ctrl.func(this);
-            ctrl.state = 1;
-        }
-        return ctrl.inst;
+        return $controllers[name];
     } else if(typeof func === 'function'){
         $defineProperty($controllers, name, new Controller(this, name, func));
         return this;

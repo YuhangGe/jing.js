@@ -39,6 +39,10 @@ jing.factory = function(name) {
         return ms[0].factory(ms[1]);
     }
 };
-jing.scope = function() {
-    return scope_create();
+jing.scope = function(name) {
+    if(name) {
+        return __root_scope_table[name];
+    } else {
+        return scope_create();
+    }
 };

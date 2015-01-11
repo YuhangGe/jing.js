@@ -13,15 +13,15 @@ function drive_render_view(ele, scope) {
             continue;
         }
 
-        var val = $scope.$get(m[1]);
+        var val = scope.$get(m[1]);
         if(!val) {
-            console.log('"'+m[1]+'" not found in scope: ' + $scope.$name);
+            log('"'+m[1]+'" not found in scope: ' + scope.$name);
             continue;
         }
         cn[i].textContent = txt.replace(m[0], val);
         var template = txt.replace(m[0], "{{0}}");
 
-        $scope.$watch(m[1], function(var_name, new_value, data) {
+        scope.$watch(m[1], function(var_name, new_value, data) {
             data.ele.textContent = data.tem.replace("{{0}}", new_value);
         }, {
             ele : cn[i],

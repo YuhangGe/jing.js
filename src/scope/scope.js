@@ -12,7 +12,7 @@ function Scope(name, parent) {
      */
     var __ = {};
     $defineProperty(this, '__', __);
-    $defineProperty(__, '$watch', []);
+    $defineProperty(__, 'watch', []);
 
     $defineProperty(this, '$$', {});
 
@@ -75,7 +75,7 @@ $defineProperty(__scope_prototype, '$watch', function(var_name, callback, data) 
         log('$watch need function');
         return;
     }
-    var __watch = this.__.$watch;
+    var __watch = this.__.watch;
     if(!$hasProperty(var_name)) {
         __watch[var_name] = [];
     }
@@ -85,28 +85,29 @@ $defineProperty(__scope_prototype, '$watch', function(var_name, callback, data) 
     });
 });
 $defineProperty(__scope_prototype, '$emit', function(var_name) {
-    var __watch = this.__.$watch;
+    var __watch = this.__.watch;
     var w_arr = __watch[var_name];
     if(!w_arr || w_arr.length === 0) {
         return;
     }
     //may be replace by setImmediate in future
-    $timeout(function() {
+    //todo 当连续几行代码改变是的同一个变量时，不应该每一行代码都更新一次。目前还只是demo初期版本。
+    $timeout($bind(this, function() {
         for(var i=0;i<w_arr.length;i++) {
             w_arr[i].cb(var_name, this.$$[var_name], w_arr[i].data);
         }
-    }, 0);
+    }), 0);
 });
 $defineProperty(__scope_prototype, '$child', function(name) {
     if(!name) {
-        name = this.parent ? this.parent.name + '.' + __scope_counter++ : 'jing.scope.' + __scope_counter++;
+        name = this.$parent ? this.$parent.name + '.' + __scope_counter++ : 'jing.scope.' + __scope_counter++;
     }
-    var cd = this.children;
+    var cd = this.$children;
     if($hasProperty(cd, name)) {
         return cd[name];
     } else {
         var cs = new Scope(name, this);
-        $defineProperty(cd, 'name', cs, false, true);
+        $defineProperty(cd, name, cs, false, true);
         return cs;
     }
 });
@@ -132,10 +133,10 @@ $defineProperty(__scope_prototype, '$set', function(var_name, value) {
 });
 
 function scope_create(parent) {
-    var name = this.parent ? this.parent.name + '.' + __scope_counter++ : 'jing.scope.' + __scope_counter++;
+    var name = this.$parent ? this.$parent.name + '.' + __scope_counter++ : 'jing.scope.' + __scope_counter++;
     var cs = new Scope(name, parent);
     if(parent) {
-        $defineProperty(parent.children, 'name', cs, false, true);
+        $defineProperty(parent.$children, name, cs, false, true);
     }
     return cs;
 }

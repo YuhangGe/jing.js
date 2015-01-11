@@ -1,26 +1,46 @@
 var __AM = ['push', 'pop', 'reverse', 'shift', 'sort', 'unshift', 'splice'];
 var __AProto = Array.prototype;
+var __scope_counter = 0;
+var __root_scope_table = {};
 
-function scope_create(name, module, parent) {
-    var __props = {};
-    var __scope = {};
-    var __watch = {};
+function Scope(name, parent) {
+    /**
+     * $$用来保存通过$declare定义的变量。
+     * __用来保存支撑逻辑的内部变量。
+     * 通过这个方式，使用Scope的实例尽可能信息隐藏；
+     *   通过for in只能取到通过$declare定义的变量。
+     */
+    var __ = {};
+    $defineProperty(this, '__', __);
+    $defineProperty(__, '$watch', []);
 
-    $defineProperty(__scope, '$name', name);
-    $defineProperty(__scope, '$children', {});
-    $defineProperty(__scope, '$parent', parent ? parent : null);
-    $defineProperty(__scope, '$module', module);
-    $defineGetterSetter(__scope, '$root', function() {
-        return this.$module.$root.$scope;
-    });
+    $defineProperty(this, '$$', {});
 
+    $defineProperty(this, '$name', name);
+    $defineProperty(this, '$children', {});
+    $defineProperty(this, '$parent', parent ? parent : null);
 
-    function declare_variables(var_name, var_value) {
+}
+
+var __scope_prototype = Scope.prototype;
+
+$defineGetterSetter(__scope_prototype, '$root', function() {
+    return this.$parent ? this.$parent.$root : this;
+});
+
+$defineProperty(__scope_prototype, '$declare', function(var_name, var_value) {
+    var $me = this;
+
+    if(typeof var_name === 'object') {
+        for(var vn in var_name) {
+            $me.$declare(vn, var_name[vn]);
+        }
+    } else if(typeof var_value !== 'function') {
         if(var_value instanceof Array) {
             $each(__AM, function(item) {
                 var_value[item] = function() {
                     var rtn = __AProto[item].apply(this, arguments);
-                    emit(var_name);
+                    $me.$emit(var_name);
                     return rtn;
                 }
             });
@@ -28,141 +48,94 @@ function scope_create(name, module, parent) {
              * 由于js不能重载[]运算符。因此要修改元素，只能使用set函数才能影响。
              * ES6里面会引入新的Proxy方式，可以实现重载[]运算符的功能。未来的版本可以修改。
              */
-            var_value.set = function(idx, val) {
+            var_value.$set = function(idx, val) {
                 this[idx] = val;
-                emit(var_name);
+                $me.$emit(var_name);
             };
         }
 
-        __props[var_name] = var_value;
+        $me.$$[var_name] = var_value;
 
-        //if(Object.defineProperty) {
-        $defineGetterSetter(__scope, var_name, function() {
-            return __props[var_name];
+        $defineGetterSetter($me, var_name, function() {
+            return $me.$$[var_name];
         }, function(val) {
-            if(__props[var_name] === val) {
+            if($me.$$[var_name] === val) {
                 return;
             }
-            __props[var_name] = val;
-            emit(var_name);
+            $me.$$[var_name] = val;
+            $me.$emit(var_name);
         }, true, true);
 
-            //Object.defineProperty(__scope, var_name, {
-            //    enumerable : true,
-            //    configurable : true,
-            //    get : function() {
-            //        return __props[var_name];
-            //    },
-            //    set : function(val) {
-            //        if(__props[var_name] === val) {
-            //            return;
-            //        }
-            //        __props[var_name] = val;
-            //        emit(var_name);
-            //    }
-            //});
-        //} else {
-        //    alert('browser not support!');
-        //    throw 'browser not support!'
-        //}
-        //if(__scope.__defineGetter__) {
-        //    __scope.__defineGetter__(var_name, function() {
-        //        return __props[var_name];
-        //    });
-        //    __scope.__defineSetter__(var_name, function(val) {
-        //        if(__props[var_name] === val) {
-        //            return;
-        //        }
-        //        __props[var_name] = val;
-        //        emit(var_name);
-        //    });
-        //}
+    } else {
+        $defineProperty($me, var_name, var_value, true, true);
     }
-
-    function declare(var_name, var_value) {
-        if(typeof var_name === 'object') {
-            for(var vn in var_name) {
-                declare(vn, var_name[vn]);
-            }
-        } else if(typeof var_value !== 'function') {
-            declare_variables(var_name, var_value);
-        } else {
-            if(['declare', 'watch'].indexOf(var_name) >= 0) {
-                log('can not use "' + var_name + '" in declare.');
-            } else {
-                $defineProperty(__scope, var_name, var_value, true, true);
-            }
-        }
+});
+$defineProperty(__scope_prototype, '$watch', function(var_name, callback, data) {
+    if(typeof callback !== 'function') {
+        log('$watch need function');
+        return;
     }
-
-    function emit(var_name) {
-        var w_arr = __watch[var_name];
-        if(!w_arr || w_arr.length === 0) {
-            return;
-        }
-        //may be replace by setImmediate in future
-        $timeout(function() {
-            for(var i=0;i<w_arr.length;i++) {
-                w_arr[i].cb(var_name, __props[var_name], w_arr[i].data);
-            }
-        }, 0);
+    var __watch = this.__.$watch;
+    if(!$hasProperty(var_name)) {
+        __watch[var_name] = [];
     }
-
-    function watch(var_name, callback, data) {
-        if(typeof callback !== 'function') {
-            return;
-        }
-        if(!__watch[var_name]) {
-            __watch[var_name] = [];
-        }
-        __watch[var_name].push({
-            cb : callback,
-            data : data
-        });
+    __watch[var_name].push({
+        cb : callback,
+        data : data
+    });
+});
+$defineProperty(__scope_prototype, '$emit', function(var_name) {
+    var __watch = this.__.$watch;
+    var w_arr = __watch[var_name];
+    if(!w_arr || w_arr.length === 0) {
+        return;
     }
+    //may be replace by setImmediate in future
+    $timeout(function() {
+        for(var i=0;i<w_arr.length;i++) {
+            w_arr[i].cb(var_name, this.$$[var_name], w_arr[i].data);
+        }
+    }, 0);
+});
+$defineProperty(__scope_prototype, '$child', function(name) {
+    if(!name) {
+        name = this.parent ? this.parent.name + '.' + __scope_counter++ : 'jing.scope.' + __scope_counter++;
+    }
+    var cd = this.children;
+    if($hasProperty(cd, name)) {
+        return cd[name];
+    } else {
+        var cs = new Scope(name, this);
+        $defineProperty(cd, 'name', cs, false, true);
+        return cs;
+    }
+});
 
-    $defineProperty(__scope, '$declare', function(var_name, var_value) {
-        declare(var_name, var_value);
-    });
-    $defineProperty(__scope, '$watch', function(var_name, callback, data) {
-        watch(var_name, callback, data);
-    });
-    $defineProperty(__scope, '$require', function(name) {
-        return module_require(name, this.$module);
-    });
-    $defineProperty(__scope, '$child', function(name) {
-        if(!name) {
-            name = 'jing.scope.' + __scope_counter++;
-        }
-        var cd = this.$children;
-        if(cd.hasOwnProperty(name)) {
-            return cd[name];
-        } else {
-            var cs = scope_create(name, this.$module, this);
-            cd[name] = cs;
-            return cs;
-        }
-    });
-    $defineProperty(__scope, '$get', function(var_name) {
-        if(this.hasOwnProperty(var_name)) {
-            return this[var_name];
-        } else if(this.$parent) {
-            return this.$parent.$get(var_name);
-        } else {
-            throw 'scope does not have declare var:' + var_name;
-        }
-    });
+$defineProperty(__scope_prototype, '$get', function(var_name) {
+    if($hasProperty(this, var_name)) {
+        return this[var_name];
+    } else if(this.$parent) {
+        return this.$parent.$get(var_name);
+    } else {
+        throw 'scope does not have declare var:' + var_name;
+    }
+});
 
-    $defineProperty(__scope, '$set', function(var_name, value) {
-        if(this.hasOwnProperty(var_name)) {
-            this[var_name] = value;
-        } else if(this.$parent) {
-            this.$parent.set(var_name, value);
-        } else {
-            throw 'scope does not have declare var:' + var_name;
-        }
-    });
+$defineProperty(__scope_prototype, '$set', function(var_name, value) {
+    if($hasProperty(this, var_name)) {
+        this[var_name] = value;
+    } else if(this.$parent) {
+        this.$parent.set(var_name, value);
+    } else {
+        throw 'scope does not have declare var:' + var_name;
+    }
+});
 
-    return __scope;
+function scope_create(parent) {
+    var name = this.parent ? this.parent.name + '.' + __scope_counter++ : 'jing.scope.' + __scope_counter++;
+    var cs = new Scope(name, parent);
+    if(parent) {
+        $defineProperty(parent.children, 'name', cs, false, true);
+    }
+    return cs;
 }
-

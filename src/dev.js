@@ -37,13 +37,21 @@
 
         loadScript(['util/util.js',
             'scope/scope.js',
+            'module/module.js',
+            'module/controller.js',
+            'module/directive.js',
+
+            'directive/global.js',
+            'directive/j-ctrl.js',
+            'directive/j-include.js',
             'directive/j-click.js',
             'directive/j-model.js',
             'directive/j-repeat.js',
-            'module/module.js',
+
             'drive/drive.js',
             'drive/directive.js',
-            'drive/parse.js',
+            'drive/view.js',
+
             'jing.js'], run);
     });
 })();
@@ -101,10 +109,10 @@ function run() {
         .factory('CC', 8888);
 
     jing.module('MyApp')
-        .factory('MyService', function($scope) {
-            var rootScope = $scope.$root;
+        .factory('MyService', function(scope) {
+            var rootScope = scope.$root;
             rootScope.$declare({
-                'message' : 'root message'
+                'message' : 'message from MyApp.MyService to root'
             });
 
             var _ = {};
@@ -117,22 +125,24 @@ function run() {
 
             return _;
         })
-        .controller("TestCtrl", function ($scope) {
-            var ServiceA = $scope.$require('Service.A');
-            var ServiceB = $scope.$require('Service.B');
-            var MyService = $scope.$require('MyService');
-            var CS = $scope.$require('Service3.ChildS1.ChildS2.CC');
+        .controller("TestCtrl", function (module, scope) {
+            var ServiceA = module.require('Service.A');
+            var ServiceB = module.require('Service.B');
+            var MyService = module.require('MyService');
+            var CS = module.require('Service3.ChildS1.ChildS2.CC');
 
             /*
              * 上面四行代码等价于下面四行。
-             * 可以通过$scope.require来导入依赖，这种情况下可以省略模块名。
+             * 通过module.require来导入依赖，这种情况下可以省略模块名，
+             *   则表示从该module里面查找。
+             * 此外，jing.require和jing.factory函数是同一个函数，都是获取模块里面的factory.
              * var SA = jing.require('Service.A');
              * var SB = jing.require('Service.B');
              * var SC = jing.require('MyApp.MyService');
-             * var CS = jing.require('');
+             * var CS = jing.require('Service3.ChildS1.ChildS2.CC');
              */
 
-            var rootScope = $scope.$root;
+            var rootScope = scope.$root;
 
             log(ServiceA.array);
             log(ServiceB.func(), ServiceB.func());
@@ -141,23 +151,24 @@ function run() {
             log(rootScope.rootMessage);
             log(rootScope.oooo);
 
-            $scope.$declare({
+            scope.$declare({
                 'message': 'Hello, World!',
                 'boys': [1, 2, 3, 4]
             });
-            $scope.$declare("test", function (ev) {
-
-                alert($scope.message);
-                console.log(this.message); //this 即 $ctrl
-                $scope.message = "Hello, Jing!";
+            scope.$declare("test", function (event) {
+                log(event);
+                alert(scope.message);
+                log(this.message); //this 即 scope
+                scope.message = "Hello, Jing!";
                 this.boys.push(6);
-                console.log($scope.boys);
+                log(scope.boys);
             });
         })
         .drive(document.body)
-        .run(function($rootScope) {
-            $rootScope.$declare({
-                'rootMessage' : 'root message: hello.'
+        .initialize(function(module, rootScope) {
+            var CC = module.require('Service3.ChildS1.ChildS2');
+            rootScope.$declare({
+                'rootMessage' : 'root message: ' + CC
             });
         });
 }

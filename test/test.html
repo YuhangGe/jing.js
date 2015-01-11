@@ -4,44 +4,30 @@
     <meta charset="UTF-8">
     <title>Test</title>
     <script type="text/javascript" src="../bower_components/jquery/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="../bower_components/angular/angular.js"></script>
     <script type="text/javascript">
-        function log() {
-            console.log.apply(console, arguments);
-        }
-
-        function cm(name, parent) {
-            var __m = {};
-
-            Object.defineProperty(__m, 'name', {
-                writable: false,
-                value : name
-            });
-
-            Object.defineProperty(__m, 'parent', {
-                writable : false,
-                value : parent ? parent : null
-            });
-            Object.defineProperty(__m, 'root', {
-                get : function() {
-                    return this.parent ? this.parent.root : this;
-                }
-            });
-
-            return __m;
-        }
-
-
-        $(function() {
-            var m1 = cm('1');
-            var m2 = cm('2', m1);
-            var m3 = cm('3', m2);
-
-            log(m3.root.name);
-
-        });
+        var app = angular.module('MyApp', [])
+                .filter('toUpper', [function() {
+                    return function(str) {
+                        return str.toUpperCase();
+                    }
+                }])
+                .controller('TestCtrl', ['$scope', function($scope) {
+                    $scope.message = 'hello';
+                }]);
     </script>
 </head>
-<body>
-
+<body ng-app="MyApp">
+    <!-- 在没有冲突的情况下，可以直接使用directive的name。-->
+    <!-- 如果有多个模块下的directive重名，则使用name只能取到最后一次定义的. -->
+    <!-- 通过j-directive-name和j-directive-value可以完整无冲突地引用directive -->
+    <!-- 在j-directive-name中如果要使用jing.js内部定义的诸如j-click，请使用jing.j-click -->
+    <!-- 这样的设计不仅可以简单地像使用angular一样地使用directive，也能支撑非常复杂的大规模模块化app -->
+    <p j-directive-name="me.xiaoge.xg-click, Alibaba.Alipay.ali-style, jing.j-model" j-directive-value="test(name), ali_style | color, message">Click</p>
+    <p xg-click="test(name)" ali-style="ali_style|color" j-model="message">Click</p>
+    <div ng-controller="TestCtrl">
+        <p>{{message | toUpper}}</p>
+        <input type="text" ng-model="message"/>
+    </div>
 </body>
 </html>

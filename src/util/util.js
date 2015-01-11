@@ -25,6 +25,17 @@ function $attr(ele, attr_name, attr_value) {
         return ele.getAttribute(attr_name);
     }
 }
+function $hasAttr(ele, attr_name) {
+    if(attr_name instanceof Array) {
+        for(var i=0;i<attr_name.length;i++) {
+            if(!ele.hasAttribute(attr_name[i])) {
+                return false;
+            }
+        }
+    } else {
+        return ele.hasAttribute(attr_name);
+    }
+}
 function $data(ele, data) {
     if(typeof data !== 'undefined') {
         ele['__JING_BIND_DATA__'] = data;
@@ -53,6 +64,10 @@ function $defineProperty(obj, prop, value, writable, enumerable) {
         enumerable : enumerable ? true : false
     });
 }
+function $hasProperty(obj, prop) {
+    return obj.hasOwnProperty(prop);
+}
+
 function $defineGetterSetter(obj, prop, getter, setter, configurable, enumerable) {
     var desc = {
         configurable : configurable ? true : false,

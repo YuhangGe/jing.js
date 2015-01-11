@@ -1,10 +1,5 @@
-directive_register('j-click', function($module) {
-
-    return function(ele, $scope, $value) {
-        if(typeof $value !== 'function') {
-            log('j-click need function.');
-            return;
-        }
-        $on(ele, 'click', $value);
+directive_create('j-click', function() {
+    return function(module, scope, element, attr_value, attr_name) {
+        $on(element, 'click', attr_value);
     }
 });

@@ -1,23 +1,44 @@
 function global_component(name, type) {
-    var ns = name.split('.');
-    var m = module_extract(ns);
-    if(!m) {
-        log(name , ': ' + type + ' not found. no module.');
-        return null;
-    } else {
-        return m[type](ns[ns.length-1]);
-    }
+
 }
 
 jing = {};
+
+jing.scope_types = {
+    INHERIT : __SCOPE_TYPE_INHERIT,
+    CREATE : __SCOPE_TYPE_CREATE,
+    PARENT : __SCOPE_TYPE_PARENT
+};
+
 jing.module = module_create;
 jing.require = module_require;
 jing.controller = function(name) {
-    return global_component(name, 'controller');
+    var ms = module_get(name, false);
+    if(!ms) {
+        log(name , ': controller not found. no module.');
+        return null;
+    } else {
+        return ms[0].controller(ms[1]);
+    }
 };
 jing.directive = function(name) {
-    return global_component(name, 'directive');
+    var ms = module_get(name, false);
+    if(!ms) {
+        log(name , ': directive not found. no module.');
+        return null;
+    } else {
+        return ms[0].directive(ms[1]);
+    }
 };
 jing.factory = function(name) {
-    return global_component(name, 'factory');
+    var ms = module_get(name, false);
+    if(!ms) {
+        log(name , ': factory not found. no module.');
+        return null;
+    } else {
+        return ms[0].factory(ms[1]);
+    }
+};
+jing.scope = function() {
+    return scope_create();
 };

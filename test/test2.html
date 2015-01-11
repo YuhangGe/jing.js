@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Test</title>
+    <script type="text/javascript">
+        function Scope(name) {
+            this.$name = name;
+            this.$age = 10;
+        }
+        Scope.prototype.getName = function() {
+          return this.$name;
+        };
+        Scope.prototype.IncAge = function() {
+            this.$age++;
+        };
+
+        var mem = {};
+
+        window.onload = function() {
+            var m;
+            var k = 0;
+            var $p = document.getElementById('info');
+
+            function log(txt) {
+                $p.textContent = $p.textContent + ' ' + txt;
+            }
+            function run() {
+                if(k===50) {
+                    log('done!');
+                } else {
+                    m = mem['mem'+k] = [];
+                    for(var i=0;i<100000;i++) {
+                        var s = new Scope('scope.'+k+'.'+i);
+                        m.push(s);
+                        s.getName();
+                        s.IncAge();
+                    }
+                    log(k);
+                    k++;
+                    setTimeout(run, 0);
+                }
+            }
+
+            setTimeout(run, 0);
+
+        }
+    </script>
+</head>
+<body>
+<div id="info"></div>
+</body>
+</html>

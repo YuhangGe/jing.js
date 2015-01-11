@@ -1,4 +1,4 @@
-directive_register('j-repeat', function($module) {
+directive_create('j-repeat', __SCOPE_TYPE_CREATE, function() {
 
     return function(ele, $scope, $value, $var_name) {
 

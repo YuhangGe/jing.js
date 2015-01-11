@@ -1,4 +1,4 @@
-function drive_parse(ele, $module, $scope) {
+function drive_render_view(ele, scope) {
     var cn = ele.childNodes;
     if(cn.length === 0) {
         return;

@@ -167,6 +167,7 @@ function run() {
                 scope.message = "Hello, Jing!";
                 this.boys.push(6);
                 log(scope.boys);
+                scope.$root.message = "update message from client to server";
             };
             scope.$watch('boys', function(var_name, new_value, data) {
                 log('boys changed to ', new_value);
@@ -174,12 +175,28 @@ function run() {
             }, {
                 info : '额外的数据'
             });
+
+            scope.book_list = module.dataSource('bookList');
+
+        })
+        .data('bookList', function() {
+            return {
+                type : 'json'
+            }
+        })
+        .data('message', function() {
+            return {
+                type : 'text'
+            }
+        })
+        .config({
+            data_source_url : 'http://localhost:8088/datasource'
         })
         .initialize(function(module, rootScope) {
             var CC = module.require('Service3.ChildS1.ChildS2.CC');
-            rootScope.$declare({
-                'rootMessage' : 'root message: ' + CC
-            });
+            rootScope.rootMessage = module.data('message');
         })
         .drive(document.body);
+
+    document.createDocumentFragment()
 }

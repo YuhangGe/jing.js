@@ -12,7 +12,7 @@ function Scope(name, parent) {
      */
     var __ = {};
     $defineProperty(this, '__', __);
-    $defineProperty(__, 'watch', {});
+    $defineProperty(__, 'watchers', {});
 
     $defineProperty(this, '$$', {});
 
@@ -56,56 +56,32 @@ $defineProperty(__scope_prototype, '$declare', function(var_name, var_value) {
 
         $me.$$[var_name] = var_value;
 
-        $defineGetterSetter($me, var_name, function() {
-            return $me.$$[var_name];
-        }, function(val) {
-            if($me.$$[var_name] === val) {
-                return;
-            }
-            $me.$$[var_name] = val;
-            $me.$emit(var_name);
-        }, true, true);
+        if(var_value instanceof DataSource) {
 
+            $defineGetterSetter($me, var_name, function() {
+                return $me.$$[var_name].get();
+            }, function(val) {
+                if($me.$$[var_name].get() === val) {
+                    return;
+                }
+                $me.$$[var_name].update(val);
+                $me.$emit(var_name);
+            }, true, true);
+        } else {
+            $defineGetterSetter($me, var_name, function() {
+                return $me.$$[var_name];
+            }, function(val) {
+                if($me.$$[var_name] === val) {
+                    return;
+                }
+                $me.$$[var_name] = val;
+                $me.$emit(var_name);
+            }, true, true);
+        }
     }
 });
 
-$defineProperty(__scope_prototype, '$watch', function(var_name, callback, data) {
-    if(typeof callback !== 'function') {
-        log('$watch need function');
-        return;
-    }
-    if(!$hasProperty(this.$$, var_name)) {
-        if(!$hasProperty(this, var_name)) {
-            log('"'+var_name+'" of scope:' + this.name + ' not found!');
-            return;
-        }
-        var val = this[var_name];
-        delete this[var_name];
-        this.$declare(var_name, val);
-    }
-    var __watch = this.__.watch;
-    if(!$hasProperty(__watch, var_name)) {
-        __watch[var_name] = [];
-    }
-    __watch[var_name].push({
-        cb : callback,
-        data : data
-    });
-});
-$defineProperty(__scope_prototype, '$emit', function(var_name) {
-    var __watch = this.__.watch;
-    var w_arr = __watch[var_name];
-    if(!w_arr || w_arr.length === 0) {
-        return;
-    }
-    //may be replace by setImmediate in future
-    //todo 当连续几行代码改变是的同一个变量时，不应该每一行代码都更新一次。目前还只是demo初期版本。
-    $timeout($bind(this, function() {
-        for(var i=0;i<w_arr.length;i++) {
-            w_arr[i].cb(var_name, this.$$[var_name], w_arr[i].data);
-        }
-    }), 0);
-});
+
 $defineProperty(__scope_prototype, '$child', function(name) {
     if(!name) {
         name = this.$parent ? this.$parent.name + '.' + __scope_counter++ : 'jing.scope.' + __scope_counter++;
@@ -126,7 +102,7 @@ $defineProperty(__scope_prototype, '$get', function(var_name) {
     } else if(this.$parent) {
         return this.$parent.$get(var_name);
     } else {
-        throw 'scope does not have declare var:' + var_name;
+        return null;
     }
 });
 

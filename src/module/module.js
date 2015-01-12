@@ -19,10 +19,15 @@ function Module(name, parent) {
     $defineProperty(__, 'directives', {});
     $defineProperty(__, 'runs' , []);
     $defineProperty(__, 'controllers', {});
+    $defineProperty(__, 'datasources', {});
+    $defineProperty(__, 'config', {
+        data_source_url : 'datasource'
+    });
 
     $defineProperty(this, 'parent', parent ? parent : null);
     $defineProperty(this, 'children', {});
     $defineProperty(this, 'name', name);
+
 
 }
 var __module_prototype = Module.prototype;
@@ -182,6 +187,15 @@ $defineProperty(__module_prototype, 'initialize', function(func) {
     }
     return this;
 });
+$defineProperty(__module_prototype, 'config', function(options) {
+    for(var kn in options) {
+        if($hasProperty(this.__.config, kn)) {
+            this.__.config[kn] = options[kn];
+        }
+    }
+    return this;
+});
+
 $defineProperty(__module_prototype, 'controller', function(name, func) {
     var $controllers = this.__.controllers;
     if(!func) {

@@ -6,18 +6,20 @@ function GrammarNode(type, child_nodes, properties) {
     }, properties);
 }
 GrammarNode.prototype = {
-    incr : function(scope, is_add) {
+    increment : function(scope, is_add) {
         return this.exec(scope);
     },
     exec : function(scope) {
-        //abstract function;
-        return null;
+        return this.nodes[0].exec(scope);
     }
 };
 
-function parse_inherit_node(node, exec_func) {
+function parse_inherit_node(node, exec_func, other_proto) {
     node.prototype.exec = exec_func;
-    $inherit(node);
+    if(other_proto) {
+        $extend(node.prototype, other_proto);
+    }
+    $inherit(node, GrammarNode);
 }
 
 
@@ -64,14 +66,15 @@ function parse_error() {
 }
 
 function parse_read_when(condition_func) {
-    var start_idx = __parse_idx- 1;
+    var start_idx = __parse_idx- 1,
+        idx = start_idx;
     var chr;
-    while((chr = __parse_idx<__parse_end ? __parse_text[__parse_idx++] : null) !== null
-    && condition_func(chr)) {
-        //do nothing
+    while((chr=idx<__parse_end ? __parse_text[idx] : null) !== null && condition_func(chr)) {
+        idx++;
     }
     __parse_chr = chr;
-    return __parse_text.slice(start_idx, __parse_idx);
+    __parse_idx = idx;
+    return __parse_text.substring(start_idx, idx);
 }
 
 function parse_number() {

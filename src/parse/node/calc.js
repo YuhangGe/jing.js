@@ -18,10 +18,10 @@ parse_inherit_node(CalcGrammarNode, function(scope) {
             return nodes[0].exec(scope) / nodes[1].exec(scope);
             break;
         case '++':
-            return nodes[0].incr(scope, true);
+            return nodes[0].increment(scope, true);
             break;
         case '--':
-            return nodes[0].incr(scope, false);
+            return nodes[0].increment(scope, false);
             break;
         case '!':
             return !nodes[0].exec(scope);

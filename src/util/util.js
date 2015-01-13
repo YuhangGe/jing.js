@@ -89,6 +89,7 @@ function $inherit(inheritClass, baseClass) {
         return rtn;
     };
 }
+
 function $extend(dst, src) {
     for(var kn in src) {
         dst[kn] = src[kn];
@@ -182,9 +183,6 @@ function $timeout(func, time) {
 function log() {
     console.log.apply(console, arguments);
 }
-function $(id) {
-    return document.getElementById(id);
-}
 function $isArray(obj) {
     return obj instanceof Array;
 }
@@ -199,4 +197,19 @@ function $merge(src, options) {
         src[kn] = options[kn];
     }
     return src;
+}
+function $copyArray(arr) {
+    var rtn = [];
+    for(var i=0;i<arr.length;i++) {
+        rtn.push(arr[i]);
+    }
+    return rtn;
+}
+/*
+ * 在部署时，所有$assert的调用都应该删除。
+ */
+function $assert(condition) {
+    if(!condition) {
+        throw '$assert failure!';
+    }
 }

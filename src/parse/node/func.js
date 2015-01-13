@@ -10,4 +10,8 @@ function FunctionCallGrammarNode(func_node, argv_nodes) {
 }
 parse_inherit_node(FunctionCallGrammarNode, function() {
 
+}, {
+    toString : function() {
+        return 'func';
+    }
 });

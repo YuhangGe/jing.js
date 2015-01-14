@@ -63,7 +63,7 @@ module.exports = function (grunt) {
         });
         var file_content = '';
         if(this.target === 'test') {
-            file_content = 'function __html_get__(name) { return __html__["'
+            file_content = 'window.__html__ = window.__html__ || {};\nfunction __html_get__(name) { return __html__["'
             + path.join(root, this.data.html_root)
             +'/" + name];}\n'
             + src_concat;

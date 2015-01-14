@@ -26,12 +26,7 @@ var __parse_op_priority = {
  */
 
 function parse_expression(expr_str) {
-    parse_init(expr_str);
-    parse_read_char(true);
-
-    if(__parse_chr === null) {
-        return new EmptyGrammarNode();
-    }
+    parse_token_init(expr_str);
 
     parse_expr();
 
@@ -56,22 +51,13 @@ function parse_expression(expr_str) {
 
 }
 
-function parse_expr() {
-    var last_op;
-    var pre_chr;
-    var cur_op;
+function parse_error() {
+    throw 'parse error';
+}
 
-    while(__parse_chr !== null) {
-        //if(__parse_chr === '+' || __parse_chr === '-') {
-        // todo prefix ++a
-        //} else
-        if(parse_is_number_char(__parse_chr)) {
-            parse_push_node(new NumberGrammarNode(parse_number()));
-            parse_read_char(true);
-        } else if(parse_is_variable_char(__parse_chr)) {
-            parse_push_node(new VariableGrammarNode(parse_variable()));
-            parse_read_char(true);
-        } else  if(__parse_chr === ';') {
+function parse_meet_op(op) {
+    switch (op) {
+        case ';':
             parse_reduce_op();
             if(__parse_node_stack.length > 0) {
                 __parse_expr_stack.push(__parse_node_stack.pop());
@@ -79,58 +65,59 @@ function parse_expr() {
                     parse_error();
                 }
             }
-            parse_read_char(true);
             break;
-        } else if(__parse_chr==='"' || __parse_chr==='\'') {
-            pre_chr = __parse_chr;
-            parse_read_char(false);
-            parse_push_node(new StringGrammarNode(parse_string(pre_chr)));
-            parse_read_char(true);
-            break;
-        } else if(__parse_chr === '(' || __parse_chr === '[') {
-            pre_chr = parse_look_before(1);
-            if(__parse_chr === '[') {
-                if(!parse_is_variable_char(pre_chr)) {
-                    parse_error();
-                } else {
-                    //这种情况是属性获取。当然也包括数组访问。
-                    __parse_op_stack.push('[]');
-                }
-            }
-            if(__parse_chr === '(' && parse_is_variable_char(pre_chr)) {
+        case '(':
+            //if(parse_is_variable_char(pre_chr)) {
                 //这种情况下是函数调用，额外放入一个#符。
-                __parse_op_stack.push('#');
-            }
+                //__parse_op_stack.push('#');
+            //}
+            __parse_op_stack.push(op);
+            break;
+        case '[':
+            //这种情况是属性获取。当然也包括数组访问。
+            __parse_op_stack.push('[]');
+            __parse_op_stack.push(op);
+            break;
+        case ')':
+        case ']':
+            parse_reduce_op(op === ')' ? '(' : '[');
+            break;
+        default :
+            var last_op = parse_op_last();
 
-            __parse_op_stack.push(__parse_chr);
-            parse_read_char(true);
-
-
-        } else if(__parse_chr === ')' || __parse_chr === ']') {
-
-            parse_reduce_op(__parse_chr===')' ? '(' : '[');
-            parse_read_char(true);
-
-        } else if($hasProperty(__parse_op_priority, __parse_chr)) {
-            last_op = parse_op_last();
-            cur_op = parse_look_after(1);
-            if((__parse_chr === '+' || __parse_chr === '-') && __parse_chr === cur_op) {
-                cur_op = __parse_chr + cur_op;
-                parse_read_char();
-            } else {
-                cur_op = __parse_chr;
-            }
-            if(last_op !== null && __parse_op_priority[cur_op] <= __parse_op_priority[last_op]) {
+            if(last_op !== null && __parse_op_priority[op] <= __parse_op_priority[last_op]) {
                 __parse_op_stack.pop();
                 parse_deal_op(last_op);
             }
-            __parse_op_stack.push(cur_op);
-            parse_read_char(true);
+            __parse_op_stack.push(op);
+            break;
+    }
+}
 
-        } else {
-            parse_error();
+function parse_expr() {
+
+    while(!__parse_token_EOF) {
+        parse_token_lex();
+        if(__parse_token_type === 'op' && ( __parse_token_value === '\'' || __parse_token_value==='"')) {
+            __parse_token_value = parse_token_string(__parse_token_type);
+            __parse_token_type = 'str';
         }
-
+        switch (__parse_token_type) {
+            case 'var':
+                parse_push_node(new VariableGrammarNode(__parse_token_value));
+                break;
+            case 'num':
+                parse_push_node(new NumberGrammarNode(__parse_token_value));
+                break;
+            case 'str':
+                parse_push_node(new StringGrammarNode(__parse_token_value));
+                break;
+            case 'op':
+                parse_meet_op(__parse_token_value);
+                break;
+            default :
+                break;
+        }
     }
 }
 

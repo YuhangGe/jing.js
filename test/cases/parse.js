@@ -38,11 +38,10 @@ describe('parse', function() {
 
         $(document.body).append(__html_get__('parse.html'));
 
-        assert.notEqual($('#btn_parse').length, 0);
-
-        log($('#txt'));
+        assert.equal($('#btn_parse').length, 0);
 
         var gn = parse_expression('34+56');
         assert.equal(gn.exec(test_scope), 90);
     });
+
 });

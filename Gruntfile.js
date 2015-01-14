@@ -10,22 +10,10 @@ var app_config = {
     },
     modules : ['util', 'scope', 'module', 'directive', {
         name : 'parse',
-        modules : ['node']
+        modules : ['node', 'token']
     }, 'drive', 'filter', 'jing'],
     root : __dirname
 };
-
-//
-//(function() {
-//    var output = "(function(){\n";
-//    files.forEach(function(file) {
-//        output += FS.readFileSync('src/' + file).toString() + '\n';
-//    });
-//    output += '})()';
-//    FS.writeFileSync('dist/jing.js', output);
-//    var mi = UglifyJS.minify(output, {fromString: true});
-//    FS.writeFileSync('dist/jing.min.js', mi.code);
-//})();
 
 module.exports = function(grunt) {
     grunt.initConfig({

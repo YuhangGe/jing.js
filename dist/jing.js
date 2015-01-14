@@ -937,9 +937,9 @@ function parse_meet_op(op) {
             parse_reduce_op(op === ')' ? '(' : '[');
             break;
         default :
-            var last_op = parse_op_last();
+            var last_op;
 
-            if(last_op !== null && __parse_op_priority[op] <= __parse_op_priority[last_op]) {
+            while((last_op = parse_op_last()) !== null && __parse_op_priority[op] <= __parse_op_priority[last_op]) {
                 __parse_op_stack.pop();
                 parse_deal_op(last_op);
             }
@@ -961,14 +961,14 @@ function parse_expr() {
                 if(__parse_token_value === 'true' || __parse_token_value === 'false') {
                     parse_push_node(new VariableGrammarNode(__parse_token_value));
                 } else {
-                    parse_push_node(new BooleanGrammarNode(__parse_token_value));
+                    parse_push_node(new ConstantGrammarNode(__parse_token_value === 'true'));
                 }
                 break;
             case 'num':
-                parse_push_node(new NumberGrammarNode(__parse_token_value));
+                parse_push_node(new ConstantGrammarNode(Number(__parse_token_value)));
                 break;
             case 'str':
-                parse_push_node(new StringGrammarNode(__parse_token_value));
+                parse_push_node(new ConstantGrammarNode(__parse_token_value));
                 break;
             case 'op':
                 parse_meet_op(__parse_token_value);
@@ -1385,14 +1385,16 @@ function __parse_token_read_ch() {
 
 function parse_token_action (action) {
     switch (action) {
+        case __parse_token_no_action:
         case __parse_token_unknow_char:
-            break;
         case __parse_token_unmatch_char:
+            __parse_token_type = 'emp';
+
             break;
 
             case 1:
 
-    __parse_token_type = __parse_token_value;
+    __parse_token_type = 'op';
 
 break;
 case 4:
@@ -1412,7 +1414,7 @@ case 3:
 break;
 case 0:
 
-     __parse_token_type = __parse_token_value;
+     __parse_token_type = 'op';
 
 break;
 case 5:

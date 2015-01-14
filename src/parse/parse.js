@@ -11,6 +11,9 @@ GrammarNode.prototype = {
     },
     exec : function(scope) {
         return this.nodes[0].exec(scope);
+    },
+    set : function(scope) {
+
     }
 };
 

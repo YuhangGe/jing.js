@@ -1,27 +1,34 @@
 var __parse_node_stack = [];
 var __parse_op_stack = [];
-var __parse_expr_stack = [];
+var __parse_token_pre_type = 'emp';
 
 var __parse_op_priority = {
+    '(' : 9000,
 
-    '#' : 50, //用这个字符表示函数调用。函数调用的优先级小于属性获取"."和“[]”以及参数“,”，高于其它运算符。
+    '[' : 300,
+    '.' : 300,
 
-    '.' : 100,
-    '[]' : 100,
+    'F' : 200, //用这个字符表示函数调用。函数调用的优先级小于属性获取"."和“[]”，高于其它运算符。
+
+
+    '#++' : 90, //自增(运算符在后)
+    '#--' : 90, //自减(运算符在后)
 
 
 
-    '++' : 90,
-    '--' : 90,
     '!' : 80,
     '~' : 80,
+    '+#' : 80, //一元加(正号)
+    '-#' : 80, //一元减(负号)
+    '++#' : 80, //自增(运算符在前)
+    '--#' : 80, //自减(运算符在前)
 
     '*' : 70,
     '/' : 70,
     '%' : 70,
 
-    '+' : 60,
-    '-' : 60,
+    '#+' : 60,
+    '#-' : 60,
 
     '<<': 50,
     '>>': 50,
@@ -39,16 +46,27 @@ var __parse_op_priority = {
 
     '&' : 20,
     '^' : 19,
-    //'|' : 18, 这里本来是有|运算符，但为了方便起见，我们把它用作了filter
+    '|' : 18,  //这里本来是有|运算符，但为了方便起见，我们把它用作了filter
     '&&' : 17,
     '||' : 16,
 
     '?' : 15,
-    ':' : 15,
+    '?:' : 15,
 
     '=' : 10,
+    '>>=' : 10,
+    '<<=' : 10,
+    '>>>=' : 10,
+    '+=': 10,
+    '-=' : 10,
+    '*=' : 10,
+    '/=' : 10,
+    '%=' : 10,
+    '&=' : 10,
+    '^=' : 10,
+    '|=' : 10,
 
-    '|' : -10, //过滤器filter的优先级也很低
+    '->' : -10, //过滤器filter的优先级也很低
     ',' : -20 //函数调用参数列表的优先级低于其它。
 
 };
@@ -58,26 +76,24 @@ var __parse_op_priority = {
  */
 
 function parse_expression(expr_str) {
+    __parse_token_pre_type = 'emp';
     parse_token_init(expr_str);
 
     parse_expr();
 
     parse_reduce_op();
 
-    if(__parse_node_stack.length > 0) {
-        __parse_expr_stack.push(__parse_node_stack.pop());
-        if(__parse_node_stack.length > 0) {
-            parse_error();
-        }
+
+    var root_node;
+    if(__parse_node_stack.length === 0) {
+        root_node =  new EmptyGrammarNode();
+    } else if(__parse_node_stack.length === 1) {
+        root_node = __parse_node_stack[0];
+    } else {
+        root_node = new GrammarNode('root', $copyArray(__parse_node_stack));
     }
 
-    if(__parse_expr_stack.length === 0) {
-        return new EmptyGrammarNode();
-    }
-
-    var root_node = __parse_expr_stack.length>1 ? new GrammarNode('root', $copyArray(__parse_expr_stack)) : __parse_expr_stack[0];
-
-    __parse_expr_stack.length = 0;
+    __parse_node_stack.length = 0;
 
     return root_node;
 
@@ -91,39 +107,38 @@ function parse_meet_op(op) {
     switch (op) {
         case ';':
             parse_reduce_op();
-            if(__parse_node_stack.length > 0) {
-                __parse_expr_stack.push(__parse_node_stack.pop());
-                if(__parse_node_stack.length > 0) {
-                    parse_error();
-                }
-            }
             break;
         case '(':
-            //if(parse_is_variable_char(pre_chr)) {
-                //这种情况下是函数调用，额外放入一个#符。
-                //__parse_op_stack.push('#');
-            //}
-            __parse_op_stack.push(op);
-            break;
-        case '[':
-            //这种情况是属性获取。当然也包括数组访问。
-            __parse_op_stack.push('[]');
+            if(__parse_token_pre_type === 'var') {
+                __parse_op_stack.push('F');
+                __parse_node_stack.push(new ArgumentGrammarNode([]));
+            }
             __parse_op_stack.push(op);
             break;
         case ')':
         case ']':
             parse_reduce_op(op === ')' ? '(' : '[');
             break;
+        case '+':
+        case '-':
+        case '++':
+        case '--':
+            parse_check_op(__parse_token_pre_type === 'op' ? op + '#' : '#' + op);
+            break;
         default :
-            var last_op;
-
-            while((last_op = parse_op_last()) !== null && __parse_op_priority[op] <= __parse_op_priority[last_op]) {
-                __parse_op_stack.pop();
-                parse_deal_op(last_op);
-            }
-            __parse_op_stack.push(op);
+            parse_check_op(op);
             break;
     }
+}
+
+function parse_check_op(op) {
+    var last_op;
+
+    while((last_op = parse_op_last()) !== null && __parse_op_priority[op] <= __parse_op_priority[last_op]) {
+        __parse_op_stack.pop();
+        parse_deal_op(last_op);
+    }
+    __parse_op_stack.push(op);
 }
 
 function parse_expr() {
@@ -141,15 +156,19 @@ function parse_expr() {
                 } else {
                     parse_push_node(new ConstantGrammarNode(__parse_token_value === 'true'));
                 }
+                __parse_token_pre_type = 'var';
                 break;
             case 'num':
                 parse_push_node(new ConstantGrammarNode(Number(__parse_token_value)));
+                __parse_token_pre_type = 'num';
                 break;
             case 'str':
                 parse_push_node(new ConstantGrammarNode(__parse_token_value));
+                __parse_token_pre_type = 'str';
                 break;
             case 'op':
                 parse_meet_op(__parse_token_value);
+                __parse_token_pre_type = 'op';
                 break;
             default :
                 break;
@@ -167,25 +186,29 @@ function parse_reduce_op(op) {
             parse_deal_op(cur_op);
         }
     }
-    if(op && cur_op === null) {
-        parse_error('括号不匹配');
+    var last_node, last_pre_node;
+    if(op === '('
+        && cur_op === '('
+        && parse_op_last() === 'F') {
+        last_node =  __parse_node_stack[__parse_node_stack.length-1];
+        if(last_node && last_node.type !== 'argument' || last_node.nodes.length >0) {
+            last_pre_node = __parse_node_stack[__parse_node_stack.length-2];
+            if(!last_pre_node || last_pre_node.type === 'argument' || last_pre_node.nodes.length) {
+                throw 'something strange wrong';
+            }
+            last_pre_node.merge(last_node);
+            parse_pop_node();
+        }
     }
 }
 
 function parse_deal_op(op) {
     var node_a, node_b, tmp;
     switch (op) {
-        case '#':
+        case 'F':
             node_b = parse_pop_node();
-            //if(node_b.type !== 'argument') {
-            //    node_a = node_b;
-            //    tmp = new EmptyGrammarNode();
-            //} else {
-            //    tmp = node_b;
-            //    node_a = parse_pop_node();
-            //}
-
-            parse_push_node(new FunctionCallGrammarNode(node_a, tmp));
+            node_a = parse_pop_node();
+            parse_push_node(new FunctionCallGrammarNode(node_a, node_b));
             break;
         case ',':
             node_b = parse_pop_node();
@@ -211,13 +234,19 @@ function parse_deal_op(op) {
             break;
         case '?' :
         case ':' :
-            //todo
+            node_b = parse_pop_node();
+            node_a = parse_pop_node();
+            parse_push_node(new ConditionGrammarNode(node_a, node_b));
             break;
-        case '++':
-        case '--':
+            break;
+        case '++#':
+        case '--#':
+        case '#++':
+        case '#--':
+        case '+#':
+        case '-#':
         case '!':
         case '~':
-
             node_a = parse_pop_node();
             tmp = new CalcGrammarNode(op, node_a, node_b);
             if(node_a.type === 'number') {
@@ -225,9 +254,8 @@ function parse_deal_op(op) {
             }
             parse_push_node(tmp);
             break;
-
-        case '+':
-        case '-':
+        case '#+':
+        case '#-':
         case '*':
         case '/':
         case '%':

@@ -36,12 +36,12 @@ describe('parse', function() {
 
     it('34 + 56 should return : ConstantGrammarNode, 90', function() {
 
-        $(document.body).append(__html_get__('parse.html'));
+        //$(document.body).append(__html_get__('parse.html'));
+        //
+        //assert.equal($('#btn_parse').length, 0);
 
-        assert.equal($('#btn_parse').length, 0);
-
-        var gn = parse_expression('34+56');
-        assert.equal(gn.exec(test_scope), 90);
+        var gn = parse_expression('34 + 56 * 67 >> 3');
+        assert.equal(gn.exec(test_scope), 34 + 56 * 67 >> 3);
     });
 
 });

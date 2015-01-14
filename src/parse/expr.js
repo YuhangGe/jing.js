@@ -9,16 +9,48 @@ var __parse_op_priority = {
     '.' : 100,
     '[]' : 100,
 
-    '+' : 0,
-    '-' : 0,
-    '*' : 1,
-    '/' : 1,
-    '++' : 10,
-    '--' : 10,
-    '!' : 5,
 
-    ',' : -20, //函数调用参数列表的优先级低于其它。
-    '|' : -10 //过滤器filter的优先级也很低
+
+    '++' : 90,
+    '--' : 90,
+    '!' : 80,
+    '~' : 80,
+
+    '*' : 70,
+    '/' : 70,
+    '%' : 70,
+
+    '+' : 60,
+    '-' : 60,
+
+    '<<': 50,
+    '>>': 50,
+    '>>>': 50,
+
+    '<' : 40,
+    '>' : 40,
+    '<=':40,
+    '>=':40,
+
+    '==': 30,
+    '===': 30,
+    '!=' : 30,
+    '!==' : 30,
+
+    '&' : 20,
+    '^' : 19,
+    //'|' : 18, 这里本来是有|运算符，但为了方便起见，我们把它用作了filter
+    '&&' : 17,
+    '||' : 16,
+
+    '?' : 15,
+    ':' : 15,
+
+    '=' : 10,
+
+    '|' : -10, //过滤器filter的优先级也很低
+    ',' : -20 //函数调用参数列表的优先级低于其它。
+
 };
 
 /**
@@ -83,9 +115,9 @@ function parse_meet_op(op) {
             parse_reduce_op(op === ')' ? '(' : '[');
             break;
         default :
-            var last_op = parse_op_last();
+            var last_op;
 
-            if(last_op !== null && __parse_op_priority[op] <= __parse_op_priority[last_op]) {
+            while((last_op = parse_op_last()) !== null && __parse_op_priority[op] <= __parse_op_priority[last_op]) {
                 __parse_op_stack.pop();
                 parse_deal_op(last_op);
             }
@@ -104,13 +136,17 @@ function parse_expr() {
         }
         switch (__parse_token_type) {
             case 'var':
-                parse_push_node(new VariableGrammarNode(__parse_token_value));
+                if(__parse_token_value === 'true' || __parse_token_value === 'false') {
+                    parse_push_node(new VariableGrammarNode(__parse_token_value));
+                } else {
+                    parse_push_node(new ConstantGrammarNode(__parse_token_value === 'true'));
+                }
                 break;
             case 'num':
-                parse_push_node(new NumberGrammarNode(__parse_token_value));
+                parse_push_node(new ConstantGrammarNode(Number(__parse_token_value)));
                 break;
             case 'str':
-                parse_push_node(new StringGrammarNode(__parse_token_value));
+                parse_push_node(new ConstantGrammarNode(__parse_token_value));
                 break;
             case 'op':
                 parse_meet_op(__parse_token_value);
@@ -173,28 +209,50 @@ function parse_deal_op(op) {
             node_a = parse_pop_node();
             parse_push_node(new PropertyGrammarNode(node_a, node_b));
             break;
+        case '?' :
+        case ':' :
+            //todo
+            break;
         case '++':
         case '--':
         case '!':
+        case '~':
+
             node_a = parse_pop_node();
             tmp = new CalcGrammarNode(op, node_a, node_b);
             if(node_a.type === 'number') {
-                tmp = new NumberGrammarNode(tmp.exec());
+                tmp = new ConstantGrammarNode(tmp.exec());
             }
             parse_push_node(tmp);
             break;
+
         case '+':
         case '-':
         case '*':
         case '/':
+        case '%':
+        case '<<':
+        case '>>':
+        case '>>>':
+        case '==':
+        case '===':
+        case '>':
+        case '<':
+        case '&':
+        case '&&':
+        case '|':
+        case '||':
+        case '!=':
+        case '!==':
+        case '^':
             node_b = parse_pop_node();
             node_a = parse_pop_node();
             tmp = new CalcGrammarNode(op, node_a, node_b);
-            if(node_a.type === 'number' && node_b.type === 'number') {
+            if(node_a.type === 'constant' && node_b.type === 'constant') {
                 /*
                  * 如果是两个常数运算，在parse期间就把数据算出来。这是一个很小的优化。
                  */
-                tmp = new NumberGrammarNode(tmp.exec());
+                tmp = new ConstantGrammarNode(tmp.exec());
             }
             parse_push_node(tmp);
             break;

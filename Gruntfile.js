@@ -50,6 +50,12 @@ module.exports = function(grunt) {
                 file : app_config.test.root + '/' + app_config.test.file_name + '.js',
                 html_root : app_config.test.html_root
             }
+        },
+        watch : {
+            test : {
+                files : ['src/**/*.js'],
+                tasks : ['generate:test']
+            }
         }
     });
 
@@ -57,6 +63,7 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-clean');
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-shell');
+    grunt.loadNpmTasks('grunt-contrib-watch');
 
     //load local tasks
     grunt.loadTasks('grunt/tasks');

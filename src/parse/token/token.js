@@ -1,13 +1,9 @@
-/*
- * Auto Generate by jslex
- */
 var __parse_token_no_action = -1;
 var __parse_token_unknow_char = -2;
 var __parse_token_unmatch_char = -3;
 
 var __parse_token_type = '';
 var __parse_token_value = '';
-
 var __parse_int_array = Int32Array;
 var __parse_token_TABLE = {
     b: new __parse_int_array(18),
@@ -17,6 +13,7 @@ var __parse_token_TABLE = {
     a: new __parse_int_array(18),
     e: new __parse_int_array(256)
 };
+
 function __parse_token_str2arrs(strs, arrs) {
     for(var j = 0; j < strs.length; j++) {
         var str = strs[j], arr = arrs[j], t = str.charCodeAt(0), len = str.length, c = 0;
@@ -34,18 +31,17 @@ function __parse_token_str2arrs(strs, arrs) {
         }
     }
 }
-__parse_token_str2arrs(["\1\10\1\5\3\2\6\2\16", "\1\15\0\2\5", "\0\0\0\6\7\3\4\10\11\12\13\5\13\14\14\15\15\15\15\15\15\15\15\15\0","\0\0\0\1\1\1\1\3\4\1\13\5\13\14\14\2\6\7\10\11\12\14\2\13\0", "\0\2\1\2\2\5\1\1\1\1\1\3\4\0", "\1\12\1\5\13\24\1\2\13\3\2\2\1\2\12\3\1\5\2\2\3\2\1\2\4\2\11\2\2\13\10\3\2\2\7\2\5\2\6\2\2\2\1\33\12\2\2\2\1\2\2\2\1\2\12\2\1\33\12\x86\1"], [__parse_token_TABLE.b, __parse_token_TABLE.d, __parse_token_TABLE.c, __parse_token_TABLE.n, __parse_token_TABLE.a, __parse_token_TABLE.e]);
+__parse_token_str2arrs(["\1\11\1\2\2\4\1\2\5\2\2\2\5\2\21", "\1\16\0\3\4\2\6", "\1\3\0\2\7\2\10\2\4\2\11\2\5\2\16\2\12\2\13\2\14\2\17\2\14\2\6\3\15\16\20\2\0","\0\0\0\1\1\1\4\1\5\1\1\14\1\14\6\15\15\3\2\7\10\11\11\16\17\12\13\15\2\14\0", "\0\2\1\6\2\2\5\1\1\1\1\1\3\4\1\1\0", "\1\12\1\5\16\24\1\2\16\2\6\2\2\2\1\2\15\2\2\2\11\5\2\2\3\2\2\2\4\2\14\2\2\13\13\3\2\2\10\2\5\2\7\2\2\2\1\33\15\2\2\2\1\3\2\2\15\2\1\33\15\2\1\2\12\2\1\2\2\x82\1"], [__parse_token_TABLE.b, __parse_token_TABLE.d, __parse_token_TABLE.c, __parse_token_TABLE.n, __parse_token_TABLE.a, __parse_token_TABLE.e]);
 
-var MAIN______DEFAULT = 12;
+var MAIN______DEFAULT = 15;
 
 var __parse_token_src = null,
     __parse_token_idx = 0,
     __parse_token_end = 0,
     __parse_token_chr = -1;
 
-var __parse_token_state = 12;
+var __parse_token_state = 15;
 var __parse_token_EOF = true;
-var __parse_token_yystack = [];
 
 function parse_token_init(src) {
     __parse_token_src = src;
@@ -132,6 +128,7 @@ function parse_token_lex() {
 
 }
 
+
 function __parse_token_read_ch() {
     if (__parse_token_idx >= __parse_token_end)
         return __parse_token_chr = -1;
@@ -143,40 +140,49 @@ function __parse_token_read_ch() {
 
 function parse_token_action (action) {
     switch (action) {
+        case __parse_token_no_action:
         case __parse_token_unknow_char:
-            break;
         case __parse_token_unmatch_char:
-            break;
-
-        case 1:
-
-            __parse_token_type = 'op';
-
-            break;
-        case 4:
-
             __parse_token_type = 'emp';
 
             break;
-        case 2:
 
-            __parse_token_type = 'var';
+            case 1:
 
-            break;
-        case 3:
+    __parse_token_type = 'op';
 
-            __parse_token_type = 'num';
+break;
+case 4:
 
-            break;
-        case 0:
+    __parse_token_type = 'emp';
 
-            __parse_token_type = 'op';
+break;
+case 2:
 
-            break;
-        default:
-            break;
+    __parse_token_type = 'var';
+
+break;
+case 3:
+
+    __parse_token_type = 'num';
+
+break;
+case 0:
+
+     __parse_token_type = 'op';
+
+break;
+case 5:
+
+    __parse_token_type = 'emp';
+
+break;
+
+
+
     }
 }
+
 
 function parse_token_string(quote) {
     var chr, idx = __parse_token_idx, e_idx = idx;

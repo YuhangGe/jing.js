@@ -26,5 +26,26 @@ parse_inherit_node(CalcGrammarNode, function(scope) {
         case '!':
             return !nodes[0].exec(scope);
             break;
+        case '>':
+            return nodes[0].exec(scope) > nodes[1].exec(scope);
+            break;
+        case '<':
+            return nodes[0].exec(scope) < nodes[1].exec(scope);
+            break;
+        case '>>':
+            return nodes[0].exec(scope) >> nodes[1].exec(scope);
+            break;
+        case '>>>':
+            return nodes[0].exec(scope) >>> nodes[1].exec(scope);
+            break;
+        case '<<':
+            return nodes[0].exec(scope) << nodes[1].exec(scope);
+            break;
+        case '==':
+            return nodes[0].exec(scope) == nodes[1].exec(scope);
+            break;
+        case '===':
+            return nodes[0].exec(scope) === nodes[1].exec(scope);
+            break;
     }
 });

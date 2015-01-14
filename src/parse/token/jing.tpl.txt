@@ -31,7 +31,7 @@ function __parse_token_str2arrs(strs, arrs) {
         }
     }
 }
-__parse_token_str2arrs(["$$_BASE_STR_$$", "$$_DEFAULT_STR_$$", "$$_CHECK_STR_$$","$$_NEXT_STR_$$", "$$_ACTION_STR_$$", "$$_EQC_STR_$$"], [TABLE._base, TABLE._default, TABLE._check, TABLE._next, TABLE._action, TABLE._eqc]);
+__parse_token_str2arrs(["$$_BASE_STR_$$", "$$_DEFAULT_STR_$$", "$$_CHECK_STR_$$","$$_NEXT_STR_$$", "$$_ACTION_STR_$$", "$$_EQC_STR_$$"], [__parse_token_TABLE.b, __parse_token_TABLE.d, __parse_token_TABLE.c, __parse_token_TABLE.n, __parse_token_TABLE.a, __parse_token_TABLE.e]);
 
 var $$_LEX_STATES_$$;
 
@@ -140,9 +140,11 @@ function __parse_token_read_ch() {
 
 function parse_token_action (action) {
     switch (action) {
+        case __parse_token_no_action:
         case __parse_token_unknow_char:
-            break;
         case __parse_token_unmatch_char:
+            __parse_token_type = 'emp';
+
             break;
 
             $$_ACTION_TABLE_$$

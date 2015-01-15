@@ -2,72 +2,76 @@ var __parse_node_stack = [];
 var __parse_op_stack = [];
 var __parse_token_pre_type = 'emp';
 
+/*
+ * 运算符优先级。第一个数字是优先级，第二个数字表示是从左到右还是从右到左。
+ */
 var __parse_op_priority = {
-    '(' : 9000,
+    '(' : [9000, 0],
 
-    '[' : 300,
-    '.' : 300,
+    '[' : [300, 0],
+    '.' : [300, 0],
 
-    'F' : 200, //用这个字符表示函数调用。函数调用的优先级小于属性获取"."和“[]”，高于其它运算符。
-
-
-    '#++' : 90, //自增(运算符在后)
-    '#--' : 90, //自减(运算符在后)
+    'F' : [200, 0], //用这个字符表示函数调用。函数调用的优先级小于属性获取"."和“[]”，高于其它运算符。
 
 
+    '#++' : [90, 0], //自增(运算符在后)
+    '#--' : [90, 0], //自减(运算符在后)
 
-    '!' : 80,
-    '~' : 80,
-    '+#' : 80, //一元加(正号)
-    '-#' : 80, //一元减(负号)
-    '++#' : 80, //自增(运算符在前)
-    '--#' : 80, //自减(运算符在前)
 
-    '*' : 70,
-    '/' : 70,
-    '%' : 70,
 
-    '#+' : 60,
-    '#-' : 60,
+    '!' : [80, 1],
+    '~' : [80, 1],
+    '+#' : [80, 1], //一元加(正号)
+    '-#' : [80, 1], //一元减(负号)
+    '++#' : [80, 1], //自增(运算符在前)
+    '--#' : [80, 1], //自减(运算符在前)
 
-    '<<': 50,
-    '>>': 50,
-    '>>>': 50,
+    '*' : [70, 0],
+    '/' : [70, 0],
+    '%' : [70, 0],
 
-    '<' : 40,
-    '>' : 40,
-    '<=':40,
-    '>=':40,
+    '#+' : [60, 0],
+    '#-' : [60, 0],
 
-    '==': 30,
-    '===': 30,
-    '!=' : 30,
-    '!==' : 30,
+    '<<': [50, 0],
+    '>>': [50, 0],
+    '>>>': [50, 0],
 
-    '&' : 20,
-    '^' : 19,
-    '|' : 18,  //这里本来是有|运算符，但为了方便起见，我们把它用作了filter
-    '&&' : 17,
-    '||' : 16,
+    '<' : [40, 0],
+    '>' : [40, 0],
+    '<=':[40, 0],
+    '>=':[40, 0],
 
-    '?' : 15,
-    '?:' : 15,
+    '==': [30, 0],
+    '===': [30, 0],
+    '!=' : [30, 0],
+    '!==' : [30, 0],
 
-    '=' : 10,
-    '>>=' : 10,
-    '<<=' : 10,
-    '>>>=' : 10,
-    '+=': 10,
-    '-=' : 10,
-    '*=' : 10,
-    '/=' : 10,
-    '%=' : 10,
-    '&=' : 10,
-    '^=' : 10,
-    '|=' : 10,
+    '&' : [20, 0],
+    '^' : [19, 0],
+    '|' : [18, 0],
+    '&&' : [17, 0],
+    '||' : [16, 0],
 
-    '->' : -10, //过滤器filter的优先级也很低
-    ',' : -20 //函数调用参数列表的优先级低于其它。
+    '?' : [15, 1],
+    ':' : [15, 1],
+
+    '=' : [10, 1],
+    '>>=' : [10, 1],
+    '<<=' : [10, 1],
+    '>>>=' : [10, 1],
+    '+=': [10, 1],
+    '-=' : [10, 1],
+    '*=' : [10, 1],
+    '/=' : [10, 1],
+    '%=' : [10, 1],
+    '&=' : [10, 1],
+    '^=' : [10, 1],
+    '|=' : [10, 1],
+
+    '->' : [-10, 0], //过滤器filter的优先级也很低
+
+    ',' : [-20, 0] //函数调用参数列表的优先级低于其它。
 
 };
 
@@ -132,11 +136,17 @@ function parse_meet_op(op) {
 }
 
 function parse_check_op(op) {
-    var last_op;
-
-    while((last_op = parse_op_last()) !== null && __parse_op_priority[op] <= __parse_op_priority[last_op]) {
-        __parse_op_stack.pop();
-        parse_deal_op(last_op);
+    var last_op, last_pri;
+    var pri = __parse_op_priority[op];
+    while(__parse_op_stack.length > 0) {
+        last_op = __parse_op_stack[__parse_op_stack.length-1];
+        last_pri = __parse_op_priority[last_op];
+        if(pri[0] < last_pri[0] || (pri[0] === last_pri[0] && pri[1]===0)) {
+            __parse_op_stack.pop();
+            parse_deal_op(last_op);
+        } else {
+            break; //important!
+        }
     }
     __parse_op_stack.push(op);
 }
@@ -152,9 +162,9 @@ function parse_expr() {
         switch (__parse_token_type) {
             case 'var':
                 if(__parse_token_value === 'true' || __parse_token_value === 'false') {
-                    parse_push_node(new VariableGrammarNode(__parse_token_value));
-                } else {
                     parse_push_node(new ConstantGrammarNode(__parse_token_value === 'true'));
+                } else {
+                    parse_push_node(new VariableGrammarNode(__parse_token_value));
                 }
                 __parse_token_pre_type = 'var';
                 break;
@@ -224,7 +234,7 @@ function parse_deal_op(op) {
         case '.':
             node_b = parse_pop_node();
             node_a = parse_pop_node();
-            tmp = node_b.type==='variable' ? new StringGrammarNode(node_b.var_name):node_b;
+            tmp = node_b.type==='variable' ? new ConstantGrammarNode(node_b.var_name) : node_b;
             parse_push_node(new PropertyGrammarNode(node_a, tmp));
             break;
         case '[]':
@@ -236,9 +246,10 @@ function parse_deal_op(op) {
         case ':' :
             node_b = parse_pop_node();
             node_a = parse_pop_node();
-            parse_push_node(new ConditionGrammarNode(node_a, node_b));
+            parse_push_node(new ConditionGrammarNode(op, node_a, node_b));
             break;
             break;
+
         case '++#':
         case '--#':
         case '#++':
@@ -252,6 +263,23 @@ function parse_deal_op(op) {
             if(node_a.type === 'number') {
                 tmp = new ConstantGrammarNode(tmp.exec());
             }
+            parse_push_node(tmp);
+            break;
+        case '=':
+        case '+=':
+        case '-=':
+        case '*=':
+        case '/=':
+        case '%=':
+        case '>>=':
+        case '>>>=':
+        case '<<=':
+        case '&=':
+        case '^=':
+        case '|=':
+            node_b = parse_pop_node();
+            node_a = parse_pop_node();
+            tmp = new SetGrammarNode(op, node_a, node_b);
             parse_push_node(tmp);
             break;
         case '#+':

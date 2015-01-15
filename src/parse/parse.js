@@ -6,14 +6,13 @@ function GrammarNode(type, child_nodes, properties) {
     }, properties);
 }
 GrammarNode.prototype = {
-    increment : function(scope, is_add) {
+    increment : function(scope, is_add, is_prefix) {
         return this.exec(scope);
     },
     exec : function(scope) {
         return this.nodes[0].exec(scope);
     },
     set : function(scope) {
-
     }
 };
 

@@ -1,8 +1,8 @@
-function ConditionGrammarNode(left_node, right_node) {
+function ConditionGrammarNode(op, left_node, right_node) {
     var nodes = [left_node];
-    if(right_node.type === 'condition') {
+    if(op === '?' && right_node.type === 'condition') {
         [].push.apply(nodes, right_node.nodes);
-    } else {
+    } else { // op === ':'
         nodes.push(right_node);
     }
     this.base('condition', nodes);

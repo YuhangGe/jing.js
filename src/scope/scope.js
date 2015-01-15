@@ -106,13 +106,21 @@ $defineProperty(__scope_prototype, '$get', function(var_name) {
     }
 });
 
+$defineProperty(__scope_prototype, '$has', function(var_name) {
+    if($hasProperty(this, var_name)) {
+        return true;
+    } else if(this.$parent) {
+        return this.$parent.$has(var_name);
+    } else {
+        return false;
+    }
+});
+
 $defineProperty(__scope_prototype, '$set', function(var_name, value) {
     if($hasProperty(this, var_name)) {
         this[var_name] = value;
     } else if(this.$parent) {
         this.$parent.set(var_name, value);
-    } else {
-        throw 'scope does not have declare var:' + var_name;
     }
 });
 

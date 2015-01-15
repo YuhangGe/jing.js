@@ -23,5 +23,10 @@ parse_inherit_node(PropertyGrammarNode, function(scope) {
             variable[prop_name] = new_val;
             return is_prefix ? new_val : val;
         }
+    },
+    set : function(scope, value) {
+        var variable = this.nodes[0].exec(scope),
+            prop_name = this.nodes[1].exec(scope);
+        variable[prop_name] = value;
     }
 });

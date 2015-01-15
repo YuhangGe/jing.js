@@ -59,9 +59,7 @@ jing.js并不会按照严格地测试驱动方式开发，但会尽量拥抱测�
    * `grunt test`：运行测试
    * `grunt build`：生成发布版本
 
-由于jing.js使用的是karma来进行测试，直接使用`grunt test`命令会执行全部单元测试，还是挺耗时间的。
-在实际开发时，是使用的神器**WebStorm**，它集成了对karma的支持，可以细粒度化的测试，
-可以指定测试某个用例，不需要每次重启浏览器，非常高效，而且可以直接在IDE中调试。
+由于使用karma.js测试会一次性测试全部用例，比较耗时，遇到问题也不好调试。会同时在浏览器端使用mocha测试，这样方便只测试某个文件，同时调试。
 
 测试与DOM元素相关的用例时，采用的方法是在测试用例里把html注入到页面中。使用
 [https://github.com/karma-runner/karma-html2js-preprocessor](https://github.com/karma-runner/karma-html2js-preprocessor)

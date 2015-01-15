@@ -18,7 +18,7 @@ module.exports = function(config) {
         '../bower_components/jquery/dist/jquery.min.js',
         '../test/jing.test.js',
 
-        '../test/cases/parse.js'
+        '../test/cases/**/*.js'
     ],
 
 
@@ -61,7 +61,7 @@ module.exports = function(config) {
 
 
     // enable / disable watching file and executing tests whenever any file changes
-    autoWatch: false,
+    autoWatch: true,
 
 
     // start these browsers

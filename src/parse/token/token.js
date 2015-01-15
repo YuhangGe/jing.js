@@ -169,7 +169,7 @@ case 3:
 break;
 case 0:
 
-    __parse_pre_token_type = __parse_token_type;
+     __parse_token_type = 'op';
 
 break;
 case 5:

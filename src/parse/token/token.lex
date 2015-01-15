@@ -12,7 +12,7 @@ OTHER       [\d\D]
 $$
 
 SINGLE_OPERATOR {
-    __parse_pre_token_type = __parse_token_type;
+     __parse_token_type = 'op';
 }
 
 MULTI_OPERATOR {

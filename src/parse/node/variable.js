@@ -12,5 +12,8 @@ parse_inherit_node(VariableGrammarNode, function(scope) {
             new_val = val + (is_add ? 1 : -1);
         scope.$set(this.var_name, new_val);
         return is_prefix ?  new_val : val;
+    },
+    set : function(scope, value) {
+        scope.$set(this.var_name, value);
     }
 });

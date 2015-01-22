@@ -5,12 +5,12 @@ var __module_table = {};
 var __root_module = new Module('jing', null);
 
 /**
- * directive的scope类型，
+ * directive的environment类型，
  *
  */
-var __SCOPE_TYPE_INHERIT = 0;
-var __SCOPE_TYPE_CREATE = 1;
-var __SCOPE_TYPE_PARENT = 2;
+var __ENV_TYPE_INHERIT = 0;
+var __ENV_TYPE_CREATE = 1;
+var __ENV_TYPE_PARENT = 2;
 
 function Module(name, parent) {
     var __ = {};
@@ -20,9 +20,7 @@ function Module(name, parent) {
     $defineProperty(__, 'runs' , []);
     $defineProperty(__, 'controllers', {});
     $defineProperty(__, 'datasources', {});
-    $defineProperty(__, 'config', {
-        data_source_url : 'datasource'
-    });
+    $defineProperty(__, 'config', {});
 
     $defineProperty(this, 'parent', parent ? parent : null);
     $defineProperty(this, 'children', {});
@@ -178,25 +176,23 @@ $defineProperty(__module_prototype, 'directive', function directive(name, scope_
         return this;
     }
 });
-$defineProperty(__module_prototype, 'initialize', function(func) {
+$defineProperty(__module_prototype, 'init', function(func) {
     if(this.parent) {
-        throw 'function "initialize" can only be applied to root Module';
+        throw 'function "init" can only be applied to root Module';
     }
     if(typeof func === 'function') {
         this.__.runs.push(func);
     }
     return this;
 });
-$defineProperty(__module_prototype, 'config', function(options) {
+$defineProperty(__module_prototype, 'conf', function(options) {
     for(var kn in options) {
-        if($hasProperty(this.__.config, kn)) {
-            this.__.config[kn] = options[kn];
-        }
+        this.__.config[kn] = options[kn];
     }
     return this;
 });
 
-$defineProperty(__module_prototype, 'controller', function(name, func) {
+$defineProperty(__module_prototype, 'env', function(name, func) {
     var $controllers = this.__.controllers;
     if(!func) {
         return $controllers[name];

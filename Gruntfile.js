@@ -8,7 +8,7 @@ var app_config = {
         html_root : 'test/html',
         file_name : 'jing.test'
     },
-    modules : ['util', 'scope', 'module', 'directive', {
+    modules : ['util', 'enviroment', 'module', 'directive', {
         name : 'parse',
         modules : ['node', 'token']
     }, 'drive', 'filter', 'jing'],

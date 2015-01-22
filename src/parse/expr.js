@@ -1,6 +1,7 @@
 var __parse_node_stack = [];
 var __parse_op_stack = [];
 var __parse_token_pre_type = 'emp';
+var __parse_in_node = null;
 
 /*
  * 运算符优先级。第一个数字是优先级，第二个数字表示是从左到右还是从右到左。
@@ -76,11 +77,12 @@ var __parse_op_priority = {
 };
 
 /**
- * 以下代码使用逆波兰表达式生成语法树。
+ * 以下代码生成语法树。
  */
 
 function parse_expression(expr_str) {
     __parse_token_pre_type = 'emp';
+    __parse_in_node = null;
     parse_token_init(expr_str);
 
     parse_expr();
@@ -99,11 +101,23 @@ function parse_expression(expr_str) {
 
     __parse_node_stack.length = 0;
 
+    if(__parse_in_node !== null) {
+        if(root_node.type === 'emp' || root_node.type === 'root') {
+            parse_error();
+        } else {
+            root_node = new InGrammarNode(__parse_in_node, root_node);
+        }
+    }
+
+
+
     return root_node;
 
 }
 
 function parse_error() {
+    __parse_node_stack = [];
+    __parse_op_stack = [];
     throw 'parse error';
 }
 
@@ -161,12 +175,26 @@ function parse_expr() {
         }
         switch (__parse_token_type) {
             case 'var':
-                if(__parse_token_value === 'true' || __parse_token_value === 'false') {
-                    parse_push_node(new ConstantGrammarNode(__parse_token_value === 'true'));
-                } else {
-                    parse_push_node(new VariableGrammarNode(__parse_token_value));
+                switch(__parse_token_value) {
+                    case 'true':
+                    case 'false':
+                        parse_push_node(new ConstantGrammarNode(__parse_token_value === 'true'));
+                        __parse_token_pre_type = 'num';
+                        break;
+                    case 'in':
+                        if(__parse_op_stack.length !== 0
+                            || __parse_node_stack.length !== 1
+                            || __parse_node_stack[0].type !== 'var'
+                            || __parse_in_node !== null) {
+                            throw 'grammar wrong: in';
+                        }
+                        __parse_in_node = __parse_node_stack.pop().var_name;
+                        break;
+                    default:
+                        parse_push_node(new VariableGrammarNode(__parse_token_value));
+                        __parse_token_pre_type = 'var';
+                        break;
                 }
-                __parse_token_pre_type = 'var';
                 break;
             case 'num':
                 parse_push_node(new ConstantGrammarNode(Number(__parse_token_value)));

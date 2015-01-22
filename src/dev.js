@@ -124,7 +124,7 @@ function run() {
 
             return _;
         })
-        .controller("TestCtrl", function (module, scope) {
+        .env("Test", function (module) {
             var ServiceA = module.require('Service.A');
             var ServiceB = module.require('Service.B');
             var MyService = module.require('MyService');
@@ -142,59 +142,61 @@ function run() {
              */
 
             /*
-             * 获取rootScope的标准方法是通过任意一个scope来调用scope.$root.
-             *   通常情况下，factory中不应该直接访问rootScope.
-             *   但是，如果一定想要得到rootScope，
-             *   可以使用 jing.scope(module.path)
-             *      但当该module没有drive任何html元素，这个函数返回空值。
+             * 获取rootEnv
              */
-            //var rootScope = jing.scope(module.path)
-            var rootScope = scope.$root;
+            var rootEnv = this.$root;
 
             log(ServiceA.array);
             log(ServiceB.func(), ServiceB.func());
             log(MyService.tick, MyService.tick, MyService.tick, MyService.tick);
             log(CS);
-            log(rootScope.rootMessage);
-            log(rootScope.oooo);
+            log(rootEnv.rootMessage);
+            log(rootEnv.oooo);
 
-            scope.message = 'Hello, World!';
-            scope.boys = [1, 2, 3, 4];
-            scope.test = function (event) {
-                log(event);
-                alert(scope.message);
-                log(this.message); //this 即 scope
-                scope.message = "Hello, Jing!";
-                this.boys.push(6);
-                log(scope.boys);
-                scope.$root.message = "update message from client to server";
+            this.$props = {
+                message : 'Hello, World',
+                boys : [1, 2, 3, 4],
+                xiaoge : {
+                    name : 'xiaoge',
+                    age : 24,
+                    girl : {
+                        name : 'xiaoguai',
+                        age: 24
+                    }
+                }
+                //bookList : module.data('bookList')
             };
-            scope.$watch('boys', function(var_name, new_value, data) {
-                log('boys changed to ', new_value);
-                log(data);
+
+            this.$funcs = {
+                test : function (event) {
+                    log(event);
+                    alert(this.message);
+                    log(this.message); //this 即 scope
+                    this.message = "Hello, Jing!";
+                    this.boys.push(6);
+                    log(this.boys);
+                    this.$root.message = "update message from client to server";
+                },
+                onBookListUpdate : function() {
+
+                }
+            };
+
+            this.$watch('xiaoge.girl.age', function(var_name, new_value, data) {
+
             }, {
                 info : '额外的数据'
             });
 
-            scope.book_list = module.dataSource('bookList');
-
         })
-        .data('bookList', function() {
-            return {
-                type : 'json'
-            }
-        })
-        .data('message', function() {
-            return {
-                type : 'text'
-            }
-        })
-        .config({
+        .conf({
             data_source_url : 'http://localhost:8088/datasource'
         })
-        .initialize(function(module, rootScope) {
+        .init(function(module, rootEnv) {
             var CC = module.require('Service3.ChildS1.ChildS2.CC');
-            rootScope.rootMessage = module.data('message');
+            rootEnv.$props = {
+                rootMessage : CC
+            }
         })
         .drive(document.body);
 

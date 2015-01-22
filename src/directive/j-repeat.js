@@ -1,45 +1,75 @@
-directive_create('j-repeat', function() {
+function JRepeat(ele, attr, drive_module, env, expr) {
+    this.ele = ele;
+    this.env = env;
+    this.expr = expr;
+    this.attr = attr;
+    this.module = drive_module;
+    this.r_envs = [];
+    this.r_eles = [];
+    this.frag = null;
+}
+var __jrepeate_prototype = JRepeat.prototype;
+__jrepeate_prototype.run = function() {
+    $css(this.ele, 'display', 'none');
 
-    return function(drive_module, directive_module, scope, element, attr_value) {
+    this.render();
 
-        /**
-         * todo 还有很多问题需要解决。
-         * 1. 使用更高效率的createDocumentFragment一类的函数。避免多次appendChild和removeChild。
-         * 2. parse
-         */
-        var scope_value = scope[attr_value];
-        if(!scope_value instanceof Array) {
-            log('j-repeat need Array!');
-            return;
+
+
+    this.env.$watch(this.expr, function(var_name, new_value, j_repeat) {
+        //todo watch j-repeat
+    }, this);
+};
+__jrepeate_prototype.render = function() {
+    var array = this.expr[1].exec(this.env);
+    var frag = document.createDocumentFragment();
+    var r_ele, r_env, r_props;
+    if(array instanceof Array) {
+        for(var i=0;i<array.length;i++) {
+            r_ele = this.ele.cloneNode(true);
+            r_env = this.env.$child();
+            r_props = {
+                '@index' : i,
+                '@item' : array[i],
+                '@first' : i===0,
+                '@last' : i===array.length-1,
+                '@middle' : i!==0 && i!==array.length-1,
+                '@key' : i
+            };
+            r_props[this.expr[0].value] = array[i];
+            r_env.$props = r_props;
+            drive_render_element(r_ele, this.attr, this.module, r_env);
+            frag.appendChild(r_ele);
         }
-        $css(element, 'display', 'none');
-        $data(element, []);
+    } else if(typeof array === 'object') {
+        //todo j-repeat for key-value Object
+        throw 'TODO: j-repeat for object.';
+        //for(var kn in array) {
+        //
+        //}
+    } else {
+        log('value of j-repeat is not Array or key-value Object.');
+        return;
+    }
+    if(this.frag !== null) {
+        this.ele.parentNode.removeChild(this.frag);
+        this.frag = null;
+    }
+    this.ele.parentNode.insertBefore(frag, this.ele);
+    this.frag = frag;
+};
 
-        render(element, scope_value);
+function directive_deal_j_repeat(ele, attr, drive_module, env) {
+    var item = attr.removeNamedItem('j-repeat'),
+        expr_str = item.value;
 
-        scope.$watch(attr_value, function(var_name, new_value, element) {
-            update(element, new_value);
-        }, element);
+    var expr = parse_expression(expr_str);
+    if(expr.type !== 'in') {
+        throw 'j-repeat format wrong!';
+    }
 
-        function render(element, array) {
-            var pn = element.parentNode, ne,
-                e_arr = $data(element);
-            for(var i=0;i<array.length;i++) {
-                ne = element.cloneNode(true);
-                $css(ne, 'display', 'block');
-                ne.removeAttribute('j-repeat');
-                pn.appendChild(ne);
-                e_arr.push(ne);
-            }
-        }
-        function update(element, new_array) {
-            var arr = $data(element);
-            for(var i=0;i<arr.length;i++) {
-                arr[i].parentNode.removeChild(arr[i]);
-            }
-            arr.length = 0;
-            render(element, new_array);
-        }
-
-    };
-});
+    /*
+     * 把逻辑放在Class里面，不使用函数的闭包。
+     */
+    new JRepeat(ele, attr, drive_module, env, expr).run();
+}

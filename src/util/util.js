@@ -128,11 +128,11 @@ function $hasAttr(ele, attr_name) {
         return ele.hasAttribute(attr_name);
     }
 }
-function $data(ele, data) {
+function $env(ele, data) {
     if(typeof data !== 'undefined') {
-        ele['__JING_BIND_DATA__'] = data;
+        ele.__JING_ENV__ = data;
     } else {
-        return ele['__JING_BIND_DATA__'];
+        return ele.__JING_ENV__;
     }
 }
 function $each(arr, func) {
@@ -186,9 +186,7 @@ function log() {
 function $isArray(obj) {
     return obj instanceof Array;
 }
-function $isUndefined(obj) {
-    return typeof obj === 'undefined';
-}
+
 function $merge(src, options) {
     if(!options) {
         return src;
@@ -205,11 +203,41 @@ function $copyArray(arr) {
     }
     return rtn;
 }
+function $id(id) {
+    return document.getElementById(id);
+}
+
+function $isString(str) {
+    return typeof str === 'string';
+}
+function $isFunction(func) {
+    return typeof func === 'function';
+}
+function $isNumber(num) {
+    return typeof num === 'number';
+}
+function $isNull(nl) {
+    return nl === null;
+}
+function $isUndefined(obj) {
+    return typeof obj === 'undefined';
+}
 /*
  * 在部署时，所有$assert的调用都应该删除。
  */
 function $assert(condition) {
     if(!condition) {
+        console.trace();
         throw '$assert failure!';
     }
+}
+
+function $ajax(options) {
+    var ops = $merge(options, {
+        method : 'get',
+        type : 'json',
+        data : {}
+    });
+    var xhr = new XMLHttpRequest();
+
 }

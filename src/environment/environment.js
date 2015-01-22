@@ -1,14 +1,14 @@
 var __AM = ['push', 'pop', 'reverse', 'shift', 'sort', 'unshift', 'splice'];
 var __AProto = Array.prototype;
-var __scope_counter = 0;
-var __root_scope_table = {};
+var __env_counter = 0;
+var __root_env_table = {};
 
-function Scope(name, parent) {
+function Environment(name, parent) {
     /**
-     * $$用来保存通过$declare定义的变量。
+     * $$用来保存用户定义的变量。
      * __用来保存支撑逻辑的内部变量。
      * 通过这个方式，使用Scope的实例尽可能信息隐藏；
-     *   通过for in只能取到通过$declare定义的变量。
+     *   通过for in只能取到通过用户定义的变量。
      */
     var __ = {};
     $defineProperty(this, '__', __);
@@ -22,13 +22,13 @@ function Scope(name, parent) {
 
 }
 
-var __scope_prototype = Scope.prototype;
+var __env_prototype = Environment.prototype;
 
-$defineGetterSetter(__scope_prototype, '$root', function() {
+$defineGetterSetter(__env_prototype, '$root', function() {
     return this.$parent ? this.$parent.$root : this;
 });
 
-$defineProperty(__scope_prototype, '$declare', function(var_name, var_value) {
+$defineProperty(__env_prototype, '$declare', function(var_name, var_value) {
     var $me = this;
 
     if(typeof var_name === 'object') {
@@ -82,7 +82,7 @@ $defineProperty(__scope_prototype, '$declare', function(var_name, var_value) {
 });
 
 
-$defineProperty(__scope_prototype, '$child', function(name) {
+$defineProperty(__env_prototype, '$child', function(name) {
     if(!name) {
         name = this.$parent ? this.$parent.name + '.' + __scope_counter++ : 'jing.scope.' + __scope_counter++;
     }
@@ -96,7 +96,7 @@ $defineProperty(__scope_prototype, '$child', function(name) {
     }
 });
 
-$defineProperty(__scope_prototype, '$get', function(var_name) {
+$defineProperty(__env_prototype, '$get', function(var_name) {
     if($hasProperty(this, var_name)) {
         return this[var_name];
     } else if(this.$parent) {
@@ -106,7 +106,7 @@ $defineProperty(__scope_prototype, '$get', function(var_name) {
     }
 });
 
-$defineProperty(__scope_prototype, '$has', function(var_name) {
+$defineProperty(__env_prototype, '$has', function(var_name) {
     if($hasProperty(this, var_name)) {
         return true;
     } else if(this.$parent) {
@@ -116,7 +116,7 @@ $defineProperty(__scope_prototype, '$has', function(var_name) {
     }
 });
 
-$defineProperty(__scope_prototype, '$set', function(var_name, value) {
+$defineProperty(__env_prototype, '$set', function(var_name, value) {
     if($hasProperty(this, var_name)) {
         this[var_name] = value;
     } else if(this.$parent) {
@@ -124,9 +124,9 @@ $defineProperty(__scope_prototype, '$set', function(var_name, value) {
     }
 });
 
-function scope_create(parent) {
-    var name = this.$parent ? this.$parent.name + '.' + __scope_counter++ : 'jing.scope.' + __scope_counter++;
-    var cs = new Scope(name, parent);
+function environment_create(parent) {
+    var name = this.$parent ? this.$parent.name + '.' + __env_counter++ : 'jing.scope.' + __env_counter++;
+    var cs = new Environment(name, parent);
     if(parent) {
         $defineProperty(parent.$children, name, cs, false, true);
     }

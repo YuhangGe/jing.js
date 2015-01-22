@@ -1,4 +1,4 @@
-$defineProperty(__scope_prototype, '$watch', function(var_name, callback, data) {
+$defineProperty(__env_prototype, '$watch', function(var_name, callback, data) {
     if(typeof callback !== 'function') {
         log('$watch need function');
         return;
@@ -6,9 +6,10 @@ $defineProperty(__scope_prototype, '$watch', function(var_name, callback, data) 
 
     var names = var_name instanceof  Array ? var_name : var_name.split('.');
 
+
     if(!$hasProperty(this.$$, var_name)) {
         if(!$hasProperty(this, var_name)) {
-            log('"'+var_name+'" of scope:' + this.name + ' not found!');
+            log('"'+var_name+'" of environment:' + this.name + ' not found!');
             return;
         }
         var val = this[var_name];
@@ -25,7 +26,7 @@ $defineProperty(__scope_prototype, '$watch', function(var_name, callback, data) 
     });
 });
 
-$defineProperty(__scope_prototype, '$emit', function(var_name) {
+$defineProperty(__env_prototype, '$emit', function(var_name) {
     var __watch = this.__.watch;
     var w_arr = __watch[var_name];
     if(!w_arr || w_arr.length === 0) {

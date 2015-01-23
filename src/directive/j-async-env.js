@@ -10,9 +10,8 @@
  *          <p>Loading...</p>
  *      </div>
  * </div>
+ *
  */
-
-var __directive_j_async_env_queue = [];
 
 function JAsyncEnv(root_ele, ready_ele, load_ele, drive_module, env) {
 

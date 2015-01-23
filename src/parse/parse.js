@@ -13,6 +13,15 @@ GrammarNode.prototype = {
         return this.nodes[0].exec(scope);
     },
     set : function(scope) {
+    },
+    destroy : function() {
+        var ns = this.nodes;
+        for(var i=0;i<ns.length;i++) {
+            ns[i].destroy();
+            ns[i] = null;
+        }
+        ns.length = 0;
+        this.nodes = null;
     }
 };
 

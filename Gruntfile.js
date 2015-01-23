@@ -8,10 +8,10 @@ var app_config = {
         html_root : 'test/html',
         file_name : 'jing.test'
     },
-    modules : ['util', 'enviroment', 'module', 'directive', {
+    modules : ['util', 'environment', 'module', 'directive', {
         name : 'parse',
         modules : ['node', 'token']
-    }, 'drive', 'filter', 'jing'],
+    }, 'event', 'strut', 'datasource', 'drive', 'filter', 'jing'],
     root : __dirname
 };
 

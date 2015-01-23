@@ -46,5 +46,5 @@ function drive_render_view(ele, scope) {
 }
 
 function drive_view_observer( var_name, new_value, data) {
-    data.element.textContent =
+    //data.element.textContent =
 }

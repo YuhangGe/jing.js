@@ -22,6 +22,12 @@ __jimodel_prototype.render = function() {
     this.ele.value = new_val;
     this.val = new_val;
 };
+__jimodel_prototype.destroy = function() {
+    this.ele = null;
+    //todo unwatch
+    this.expr.destroy();
+    this.expr = null;
+};
 
 directive_create('j-model', function() {
 
@@ -33,8 +39,9 @@ directive_create('j-model', function() {
 
         //todo check expr can be set. That is, expr.type is 'variable' or 'property'
 
-        new JInputModel(element, env, expr).run();
-
+        var inner = new JInputModel(element, env, expr);
+        directive_put_inner(ele, inner);
+        inner.run();
 
     };
 });

@@ -216,6 +216,9 @@ function $isFunction(func) {
 function $isNumber(num) {
     return typeof num === 'number';
 }
+function $isObject(obj) {
+    return typeof obj === 'object';
+}
 function $isNull(nl) {
     return nl === null;
 }

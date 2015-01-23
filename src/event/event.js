@@ -6,8 +6,11 @@ var __event_table = {
 
 var __event_jid_counter = 0;
 
-function event_jid() {
-    return 'j.ele.' + (__event_jid_counter++).toString(36);
+function event_jid(ele) {
+    if(!ele.id) {
+        ele.id = 'j.ele.' + (__event_jid_counter++).toString(36);
+    }
+    return ele.id;
 }
 
 function event_bind_stop(ev) {
@@ -53,11 +56,7 @@ function event_before(ele, event_name, handler) {
 }
 
 function event_on(ele, event_name, handler) {
-    var jid = $attr(ele, 'id');
-    if(!jid) {
-        jid = event_jid();
-        $attr(ele, 'id', jid);
-    }
+    var jid = event_jid(ele);
     var table = __event_table.on,
         et;
     if(!$hasProperty(table, event_name)) {

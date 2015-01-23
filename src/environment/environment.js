@@ -4,17 +4,6 @@ var __env_counter = 0;
 var __root_env_table = {};
 
 function Environment(name, parent) {
-    /**
-     * $$用来保存用户定义的变量。
-     * __用来保存支撑逻辑的内部变量。
-     * 通过这个方式，使用Scope的实例尽可能信息隐藏；
-     *   通过for in只能取到通过用户定义的变量。
-     */
-    var __ = {};
-    $defineProperty(this, '__', __);
-    $defineProperty(__, 'watchers', {});
-
-    $defineProperty(this, '$$', {});
 
     $defineProperty(this, '$name', name);
     $defineProperty(this, '$children', {});
@@ -27,60 +16,6 @@ var __env_prototype = Environment.prototype;
 $defineGetterSetter(__env_prototype, '$root', function() {
     return this.$parent ? this.$parent.$root : this;
 });
-
-$defineProperty(__env_prototype, '$declare', function(var_name, var_value) {
-    var $me = this;
-
-    if(typeof var_name === 'object') {
-        for(var vn in var_name) {
-            $me.$declare(vn, var_name[vn]);
-        }
-    } else if(typeof var_value !== 'function') {
-        if(var_value instanceof Array) {
-            $each(__AM, function(item) {
-                var_value[item] = function() {
-                    var rtn = __AProto[item].apply(this, arguments);
-                    $me.$emit(var_name);
-                    return rtn;
-                }
-            });
-            /*
-             * 由于js不能重载[]运算符。因此要修改元素，只能使用set函数才能影响。
-             * ES6里面会引入新的Proxy方式，可以实现重载[]运算符的功能。未来的版本可以修改。
-             */
-            var_value.$set = function(idx, val) {
-                this[idx] = val;
-                $me.$emit(var_name);
-            };
-        }
-
-        $me.$$[var_name] = var_value;
-
-        if(var_value instanceof DataSource) {
-
-            $defineGetterSetter($me, var_name, function() {
-                return $me.$$[var_name].get();
-            }, function(val) {
-                if($me.$$[var_name].get() === val) {
-                    return;
-                }
-                $me.$$[var_name].update(val);
-                $me.$emit(var_name);
-            }, true, true);
-        } else {
-            $defineGetterSetter($me, var_name, function() {
-                return $me.$$[var_name];
-            }, function(val) {
-                if($me.$$[var_name] === val) {
-                    return;
-                }
-                $me.$$[var_name] = val;
-                $me.$emit(var_name);
-            }, true, true);
-        }
-    }
-});
-
 
 $defineProperty(__env_prototype, '$child', function(name) {
     if(!name) {
@@ -96,16 +31,21 @@ $defineProperty(__env_prototype, '$child', function(name) {
     }
 });
 
-$defineProperty(__env_prototype, '$get', function(var_name) {
+/*
+ * 取得变量名对应的值，会循环检索父亲env
+ */
+$defineProperty(__env_prototype, '$val', function(var_name) {
     if($hasProperty(this, var_name)) {
         return this[var_name];
     } else if(this.$parent) {
-        return this.$parent.$get(var_name);
+        return this.$parent.$val(var_name);
     } else {
         return null;
     }
 });
-
+/*
+ * 检测是否存在变量名对应的值，会循环检索父亲env
+ */
 $defineProperty(__env_prototype, '$has', function(var_name) {
     if($hasProperty(this, var_name)) {
         return true;
@@ -116,6 +56,21 @@ $defineProperty(__env_prototype, '$has', function(var_name) {
     }
 });
 
+/*
+ * 取得变量名所在的env，会循环检索父亲env
+ */
+$defineProperty(__env_prototype, '$get', function(var_name) {
+   if($hasProperty(this, var_name)) {
+       return this;
+   } else if(this.$parent) {
+       return this.$parent.$var(var_name);
+   } else {
+       return null;
+   }
+});
+/*
+ * 设置变量名对应的值，会循环检索父亲env。
+ */
 $defineProperty(__env_prototype, '$set', function(var_name, value) {
     if($hasProperty(this, var_name)) {
         this[var_name] = value;
@@ -123,6 +78,36 @@ $defineProperty(__env_prototype, '$set', function(var_name, value) {
         this.$parent.set(var_name, value);
     }
 });
+
+/**
+ * 添加成员的辅助方法。在env中可以使用:
+ *
+ *   this.$prop({
+ *      name : 'xiaoge',
+ *      age : 10,
+ *      say : function() {
+ *          alert('hello, ' + this.name);
+ *      }
+ *   });
+ *   this.$prop('name', 'xiaoge');
+ *
+ * 也可以直接在this上赋值，如：
+ *   this.name = 'xiaoge';
+ *   this.age = 10;
+ *   this.say = function() {
+ *      alert('hello, '+this.name);
+ *   }
+ */
+$defineProperty(__env_prototype, '$prop', function(name, value) {
+   if($isObject(name)) {
+       for(var kn in name) {
+           this[kn] = name[kn];
+       }
+   } else {
+       this[name] = value;
+   }
+});
+
 
 function environment_create(parent) {
     var name = this.$parent ? this.$parent.name + '.' + __env_counter++ : 'jing.scope.' + __env_counter++;

@@ -59,6 +59,11 @@ __jinclude_prototype.success = function(body) {
 __jinclude_prototype.error = function() {
     this.ele.innerHTML = '<p class="j-include-error">Error at j-include.</p>';
 };
+__jinclude_prototype.destroy = function() {
+    this.ele = null;
+    this.module = null;
+    this.env = null;
+};
 
 function directive_deal_j_include(ele, attr, drive_module, env) {
     var item = attr.removeNamedItem('j-include'),
@@ -71,6 +76,8 @@ function directive_deal_j_include(ele, attr, drive_module, env) {
         throw 'j-include need string.';
     }
 
-    new JInclude(ele, drive_module, env).run(url);
+    var inner = new JInclude(ele, drive_module, env);
+    directive_put_inner(ele, inner);
+    inner.run(url);
 
 }

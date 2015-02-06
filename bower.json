@@ -6,7 +6,7 @@
     "YuhangGe <abeyuhang@gmail.com>"
   ],
   "description": "Flexible javascript MVW framework",
-  "main": "index.js",
+  "main": "dist/jing.min.js",
   "keywords": [
     "javascript",
     "MVW",
@@ -19,11 +19,11 @@
     "node_modules",
     "bower_components",
     "test",
-    "tests",
     ".idea",
-    ".npmignore"
-  ],
-  "dependencies": {
-    "jquery": "~2.1.3"
-  }
+    ".npmignore",
+    "grunt",
+    ".gitignore",
+    "package.json",
+    "gruntfile.js"
+  ]
 }

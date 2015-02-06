@@ -1,16 +1,40 @@
-function GrammarNode(type, child_nodes, properties) {
+function GrammarNode(type, child_nodes) {
     this.type = type;
     this.nodes = child_nodes ? child_nodes : [];
-    this.props = $merge({
-        writable : false //是否是可以写入的类型。比如 ng-model=''这种指令就需要writable为true
-    }, properties);
+    this.parent = null;
+    for(var i=0;i<this.nodes.length;i++) {
+        this.nodes[i].parent = this;
+    }
+    /*
+     * 以下成员用来对表达式的值进行缓存。
+     * need_cached如果为false，则不缓存。用于 j-click 等情况。
+     * need_cached如果为true，则缓存，用于{{expr}}等情况。
+     */
+    this.value = null;
+    this.cached = false;
+    this.need_cached = true;
 }
 GrammarNode.prototype = {
     increment : function(scope, is_add, is_prefix) {
         return this.exec(scope);
     },
-    exec : function(scope) {
+    _exec : function(scope) {
         return this.nodes[0].exec(scope);
+    },
+    exec : function(scope) {
+        if(!this.need_cached) {
+            return this._exec(scope);
+        } else {
+            var val;
+            if(this.cached) {
+                val = this.value;
+            } else {
+                val = this._exec(scope);
+                this.value = val;
+                this.cached = true;
+            }
+            return val;
+        }
     },
     set : function(scope) {
     },
@@ -25,8 +49,8 @@ GrammarNode.prototype = {
     }
 };
 
-function parse_inherit_node(node, exec_func, other_proto) {
-    node.prototype.exec = exec_func;
+function parse_inherit_node(node, do_exec_func, other_proto) {
+    node.prototype._exec = do_exec_func;
     if(other_proto) {
         $extend(node.prototype, other_proto);
     }

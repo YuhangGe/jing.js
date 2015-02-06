@@ -1,27 +1,32 @@
-var __AM = ['push', 'pop', 'reverse', 'shift', 'sort', 'unshift', 'splice'];
-var __AProto = Array.prototype;
-var __env_counter = 0;
-var __root_env_table = {};
-
 function Environment(name, parent) {
-
-    $defineProperty(this, '$name', name);
-    $defineProperty(this, '$children', {});
-    $defineProperty(this, '$parent', parent ? parent : null);
-
+    this.__ = {
+        et : new RootEmitNode(this),
+        name : name,
+        children : {},
+        parent : parent ? parent : null
+    }
 }
 
 var __env_prototype = Environment.prototype;
+$defineGetterSetter(__env_prototype, '$name', function() {
+    return this.__.name;
+});
+$defineGetterSetter(__env_prototype, '$children', function() {
+    return this.__.children;
+});
+$defineGetterSetter(__env_prototype, '$parent', function() {
+    return this.__.parent;
+});
 
 $defineGetterSetter(__env_prototype, '$root', function() {
-    return this.$parent ? this.$parent.$root : this;
+    return this.__.parent ? this.__.parent.$root : this;
 });
 
 $defineProperty(__env_prototype, '$child', function(name) {
     if(!name) {
-        name = this.$parent ? this.$parent.name + '.' + __scope_counter++ : 'jing.scope.' + __scope_counter++;
+        name = this.__.parent ? this.__.parent.name + '.' + __scope_counter++ : 'jing.scope.' + __scope_counter++;
     }
-    var cd = this.$children;
+    var cd = this.__.children;
     if($hasProperty(cd, name)) {
         return cd[name];
     } else {
@@ -37,8 +42,8 @@ $defineProperty(__env_prototype, '$child', function(name) {
 $defineProperty(__env_prototype, '$val', function(var_name) {
     if($hasProperty(this, var_name)) {
         return this[var_name];
-    } else if(this.$parent) {
-        return this.$parent.$val(var_name);
+    } else if(this.__.parent) {
+        return this.__.parent.$val(var_name);
     } else {
         return null;
     }
@@ -49,8 +54,8 @@ $defineProperty(__env_prototype, '$val', function(var_name) {
 $defineProperty(__env_prototype, '$has', function(var_name) {
     if($hasProperty(this, var_name)) {
         return true;
-    } else if(this.$parent) {
-        return this.$parent.$has(var_name);
+    } else if(this.__.parent) {
+        return this.__.parent.$has(var_name);
     } else {
         return false;
     }
@@ -59,13 +64,11 @@ $defineProperty(__env_prototype, '$has', function(var_name) {
 /*
  * 取得变量名所在的env，会循环检索父亲env
  */
-$defineProperty(__env_prototype, '$get', function(var_name) {
+$defineProperty(__env_prototype, '$find', function(var_name) {
    if($hasProperty(this, var_name)) {
        return this;
-   } else if(this.$parent) {
-       return this.$parent.$var(var_name);
-   } else {
-       return null;
+   } else if(this.__.parent) {
+       return this.__.parent.$find(var_name);
    }
 });
 /*
@@ -74,8 +77,8 @@ $defineProperty(__env_prototype, '$get', function(var_name) {
 $defineProperty(__env_prototype, '$set', function(var_name, value) {
     if($hasProperty(this, var_name)) {
         this[var_name] = value;
-    } else if(this.$parent) {
-        this.$parent.set(var_name, value);
+    } else if(this.__.parent) {
+        this.__.parent.set(var_name, value);
     }
 });
 
@@ -108,12 +111,12 @@ $defineProperty(__env_prototype, '$prop', function(name, value) {
    }
 });
 
-
-function environment_create(parent) {
-    var name = this.$parent ? this.$parent.name + '.' + __env_counter++ : 'jing.scope.' + __env_counter++;
-    var cs = new Environment(name, parent);
-    if(parent) {
-        $defineProperty(parent.$children, name, cs, false, true);
-    }
-    return cs;
-}
+//
+//function environment_create(parent) {
+//    var name = this.__.parent ? this.__.parent.name + '.' + __env_counter++ : 'jing.scope.' + __env_counter++;
+//    var cs = new Environment(name, parent);
+//    if(parent) {
+//        $defineProperty(parent.$children, name, cs, false, true);
+//    }
+//    return cs;
+//}

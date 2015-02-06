@@ -373,7 +373,7 @@ function Emitter(id) {
     this.children = {};
 }
 Emitter.prototype = {
-    tell : function(type, value) {
+    notify : function(type, value) {
         var ls = this.listeners,
             chs = this.children;
         for(var i=0;i<ls.length;i++) {
@@ -401,7 +401,7 @@ function Listener(id, handler, data, lazy_time) {
     this.delegate = $bind(this, this.deal);
 }
 Listener.prototype = {
-    tell : function(emit_event) {
+    notify : function(emit_event) {
         if(this.timeout !== null) {
             clearTimeout(this.timeout);
             this.timeout = null;

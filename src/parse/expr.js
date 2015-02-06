@@ -2,6 +2,7 @@ var __parse_node_stack = [];
 var __parse_op_stack = [];
 var __parse_token_pre_type = 'emp';
 var __parse_in_node = null;
+var __parse_node_need_cache = true;
 
 /*
  * 运算符优先级。第一个数字是优先级，第二个数字表示是从左到右还是从右到左。
@@ -80,9 +81,10 @@ var __parse_op_priority = {
  * 以下代码生成语法树。
  */
 
-function parse_expression(expr_str) {
+function parse_expression(expr_str, node_need_cache) {
     __parse_token_pre_type = 'emp';
     __parse_in_node = null;
+    __parse_node_need_cache = node_need_cache ? true : false;
     parse_token_init(expr_str);
 
     parse_expr();
@@ -97,6 +99,7 @@ function parse_expression(expr_str) {
         root_node = __parse_node_stack[0];
     } else {
         root_node = new GrammarNode('root', $copyArray(__parse_node_stack));
+        root_node.need_cached = __parse_node_need_cache;
     }
 
     __parse_node_stack.length = 0;
@@ -357,5 +360,6 @@ function parse_pop_node() {
 }
 
 function parse_push_node(node) {
+    node.need_cached = __parse_node_need_cache;
     __parse_node_stack.push(node);
 }

@@ -1,7 +1,5 @@
 function PropertyGrammarNode(var_node, prop_node) {
-    this.base('property', [var_node, prop_node], {
-        writable : true
-    });
+    this.base('property', [var_node, prop_node]);
 }
 parse_inherit_node(PropertyGrammarNode, function(scope) {
     var variable = this.nodes[0].exec(scope),

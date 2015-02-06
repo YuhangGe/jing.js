@@ -1,23 +1,79 @@
-function Emitter(id) {
+function EmitNode(id, parent) {
     this.id = id;
-    this.listeners = [];
+    this.I_emitter = null;
+    this.L_emitter = null;
     this.children = {};
+    this.parent = parent;
+    this.path = parent.path + '.' + id;
 }
-Emitter.prototype = {
-    tell : function(type, value) {
-        var ls = this.listeners,
-            chs = this.children;
-        for(var i=0;i<ls.length;i++) {
-            ls[i].tell(new EmitEvent(this.id, type, value));
+EmitNode.prototype = {
+    val : function(var_name) {
+        var p = this.parent.val(this.id);
+        if(p && var_name) {
+            return p[var_name];
+        } else {
+            return p;
         }
-        for(var k in chs) {
-            chs[k].tell(type, value);
+    },
+    notify : function() {
+        if(this.I_emitter !== null) {
+            this.I_emitter.notify();
+        }
+        if(this.L_emitter !== null) {
+            this.L_emitter.notify();
+        }
+        for(var k in this.children) {
+            this.children[k].notify();
         }
     }
 };
 
-function EmitEvent(id, type, value) {
-    this.id = id;
-    this.type = type;
-    this.value = value;
+function RootEmitNode(env) {
+    this.children = {};
+    this.env = env;
+    this.path = '';
 }
+RootEmitNode.prototype = {
+    val : function(var_name) {
+        return this.env.$get(var_name);
+    }
+};
+
+function ImmEmitter(node) {
+    this.node = node;
+    this.pre_value = node.val();
+    this.cur_value = this.pre_value;
+    this.listeners = [];
+}
+ImmEmitter.prototype = {
+    notify : function() {
+        this.cur_value = this.node.val();
+        if(this.cur_value === this.pre_value) {
+            return;
+        }
+        for(var i=0;i<this.listeners.length;i++) {
+            this.listeners[i].notify(this.cur_value, this.pre_value);
+        }
+        this.cur_value = this.pre_value;
+    }
+};
+
+function LazyEmitter(node) {
+    this.base(node);
+    this.handler = $bind(this, this.deal);
+    this.tm = null;
+}
+LazyEmitter.prototype = {
+    notify : function() {
+        if(this.tm !== null) {
+            clearTimeout(this.tm);
+            this.tm = null;
+        }
+        this.tm = setTimeout(this.handler, 0);
+    },
+    deal : function() {
+        this.tm = null;
+        this.callBase('notify');
+    }
+};
+$inherit(LazyEmitter, Emitter);

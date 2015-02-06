@@ -203,6 +203,11 @@ function $copyArray(arr) {
     }
     return rtn;
 }
+function $setArray(dst_arr, src_arr) {
+    for(var i=0;i<src_arr.length;i++) {
+        dst_arr[i] = src_arr[i];
+    }
+}
 function $id(id) {
     return document.getElementById(id);
 }

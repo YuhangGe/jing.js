@@ -1,11 +1,6 @@
 
 jing = {};
 
-jing.scope_types = {
-    INHERIT : __ENV_TYPE_INHERIT,
-    CREATE : __SCOPE_TYPE_CREATE,
-    PARENT : __SCOPE_TYPE_PARENT
-};
 
 jing.module = module_create;
 jing.require = module_require;

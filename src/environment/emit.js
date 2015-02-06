@@ -4,7 +4,7 @@ function EmitNode(id, parent) {
     this.L_emitter = null;
     this.children = {};
     this.parent = parent;
-    this.path = parent.path + '.' + id;
+    this.path = (parent.path ? parent.path + '.' : '') + id;
 }
 EmitNode.prototype = {
     val : function(var_name) {
@@ -31,11 +31,11 @@ EmitNode.prototype = {
 function RootEmitNode(env) {
     this.children = {};
     this.env = env;
-    this.path = '';
+    this.path = null;
 }
 RootEmitNode.prototype = {
     val : function(var_name) {
-        return this.env.$get(var_name);
+        return this.env.$val(var_name);
     }
 };
 
@@ -52,9 +52,9 @@ ImmEmitter.prototype = {
             return;
         }
         for(var i=0;i<this.listeners.length;i++) {
-            this.listeners[i].notify(this.cur_value, this.pre_value);
+            this.listeners[i].notify(this.node.path, this.cur_value, this.pre_value);
         }
-        this.cur_value = this.pre_value;
+        this.pre_value = this.cur_value;
     }
 };
 
@@ -76,4 +76,4 @@ LazyEmitter.prototype = {
         this.callBase('notify');
     }
 };
-$inherit(LazyEmitter, Emitter);
+$inherit(LazyEmitter, ImmEmitter);

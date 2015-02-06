@@ -150,10 +150,17 @@ function $in(obj, func) {
     }
 }
 function $defineProperty(obj, prop, value, writable, enumerable) {
+    //Object.defineProperty(obj, prop, {
+    //    value : value,
+    //    writable : writable ? true : false,
+    //    enumerable : enumerable ? true : false
+    //});
+    //开发阶段enumerable都为true，方便调试
+    //todo remove enumerable [true]
     Object.defineProperty(obj, prop, {
         value : value,
         writable : writable ? true : false,
-        enumerable : enumerable ? true : false
+        enumerable : true
     });
 }
 function $hasProperty(obj, prop) {

@@ -124,7 +124,7 @@ function run() {
 
             return _;
         })
-        .env("Test", function (module) {
+        .env("Test", function (module, $scope) {
             var ServiceA = module.require('Service.A');
             var ServiceB = module.require('Service.B');
             var MyService = module.require('MyService');
@@ -153,7 +153,21 @@ function run() {
             log(rootEnv.rootMessage);
             log(rootEnv.oooo);
 
-            this.$props = {
+            /**
+             * 定义成员变量非常灵活。可以最简单的方式，
+             *    直接this.<prop_name> = <prop_value>。
+             *    也可以通过this.$prop = <prop_key_value_object>
+             *    或者this.$prop(<prop_name>, <prop_value>)
+             *    或者this.$prop(<prop_key_value_object>)。
+             * 就看你喜欢哪种风格了。
+             *
+             * 如果你喜欢angular的$scope风格来定义，
+             *    也可以直接用$scope.<prop_name> = <prop_value>
+             *    或者$scope.$prop = ...
+             * ($scope是通过参数传进来的，其实也是environment自身，和this是完全一样的，
+             *  你也可以把$scope改成其它你喜欢的名称。)
+             */
+            this.$prop = {
                 message : 'Hello, World',
                 boys : [1, 2, 3, 4],
                 xiaoge : {
@@ -164,30 +178,36 @@ function run() {
                         age: 24
                     }
                 }
-                //bookList : module.data('bookList')
             };
+            this.$prop('prop2', 999);
+            this.$prop({
+                prop3 : 'prop3'
+            });
 
-            this.$funcs = {
-                test : function (event) {
-                    log(event);
-                    alert(this.message);
-                    log(this.message); //this 即 scope
-                    this.message = "Hello, Jing!";
-                    this.boys.push(6);
-                    log(this.boys);
-                    this.$root.message = "update message from client to server";
-                },
-                onBookListUpdate : function() {
-
-                }
+            this.test = function (event) {
+                log(event);
+                alert(this.message);
+                log(this.message); //this 即 scope
+                this.message = "Hello, Jing!";
+                this.boys.push(6);
+                log(this.boys);
+                this.$root.message = "update message from client to server";
             };
+            this.prop4 = {
+                a : 'a'
+            };
+            //same as this.arr_prop
+            $scope.arr_prop = [1, 2, 3, 4, 5];
 
-            this.$watch('xiaoge.girl.age', function(var_name, new_value, data) {
+            this.$watch('xiaoge.girl.age', function(change_list, data) {
 
             }, {
                 info : '额外的数据'
             });
+            //same as this.$watch
+            $scope.$watch("arr_prop[3]", function(change_list, data) {
 
+            }, {});
         })
         .conf({
             data_source_url : 'http://localhost:8088/datasource'

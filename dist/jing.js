@@ -204,6 +204,11 @@ function $copyArray(arr) {
     }
     return rtn;
 }
+function $setArray(dst_arr, src_arr) {
+    for(var i=0;i<src_arr.length;i++) {
+        dst_arr[i] = src_arr[i];
+    }
+}
 function $id(id) {
     return document.getElementById(id);
 }
@@ -247,30 +252,35 @@ function $ajax(options) {
 }
 
 
-var __AM = ['push', 'pop', 'reverse', 'shift', 'sort', 'unshift', 'splice'];
-var __AProto = Array.prototype;
-var __env_counter = 0;
-var __root_env_table = {};
-
 function Environment(name, parent) {
-
-    $defineProperty(this, '$name', name);
-    $defineProperty(this, '$children', {});
-    $defineProperty(this, '$parent', parent ? parent : null);
-
+    this.__ = {
+        et : new RootEmitNode(this),
+        name : name,
+        children : {},
+        parent : parent ? parent : null
+    }
 }
 
 var __env_prototype = Environment.prototype;
+$defineGetterSetter(__env_prototype, '$name', function() {
+    return this.__.name;
+});
+$defineGetterSetter(__env_prototype, '$children', function() {
+    return this.__.children;
+});
+$defineGetterSetter(__env_prototype, '$parent', function() {
+    return this.__.parent;
+});
 
 $defineGetterSetter(__env_prototype, '$root', function() {
-    return this.$parent ? this.$parent.$root : this;
+    return this.__.parent ? this.__.parent.$root : this;
 });
 
 $defineProperty(__env_prototype, '$child', function(name) {
     if(!name) {
-        name = this.$parent ? this.$parent.name + '.' + __scope_counter++ : 'jing.scope.' + __scope_counter++;
+        name = this.__.parent ? this.__.parent.name + '.' + __scope_counter++ : 'jing.scope.' + __scope_counter++;
     }
-    var cd = this.$children;
+    var cd = this.__.children;
     if($hasProperty(cd, name)) {
         return cd[name];
     } else {
@@ -286,8 +296,8 @@ $defineProperty(__env_prototype, '$child', function(name) {
 $defineProperty(__env_prototype, '$val', function(var_name) {
     if($hasProperty(this, var_name)) {
         return this[var_name];
-    } else if(this.$parent) {
-        return this.$parent.$val(var_name);
+    } else if(this.__.parent) {
+        return this.__.parent.$val(var_name);
     } else {
         return null;
     }
@@ -298,8 +308,8 @@ $defineProperty(__env_prototype, '$val', function(var_name) {
 $defineProperty(__env_prototype, '$has', function(var_name) {
     if($hasProperty(this, var_name)) {
         return true;
-    } else if(this.$parent) {
-        return this.$parent.$has(var_name);
+    } else if(this.__.parent) {
+        return this.__.parent.$has(var_name);
     } else {
         return false;
     }
@@ -308,13 +318,11 @@ $defineProperty(__env_prototype, '$has', function(var_name) {
 /*
  * 取得变量名所在的env，会循环检索父亲env
  */
-$defineProperty(__env_prototype, '$get', function(var_name) {
+$defineProperty(__env_prototype, '$find', function(var_name) {
    if($hasProperty(this, var_name)) {
        return this;
-   } else if(this.$parent) {
-       return this.$parent.$var(var_name);
-   } else {
-       return null;
+   } else if(this.__.parent) {
+       return this.__.parent.$find(var_name);
    }
 });
 /*
@@ -323,8 +331,8 @@ $defineProperty(__env_prototype, '$get', function(var_name) {
 $defineProperty(__env_prototype, '$set', function(var_name, value) {
     if($hasProperty(this, var_name)) {
         this[var_name] = value;
-    } else if(this.$parent) {
-        this.$parent.set(var_name, value);
+    } else if(this.__.parent) {
+        this.__.parent.set(var_name, value);
     }
 });
 
@@ -357,171 +365,359 @@ $defineProperty(__env_prototype, '$prop', function(name, value) {
    }
 });
 
+//
+//function environment_create(parent) {
+//    var name = this.__.parent ? this.__.parent.name + '.' + __env_counter++ : 'jing.scope.' + __env_counter++;
+//    var cs = new Environment(name, parent);
+//    if(parent) {
+//        $defineProperty(parent.$children, name, cs, false, true);
+//    }
+//    return cs;
+//}
 
-function environment_create(parent) {
-    var name = this.$parent ? this.$parent.name + '.' + __env_counter++ : 'jing.scope.' + __env_counter++;
-    var cs = new Environment(name, parent);
-    if(parent) {
-        $defineProperty(parent.$children, name, cs, false, true);
-    }
-    return cs;
-}
-
-function Emitter(id) {
+function EmitNode(id, parent) {
     this.id = id;
-    this.listeners = [];
+    this.I_emitter = null;
+    this.L_emitter = null;
     this.children = {};
+    this.parent = parent;
+    this.path = parent.path + '.' + id;
 }
-Emitter.prototype = {
-    notify : function(type, value) {
-        var ls = this.listeners,
-            chs = this.children;
-        for(var i=0;i<ls.length;i++) {
-            ls[i].tell(new EmitEvent(this.id, type, value));
+EmitNode.prototype = {
+    val : function(var_name) {
+        var p = this.parent.val(this.id);
+        if(p && var_name) {
+            return p[var_name];
+        } else {
+            return p;
         }
-        for(var k in chs) {
-            chs[k].tell(type, value);
+    },
+    notify : function() {
+        if(this.I_emitter !== null) {
+            this.I_emitter.notify();
+        }
+        if(this.L_emitter !== null) {
+            this.L_emitter.notify();
+        }
+        for(var k in this.children) {
+            this.children[k].notify();
         }
     }
 };
 
-function EmitEvent(id, type, value) {
-    this.id = id;
-    this.type = type;
-    this.value = value;
+function RootEmitNode(env) {
+    this.children = {};
+    this.env = env;
+    this.path = '';
 }
+RootEmitNode.prototype = {
+    val : function(var_name) {
+        return this.env.$get(var_name);
+    }
+};
 
-function Listener(id, handler, data, lazy_time) {
-    this.id = id;
-    this.lazy = $isNumber(lazy_time) ? ((lazy_time = Math.floor(lazy_time)) >=0 ? lazy_time : 0) : 0;
-    this.handler  = handler;
-    this.data = data;
-    this.timeout = null;
-    this.emit_events = [];
-    this.delegate = $bind(this, this.deal);
+function ImmEmitter(node) {
+    this.node = node;
+    this.pre_value = node.val();
+    this.cur_value = this.pre_value;
+    this.listeners = [];
 }
-Listener.prototype = {
-    notify : function(emit_event) {
+ImmEmitter.prototype = {
+    notify : function() {
+        this.cur_value = this.node.val();
+        if(this.cur_value === this.pre_value) {
+            return;
+        }
+        for(var i=0;i<this.listeners.length;i++) {
+            this.listeners[i].notify(this.cur_value, this.pre_value);
+        }
+        this.cur_value = this.pre_value;
+    }
+};
+
+function LazyEmitter(node) {
+    this.base(node);
+    this.handler = $bind(this, this.deal);
+    this.tm = null;
+}
+LazyEmitter.prototype = {
+    notify : function() {
+        if(this.tm !== null) {
+            clearTimeout(this.tm);
+            this.tm = null;
+        }
+        this.tm = setTimeout(this.handler, 0);
+    },
+    deal : function() {
+        this.tm = null;
+        this.callBase('notify');
+    }
+};
+$inherit(LazyEmitter, Emitter);
+
+function ImmListener(handler, data) {
+    this.handler = handler;
+    this.data = data;
+}
+ImmListener.prototype = {
+    notify : function(var_name, pre_value, cur_value) {
+        this.handler([{
+            var_name : var_name,
+            pre_value : pre_value,
+            cur_value : cur_value
+        }], this.data);
+    }
+};
+
+function LazyListener(handler, data, lazy_time) {
+    this.handler = handler;
+    this.data = data;
+    this.lazy = $isNumber(lazy_time) ? ((lazy_time = Math.floor(lazy_time)) >=0 ? lazy_time : 0) : 0;
+    this.timeout = null;
+    this.delegate = $bind(this, this.deal);
+    this.changes = [];
+}
+LazyListener.prototype = {
+    notify : function(var_name, pre_value, cur_value) {
         if(this.timeout !== null) {
             clearTimeout(this.timeout);
             this.timeout = null;
         }
-        this.emit_events.push(emit_event);
+        this.changes.push({
+            var_name : var_name,
+            pre_value : pre_value,
+            cur_value : cur_value
+        });
         this.timeout = setTimeout(this.delegate, this.lazy);
     },
     deal : function() {
-        this.handler(this.emit_events, this.data);
-        this.emit_events.length = 0;
-        this.timeout = null;
+        this.handler(this.changes, this.data);
+        this.changes.length = 0;
     }
 };
 
 /*
  * 尽可能使用一个不会被使用的名称来作为内部成员。
  */
-var __environment_watch_inner_prop_name = '__$ge.jing.0210.prop$__';
-var __environment_watch_inner_emit_name = '__$ge.jing.0210.emit$__';
-var __environment_emit_type_value = 0;
-var __environment_emit_type_array = 1;
-
+var __env_prop_name = '__$jing.0210.prop$__';
+var __env_emit_name = '__$jing.0210.emit$__';
 /*
- * __environment_watch_inner_prop_name和__environment_watch_inner_emit_name在压缩时，
+ * __env_prop_name和__env_emit_name在压缩时，
  *   会被检测到未被改写过，也就是常数，从而被替换为常数，避免闭包。
  *
  * 但var_name还是难以避免地成为闭包变量。
  *   通过Object.defineProperty定义的getter和setter如果能取得当前getter/setter的名称，
  *   就可以解决var_name的闭包问题。
  *
+ *
  */
-function environment_declare_var(p, var_name, value) {
-    if($isArray(value)) {
+function environment_declare_var(p, var_name, value, emit_node) {
+    p[__env_prop_name][var_name] = value;
+    p[__env_emit_name][var_name] = emit_node;
+    $defineGetterSetter(p, var_name, function () {
+        return this[__env_prop_name][var_name];
+    }, function (val) {
+        var props = this[__env_prop_name];
+        if($isObject(props[var_name]) && $isObject(val)) {
+            var en = this[__env_emit_name][var_name];
+            environment_redeclare_var(en, val);
+            props[var_name] = val;
+        } else {
+            props[var_name] = val;
+        }
+        this[__env_emit_name][var_name].notify();
+    });
+}
 
-    } else {
-        $defineGetterSetter(p, var_name, function() {
-            return this[__environment_watch_inner_prop_name][var_name];
-        }, function(val) {
-            var prop = this[__environment_watch_inner_prop_name],
-                pre_val = prop[var_name];
-            if(pre_val === val) {
-                return;
-            }
-            prop[var_name] = val;
-            this[__environment_watch_inner_emit_name][var_name].tell(__environment_emit_type_value, val);
-        });
+function environment_redeclare_var(emit_node, obj) {
+    var k, cs = emit_node.children, val;
+    for(k in cs) {
+        if($hasProperty(obj, k)) {
+            val = obj[k];
+            delete obj[k];
+            environment_declare_var(obj, k, val, cs[k]);
+            environment_redeclare_var(cs[k], val);
+        }
     }
 }
 
-function environment_watch_each_var(p, var_name, et) {
-    var ps, val, e_tree;
-    if(!$hasProperty(p, __environment_watch_inner_prop_name)) {
+function environment_declare_array(p, var_name, arr, emit_node) {
+    p[__env_prop_name][var_name] = new JArray(arr);
+    p[__env_emit_name][var_name] = emit_node;
+    $defineGetterSetter(p, var_name, function () {
+        return this[__env_prop_name][var_name];
+    }, function (val) {
+        //if(!$isArray(val)) {
+        //    //如果把一个本来的Array类型又变成其它类型，则不被允许。
+        //    throw "can't set array to other type.";
+        //} else {
+        //    val = new JArray(val);
+        //}
+        ////对原来的JArray进行消毁
+        //struct_destroy_jarray(this[__env_prop_name][var_name]);
+        //this[__env_prop_name][var_name] = val;
+        //this[__env_emit_name][var_name].notify(val);
+        log('不允许覆盖array');
+    });
+}
+function environment_watch_each_var(p, var_name, emit_node) {
+    var ps, val;
+    if (!$hasProperty(p, __env_prop_name)) {
         ps = {};
-        $defineProperty(p, __environment_watch_inner_prop_name, ps);
+        $defineProperty(p, __env_prop_name, ps);
     } else {
-        ps = p[__environment_watch_inner_prop_name];
+        ps = p[__env_prop_name];
     }
-    if(!$hasProperty(p, __environment_watch_inner_emit_name)) {
-        e_tree = {};
-        $defineProperty(p, __environment_watch_inner_emit_name, e_tree);
-    } else {
-        e_tree = p[__environment_watch_inner_emit_name];
+    if(!$hasProperty(p, __env_emit_name)) {
+        $defineProperty(p, __env_emit_name, {});
     }
 
-    if(!$hasProperty(ps, var_name)) {
-        if(!$hasProperty(p, var_name)) {
-            throw 'property '+ var_name + ' not found.'
+    if (!$hasProperty(ps, var_name)) {
+        if (!$hasProperty(p, var_name)) {
+            throw 'property ' + var_name + ' not found.'
         }
         val = p[var_name];
         delete p[var_name];
-        ps[var_name] = val;
-        environment_declare_var(p, var_name, val);
-    }
-
-    if(!$hasProperty(e_tree, var_name)) {
-        e_tree[var_name] = new Emitter(var_name);
-    }
-
-    if(et && !$hasProperty(et.children, var_name)) {
-        et.children[var_name] = e_tree[var_name];
-    }
-}
-
-function environment_watch_vars(env, var_name, listener) {
-    var var_array = var_name.split('.');
-    var p = env, vn, i, et = null;
-    for(i=0;i<var_array;i++) {
-        vn = var_array[i];
-        environment_watch_each_var(p, vn, et);
-        p = p[__environment_watch_inner_prop_name][vn];
-        et = p[__environment_watch_inner_emit_name][vn];
-        if(!$isObject(p)) {
-            throw('watch need object.');
+        if($isArray(val)) {
+            environment_declare_array(p, var_name, new JArray(val));
+        } else {
+            environment_declare_var(p, var_name, val, emit_node);
         }
     }
-    if(i>0) {
-        ps[__environment_watch_inner_emit_name][vn].listeners.push(listener);
+    return ps[var_name];
+}
+
+function environment_watch_vars(env, var_name, listener, is_lazy) {
+    /*
+     * 将a.b[4][3][7].c.d[9]转成a.b.4.3.7.c.d.9的形式。
+     */
+    var v_arr = var_name.replace(/\[\s*(\d+)\s*\]/g, ".$1.").replace(/\.{2}/g, '.').split('.');
+
+    var e_node = environment_get_emit_node(env, v_arr);
+    var emitter = is_lazy ? e_node.L_emitter : e_node.I_emitter;
+    if(emitter === null) {
+        if(is_lazy) {
+            emitter = new LazyEmitter(e_node);
+            e_node.L_emitter = emitter;
+        } else {
+            emitter = new ImmEmitter(e_node);
+            e_node.I_emitter = emitter;
+        }
+    }
+    emitter.listeners.push(listener);
+    environment_watch_items(env, v_arr);
+
+}
+
+function environment_get_emit_node(env, var_array) {
+
+    function get_node(parent, name) {
+        var n = parent.children[name];
+        if(!n) {
+            n = parent.children[name] = new EmitNode(name, parent);
+        }
+        return n;
+    }
+    var root = env.__.et, //root emit node
+        e_node = get_node(root, var_array[0]);
+    var i;
+    for(i=1;i<var_array;i++) {
+        e_node = get_node(e_node, var_array[i]);
+    }
+    return e_node;
+}
+
+function environment_watch_items(env, var_array) {
+
+    var p = env, vn, i, et = env.__.et;
+    var en, cp;
+    for (i = 0; i < var_array; i++) {
+        vn = var_array[i];
+        en = et.children[vn];
+        cp = environment_watch_each_var(p, vn, en);
+        if (!$isObject(cp)) {
+            throw('$watch need object.');
+        }
+        p = cp;
+        et = en;
     }
 }
 
-$defineProperty(__env_prototype, '$watch', function(var_name, callback, data, lazy_time) {
-    if(typeof callback !== 'function') {
+$defineProperty(__env_prototype, '$watch', function (var_name, callback, data, lazy_time) {
+    if (typeof callback !== 'function') {
         log('$watch need function');
         return;
     }
-    var i, listener;
-    var lazy = ($isUndefined(lazy_time) && $isNumber(data)) ? data : ($isNumber(lazy_time)?lazy_time:0);
-    listener = new Listener(var_name, callback, data, lazy);
-    if($isString(var_name)) {
-        environment_watch_vars(this, var_name.trim(), listener);
-    } else if($isArray(var_name)) {
-        for(i=0;i<var_name.length;i++) {
-            environment_watch_vars(this, var_name[i].trim(), listener);
-        }
-    } else if($isObject(var_name)) {
-        //watch expression
 
+    var i, listener;
+
+    listener = lazy_time === false ? new ImmListener() : new LazyListener(var_name, callback, data, $isNumber(lazy_time) ? lazy_time : 0);
+
+    if ($isString(var_name)) {
+        environment_watch_vars(this, var_name.trim(), listener, lazy_time === false);
+    } else if ($isArray(var_name)) {
+        for (i = 0; i < var_name.length; i++) {
+            environment_watch_vars(this, var_name[i].trim(), listener, lazy_time === false);
+        }
+    } else {
+        log('$watch wrong format');
+    }
+});
+
+function environment_parse_expr(array) {
+    var na = new VariableGrammarNode(array[0]), nb;
+    for(var i=1;i<array.length;i++) {
+        nb = new ConstantGrammarNode(array[i]);
+        na = new PropertyGrammarNode(na, nb);
+    }
+    return na;
+}
+
+function environment_watch_expression(env, expr, callback, data, lazy_time) {
+    var watch_array = [];
+
+    expr_loop(expr, watch_array);
+
+    if(watch_array.length === 0) {
+        return;
     }
 
-});
+    var listener = lazy_time === false ? new ImmListener(callback, data) : new LazyListener(callback, data, $isNumber(lazy_time) ? lazy_time : 0);
+
+    for (var i = 0; i < watch_array.length; i++) {
+        var p_expr = environment_parse_expr(watch_array[i]),
+            notifier = new Notifier(p_expr, env);
+
+        notifier.listeners.push(listener);
+        environment_watch_items(env, watch_array[i], notifier);
+    }
+
+    function expr_prop(expr, v_arr) {
+        var nb = expr.nodes[1];
+        if(nb.type === 'constant') {
+            v_arr.push(nb.value);
+        }
+        if(expr.parent && expr.parent.type === 'property') {
+           expr_prop(expr.parent, v_arr);
+        }
+    }
+
+    function expr_loop(expr, w_arr) {
+        if(expr.type === 'variable') {
+            var vn = [expr.var_name];
+            if(expr.parent.type === 'property') {
+                expr_prop(expr.parent, vn);
+            }
+            w_arr.push(vn);
+        } else {
+            for(var i=0;i<expr.nodes.length;i++) {
+                expr_loop(expr.nodes[i]);
+            }
+        }
+    }
+
+
+}
 
 /*
  * 保存全局的顶层Module
@@ -865,6 +1061,11 @@ function directive_deal_j_env(ele, attr, drive_module, env) {
     env_def.func.call(env, drive_module);
 }
 
+/**
+ * Created by abraham on 15/2/4.
+ */
+
+
 /*
  *
  * 使用方法如下，注意一定要用双引号把字符串包裹，因为j-include接受的也是表达式。
@@ -1087,19 +1288,61 @@ function directive_deal_j_repeat(ele, attr, drive_module, env) {
     new JRepeat(ele, attr, drive_module, env, expr).run();
 }
 
-function GrammarNode(type, child_nodes, properties) {
+/**
+ * j-style可以使用两种方式。
+ *   一种是使用嵌入表达式，
+ *   比如<div j-style="background: {{bg-color}}; font-size:{{size}}"></div>。
+ *   一种是使用完整表达式，
+ *   比如<div j-style="st"></div>，其中st是在environment里定义的变量，可以是字符串也可以是json
+ */
+directive_create('j-style', function() {
+    return function(drive_module, directive_module, env, element, attr_value) {
+        var expr_pieces = drive_get_expr_pieces(attr_value);
+        if(expr_pieces.length === 0) {
+
+        } else {
+
+        }
+    }
+});
+
+function GrammarNode(type, child_nodes) {
     this.type = type;
     this.nodes = child_nodes ? child_nodes : [];
-    this.props = $merge({
-        writable : false //是否是可以写入的类型。比如 ng-model=''这种指令就需要writable为true
-    }, properties);
+    this.parent = null;
+    for(var i=0;i<this.nodes.length;i++) {
+        this.nodes[i].parent = this;
+    }
+    /*
+     * 以下成员用来对表达式的值进行缓存。
+     * need_cached如果为false，则不缓存。用于 j-click 等情况。
+     * need_cached如果为true，则缓存，用于{{expr}}等情况。
+     */
+    this.value = null;
+    this.cached = false;
+    this.need_cached = true;
 }
 GrammarNode.prototype = {
     increment : function(scope, is_add, is_prefix) {
         return this.exec(scope);
     },
-    exec : function(scope) {
+    _exec : function(scope) {
         return this.nodes[0].exec(scope);
+    },
+    exec : function(scope) {
+        if(!this.need_cached) {
+            return this._exec(scope);
+        } else {
+            var val;
+            if(this.cached) {
+                val = this.value;
+            } else {
+                val = this._exec(scope);
+                this.value = val;
+                this.cached = true;
+            }
+            return val;
+        }
     },
     set : function(scope) {
     },
@@ -1114,8 +1357,8 @@ GrammarNode.prototype = {
     }
 };
 
-function parse_inherit_node(node, exec_func, other_proto) {
-    node.prototype.exec = exec_func;
+function parse_inherit_node(node, do_exec_func, other_proto) {
+    node.prototype._exec = do_exec_func;
     if(other_proto) {
         $extend(node.prototype, other_proto);
     }
@@ -1126,6 +1369,7 @@ var __parse_node_stack = [];
 var __parse_op_stack = [];
 var __parse_token_pre_type = 'emp';
 var __parse_in_node = null;
+var __parse_node_need_cache = true;
 
 /*
  * 运算符优先级。第一个数字是优先级，第二个数字表示是从左到右还是从右到左。
@@ -1204,9 +1448,10 @@ var __parse_op_priority = {
  * 以下代码生成语法树。
  */
 
-function parse_expression(expr_str) {
+function parse_expression(expr_str, node_need_cache) {
     __parse_token_pre_type = 'emp';
     __parse_in_node = null;
+    __parse_node_need_cache = node_need_cache ? true : false;
     parse_token_init(expr_str);
 
     parse_expr();
@@ -1221,6 +1466,7 @@ function parse_expression(expr_str) {
         root_node = __parse_node_stack[0];
     } else {
         root_node = new GrammarNode('root', $copyArray(__parse_node_stack));
+        root_node.need_cached = __parse_node_need_cache;
     }
 
     __parse_node_stack.length = 0;
@@ -1481,6 +1727,7 @@ function parse_pop_node() {
 }
 
 function parse_push_node(node) {
+    node.need_cached = __parse_node_need_cache;
     __parse_node_stack.push(node);
 }
 
@@ -1581,12 +1828,15 @@ parse_inherit_node(ConditionGrammarNode, function(scope) {
 });
 
 function ConstantGrammarNode(value) {
-    this.base('constant');
+    this.base('constant', []);
     this.value = value;
 }
 parse_inherit_node(ConstantGrammarNode, function() {
     return this.value;
 }, {
+    exec : function() {
+        return this.value;
+    },
     increment : function(scope, is_add, is_prefix) {
         return this.value +(is_add? 1:0);
     }
@@ -1625,9 +1875,7 @@ parse_inherit_node(InGrammarNode, function() {
 });
 
 function PropertyGrammarNode(var_node, prop_node) {
-    this.base('property', [var_node, prop_node], {
-        writable : true
-    });
+    this.base('property', [var_node, prop_node]);
 }
 parse_inherit_node(PropertyGrammarNode, function(scope) {
     var variable = this.nodes[0].exec(scope),
@@ -1708,22 +1956,20 @@ parse_inherit_node(SetGrammarNode, function(scope) {
 });
 
 function VariableGrammarNode(var_name) {
-    this.base('variable', [], {
-        writable : true
-    });
+    this.base('variable', []);
     this.var_name = var_name;
 }
-parse_inherit_node(VariableGrammarNode, function(scope) {
-    return scope.$get(this.var_name);
+parse_inherit_node(VariableGrammarNode, function(env) {
+    return env.$get(this.var_name);
 }, {
-    increment : function(scope, is_add, is_prefix) {
-        var val = this.exec(scope),
+    increment : function(env, is_add, is_prefix) {
+        var val = this.exec(env),
             new_val = val + (is_add ? 1 : -1);
-        scope.$set(this.var_name, new_val);
+        env.$set(this.var_name, new_val);
         return is_prefix ?  new_val : val;
     },
-    set : function(scope, value) {
-        scope.$set(this.var_name, value);
+    set : function(env, value) {
+        env.$set(this.var_name, value);
     }
 });
 
@@ -2016,33 +2262,6 @@ function event_check_directive(value) {
     }
 }
 
-function struct_init_jarray(jarray) {
-
-}
-
-function JArray(array, env) {
-    var _array = $isUndefined(array) ? [] : ($isArray(array) ? array : ($isNumber(array) ? new Array(array) : [array]));
-    var __ = {
-        array :  _array,
-        length : _array.length,
-        env : env
-    };
-    $defineProperty(this, '__', __);
-
-}
-var __jarray_prototype = JArray.prototype;
-$defineProperty(__jarray_prototype, 'push', function(item) {
-
-});
-$defineGetterSetter(__jarray_prototype, 'length', function() {
-    return this.__.length;
-}, function(len) {
-    if(!$isNumber(len) || (len = Math.floor(len)) < 0) {
-        return;
-    }
-    this.__.array.length = len;
-});
-
 function DataSource(name, options) {
 
     $defineProperty(this, 'name', name);
@@ -2221,55 +2440,83 @@ function drive_parse_element(ele, drive_module, env) {
 
 
 
-var __drive_view_REG = /\{\{.+?\}\}/g;
+var __drive_expr_REG = /\{\{.+?\}\}/g;
 
 function RenderPiece(type, value) {
     this.type = type;
     this.value = value;
 }
 
-function drive_render_view(ele, scope) {
-    var txt = ele.textContent;
-    var expr = null;
+function drive_get_view_expr(txt) {
     var piece_start = 0;
     var piece_array = [];
-    while((expr = __drive_view_REG.exec(txt))!==null) {
-        if(expr.index > piece_start) {
-            piece_array.push(new RenderPiece(0, txt.substring(piece_start, expr.index)));
+    var piece;
+
+    while((piece = __drive_expr_REG.exec(txt))!==null) {
+        if(piece.index > piece_start) {
+            piece_array.push(new ConstantGrammarNode(txt.substring(piece_start, piece.index)));
         }
-        piece_start = expr.index + expr[0].length;
-        piece_array.push(new RenderPiece(1, parse_expression(expr[0])));
+        piece_start = piece.index + piece[0].length;
+        piece_array.push(parse_expression(piece[0]));
     }
-    if(expr === null) {
-        return;
-    } else if(piece_start < txt.length) {
-        piece_array.push(new RenderPiece(0, txt.substring(piece_start)));
+    if(piece && piece_start < txt.length) {
+        piece_array.push(new ConstantGrammarNode(txt.substring(piece_start)));
     }
 
-    for(var i=0;i<piece_array.length;i++) {
-        if(piece_array[i].type === 1) {
-            scope.$watch(piece_array[i].value, drive_view_observer, {
-                element : ele,
-                pieces : piece_array,
-                piece_idx : i
-            });
+    if(piece_array.length === 0) {
+        return null;
+    } else if(piece_array.length === 1) {
+        return piece_array[0];
+    }
+
+    var ea = piece_array[0], eb;
+    /*
+     * 当前的处理方式，是把内容转成相加的表达式，
+     *   比如<p>hello {{name}}</p>会转成  "Hello" + name。
+     *   这样会存在一个小问题，比如<p>{{age}}{{year}}</p>
+     *   转成  age + year，如果age和year都是数字，就会被以数学的方式加起来。
+     *   为了简单起见，采取的解决方法是，在最左边添加一个空字符串，
+     *   这样相加的时候会从左往右计算，javascript会以字符串形式链接 '' + age + year
+     */
+    if(ea.type !== 'constant' || !$isString(ea.value)) {
+        piece_array.unshift(new ConstantGrammarNode(''));
+        ea = piece_array[0];
+    }
+
+    for(var i=1;i<piece_array.length;i++) {
+        eb = piece_array[i];
+        if(ea.type === 'constant' && eb.type === 'constant') {
+            ea = new ConstantGrammarNode(ea.value + eb.value);
+        } else {
+            ea = new CalcGrammarNode("#+", ea, eb);
         }
     }
 
-    var val = scope.$get(m[1]);
-    if(!val) {
-        log('"'+m[1]+'" not found in scope: ' + scope.$name);
-    }
-    cn[i].textContent = txt.replace(m[0], val);
-    var template = txt.replace(m[0], "{{0}}");
-
-
-
-    //todo 一个textNode里面可能有多个{{var_name}}，并且{{var_name}}可能有重复。
+    return ea;
 }
 
-function drive_view_observer( var_name, new_value, data) {
-    //data.element.textContent =
+function drive_render_view(ele, env) {
+    var txt = ele.textContent;
+    var expr = drive_get_view_expr(txt);
+
+    if(expr === null) {
+        return;
+    } else if(expr.type === 'constant') {
+        ele.textContent = expr.value;
+        return;
+    }
+
+    ele.textContent = expr.exec(env);
+
+    environment_watch_expression(env, expr, drive_view_observer, {
+        ele : ele,
+        exp : expr,
+        env : env
+    }, 10);
+}
+
+function drive_view_observer(event, data) {
+    data.ele.textContent = data.exp.exec(data.env);
 }
 
 

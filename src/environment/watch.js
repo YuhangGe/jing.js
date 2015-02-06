@@ -32,8 +32,17 @@ function environment_declare_var(p, var_name, value, emit_node) {
 }
 
 function environment_redeclare_var(emit_node, obj) {
-    var k, cs = emit_node.children, val;
+    var k, cs = emit_node.children, val, ps;
     for(k in cs) {
+        if (!$hasProperty(obj, __env_prop_name)) {
+            ps = {};
+            $defineProperty(obj, __env_prop_name, ps);
+        } else {
+            ps = obj[__env_prop_name];
+        }
+        if(!$hasProperty(obj, __env_emit_name)) {
+            $defineProperty(obj, __env_emit_name, {});
+        }
         if($hasProperty(obj, k)) {
             val = obj[k];
             delete obj[k];
@@ -120,10 +129,10 @@ function environment_get_emit_node(env, var_array) {
         }
         return n;
     }
-    var root = env.__.et, //root emit node
+    var root = env.__.emit_tree, //root emit node
         e_node = get_node(root, var_array[0]);
     var i;
-    for(i=1;i<var_array;i++) {
+    for(i=1;i<var_array.length;i++) {
         e_node = get_node(e_node, var_array[i]);
     }
     return e_node;
@@ -131,15 +140,15 @@ function environment_get_emit_node(env, var_array) {
 
 function environment_watch_items(env, var_array) {
 
-    var p = env, vn, i, et = env.__.et;
+    var p = env, vn, i, et = env.__.emit_tree;
     var en, cp;
-    for (i = 0; i < var_array; i++) {
+    for (i = 0; i < var_array.length; i++) {
+        if (!$isObject(p)) {
+            throw('$watch need object.');
+        }
         vn = var_array[i];
         en = et.children[vn];
         cp = environment_watch_each_var(p, vn, en);
-        if (!$isObject(cp)) {
-            throw('$watch need object.');
-        }
         p = cp;
         et = en;
     }
@@ -151,15 +160,15 @@ $defineProperty(__env_prototype, '$watch', function (var_name, callback, data, l
         return;
     }
 
-    var i, listener;
+    var i, listener, imm = lazy_time === false;
 
-    listener = lazy_time === false ? new ImmListener() : new LazyListener(var_name, callback, data, $isNumber(lazy_time) ? lazy_time : 0);
+    listener = imm ? new ImmListener(callback, data) : new LazyListener(callback, data, $isNumber(lazy_time) ? lazy_time : 0);
 
     if ($isString(var_name)) {
-        environment_watch_vars(this, var_name.trim(), listener, lazy_time === false);
+        environment_watch_vars(this, var_name.trim(), listener, !imm);
     } else if ($isArray(var_name)) {
         for (i = 0; i < var_name.length; i++) {
-            environment_watch_vars(this, var_name[i].trim(), listener, lazy_time === false);
+            environment_watch_vars(this, var_name[i].trim(), listener, !imm);
         }
     } else {
         log('$watch wrong format');

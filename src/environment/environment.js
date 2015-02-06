@@ -1,11 +1,21 @@
 function Environment(name, parent) {
-    this.__ = {
-        et : new RootEmitNode(this),
+    $defineProperty(this, '__', {
+        prop : $bind(this, environment_def_props),
+        emit_tree : new RootEmitNode(this),
         name : name,
         children : {},
         parent : parent ? parent : null
-    }
+    });
 }
+//
+//function environment_init_props(env) {
+//    var k;
+//    for(k in env) {
+//        if(k !== '__') {
+//
+//        }
+//    }
+//}
 
 var __env_prototype = Environment.prototype;
 $defineGetterSetter(__env_prototype, '$name', function() {
@@ -93,6 +103,9 @@ $defineProperty(__env_prototype, '$set', function(var_name, value) {
  *      }
  *   });
  *   this.$prop('name', 'xiaoge');
+ *   this.$prop = {
+ *      name : 'xiaoge'
+ *   }
  *
  * 也可以直接在this上赋值，如：
  *   this.name = 'xiaoge';
@@ -101,15 +114,21 @@ $defineProperty(__env_prototype, '$set', function(var_name, value) {
  *      alert('hello, '+this.name);
  *   }
  */
-$defineProperty(__env_prototype, '$prop', function(name, value) {
-   if($isObject(name)) {
-       for(var kn in name) {
-           this[kn] = name[kn];
-       }
-   } else {
-       this[name] = value;
-   }
+$defineGetterSetter(__env_prototype, '$prop', function() {
+    return this.__.prop;
+}, function() {
+    environment_def_props.apply(this, arguments);
 });
+
+function environment_def_props(name, value) {
+    if($isObject(name)) {
+        for(var kn in name) {
+            this[kn] = name[kn];
+        }
+    } else {
+        this[name] = value;
+    }
+}
 
 //
 //function environment_create(parent) {

@@ -3,7 +3,7 @@ function ImmListener(handler, data) {
     this.data = data;
 }
 ImmListener.prototype = {
-    notify : function(var_name, pre_value, cur_value) {
+    notify : function(var_name, cur_value, pre_value) {
         this.handler([{
             var_name : var_name,
             pre_value : pre_value,
@@ -21,7 +21,7 @@ function LazyListener(handler, data, lazy_time) {
     this.changes = [];
 }
 LazyListener.prototype = {
-    notify : function(var_name, pre_value, cur_value) {
+    notify : function(var_name, cur_value, pre_value) {
         if(this.timeout !== null) {
             clearTimeout(this.timeout);
             this.timeout = null;

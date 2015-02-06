@@ -14,5 +14,5 @@ function directive_deal_j_env(ele, attr, drive_module, env) {
     if (!env_def) {
         throw 'j-env: environment "' + env_value + '" not found.';
     }
-    env_def.func.call(env, drive_module);
+    env_def.func.call(env, drive_module, env);
 }

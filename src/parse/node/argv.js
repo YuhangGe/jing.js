@@ -1,9 +1,10 @@
 function ArgumentGrammarNode(args_node) {
     this.base('argument', args_node instanceof Array ? args_node : [args_node]);
 }
-parse_inherit_node(ArgumentGrammarNode, function(scope) {
+parse_inherit_node(ArgumentGrammarNode, function(env) {
+    var argvs = [];
     for(var i=0;i<this.nodes.length;i++) {
-        this.nodes[i].exec(scope);
+        argvs.push(this.nodes[i].exec(env));
     }
 }, {
     merge : function(expr_node, left) {

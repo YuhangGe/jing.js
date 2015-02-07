@@ -132,7 +132,7 @@ function parse_meet_op(op) {
             break;
         case '(':
             if(__parse_token_pre_type === 'var') {
-                __parse_op_stack.push('F');
+                parse_check_op('F');
                 __parse_node_stack.push(new ArgumentGrammarNode([]));
             }
             __parse_op_stack.push(op);

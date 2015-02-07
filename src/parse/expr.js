@@ -8,7 +8,6 @@ var __parse_node_need_cache = true;
  * 运算符优先级。第一个数字是优先级，第二个数字表示是从左到右还是从右到左。
  */
 var __parse_op_priority = {
-    '(' : [9000, 0],
 
     '[' : [300, 0],
     '.' : [300, 0],
@@ -70,6 +69,8 @@ var __parse_op_priority = {
     '&=' : [10, 1],
     '^=' : [10, 1],
     '|=' : [10, 1],
+
+    '(' : [0, 0],
 
     '->' : [-10, 0], //过滤器filter的优先级也很低
 
@@ -173,7 +174,7 @@ function parse_expr() {
     while(!__parse_token_EOF) {
         parse_token_lex();
         if(__parse_token_type === 'op' && ( __parse_token_value === '\'' || __parse_token_value==='"')) {
-            __parse_token_value = parse_token_string(__parse_token_type);
+            __parse_token_value = parse_token_string(__parse_token_value);
             __parse_token_type = 'str';
         }
         switch (__parse_token_type) {

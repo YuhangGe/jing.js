@@ -35,7 +35,7 @@ function RootEmitNode(env) {
 }
 RootEmitNode.prototype = {
     val : function(var_name) {
-        return this.env.$val(var_name);
+        return this.env.$get(var_name);
     }
 };
 

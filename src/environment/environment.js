@@ -49,7 +49,7 @@ $defineProperty(__env_prototype, '$child', function(name) {
 /*
  * 取得变量名对应的值，会循环检索父亲env
  */
-$defineProperty(__env_prototype, '$val', function(var_name) {
+$defineProperty(__env_prototype, '$get', function(var_name) {
     if($hasProperty(this, var_name)) {
         return this[var_name];
     } else if(this.__.parent) {

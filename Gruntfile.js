@@ -49,12 +49,20 @@ module.exports = function(grunt) {
                 root : app_config.root,
                 file : app_config.test.root + '/' + app_config.test.file_name + '.js',
                 html_root : app_config.test.html_root
+            },
+            template : {
+                modules : app_config.modules,
+                root : app_config.root,
+                test_root : app_config.test.root,
+                file : app_config.test.root + '/index.html',
+                temp : app_config.test.root + '/template.html',
+                replace : '<!--JING SOURCE FILES-->'
             }
         },
         watch : {
             test : {
-                files : ['src/**/*.js'],
-                tasks : ['generate:test']
+                files : ['src/**/*.js', 'test/template.html'],
+                tasks : ['generate:template']
             }
         }
     });

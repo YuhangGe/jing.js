@@ -1,5 +1,5 @@
 function EmptyGrammarNode() {
-    this.base('emp');
+    this.base('empty');
 }
 parse_inherit_node(EmptyGrammarNode, function() {
     return null;

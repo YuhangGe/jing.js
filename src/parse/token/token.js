@@ -186,11 +186,11 @@ break;
 
 function parse_token_string(quote) {
     var chr, idx = __parse_token_idx, e_idx = idx;
-    while((chr = __parse_token_src[e_idx++]) && chr !== quote) {
-
+    while((chr = __parse_token_src[e_idx]) && chr !== quote) {
+        e_idx++;
     }
     var not_end = chr === quote;
-    __parse_token_idx = not_end ? e_idx+1:e_idx;
+    __parse_token_idx = not_end ? e_idx + 1 : e_idx;
     __parse_token_EOF = not_end ? __parse_token_EOF : true;
-    return __parse_token_src.substring(idx, not_end ? e_idx-1: e_idx);
+    return __parse_token_src.substring(idx, not_end ? e_idx: e_idx+1);
 }

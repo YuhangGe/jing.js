@@ -1,6 +1,6 @@
 var __parse_node_stack = [];
 var __parse_op_stack = [];
-var __parse_token_pre_type = 'emp';
+var __parse_is_pre_token_var = false;
 var __parse_in_node = null;
 var __parse_node_need_cache = true;
 
@@ -9,10 +9,9 @@ var __parse_node_need_cache = true;
  */
 var __parse_op_priority = {
 
-    '[' : [300, 0],
-    '.' : [300, 0],
-
-    'F' : [200, 0], //用这个字符表示函数调用。函数调用的优先级小于属性获取"."和“[]”，高于其它运算符。
+    'A' : [400, 0], //Array的构造函数，优先级最高
+    '.' : [200, 0],
+    'F' : [300, 0], //用字符F表示函数调用。
 
 
     '#++' : [90, 0], //自增(运算符在后)
@@ -70,11 +69,13 @@ var __parse_op_priority = {
     '^=' : [10, 1],
     '|=' : [10, 1],
 
-    '(' : [0, 0],
 
     '->' : [-10, 0], //过滤器filter的优先级也很低
 
-    ',' : [-20, 0] //函数调用参数列表的优先级低于其它。
+    ',' : [-20, 0], //多个元素分隔（包括函数调用参数列表）优先级
+
+    '(' : [-1000, 0] //括号并算是严格的运算符。
+
 
 };
 
@@ -83,14 +84,19 @@ var __parse_op_priority = {
  */
 
 function parse_expression(expr_str, node_need_cache) {
-    __parse_token_pre_type = 'emp';
+    __parse_is_pre_token_var = false;
     __parse_in_node = null;
     __parse_node_need_cache = node_need_cache ? true : false;
     parse_token_init(expr_str);
 
-    parse_expr();
+    try {
+        parse_expr();
+        parse_reduce_op();
+    } catch(ex) {
+        console.log(ex.message);
+        console.log(ex.stack);
+    }
 
-    parse_reduce_op();
 
 
     var root_node;
@@ -131,26 +137,45 @@ function parse_meet_op(op) {
             parse_reduce_op();
             break;
         case '(':
-            if(__parse_token_pre_type === 'var') {
+            if(__parse_is_pre_token_var) {
                 parse_check_op('F');
-                __parse_node_stack.push(new ArgumentGrammarNode([]));
+                __parse_op_stack.push('A');
+                parse_push_node(new EmptyGrammarNode());
             }
-            __parse_op_stack.push(op);
+            __parse_op_stack.push('(');
+            break;
+        case '[':
+            if(__parse_is_pre_token_var) {
+                /*
+                 * 中括号相当于 .() ，也就是先运算括号内，再取Property
+                 */
+                parse_check_op('.');
+                __parse_op_stack.push('(');
+            } else {
+                /*
+                 * 中括号是数组
+                 */
+                __parse_op_stack.push('A');
+                parse_push_node(new EmptyGrammarNode());
+
+                __parse_op_stack.push('(');
+            }
             break;
         case ')':
         case ']':
-            parse_reduce_op(op === ')' ? '(' : '[');
+            parse_reduce_op('(');
             break;
         case '+':
         case '-':
         case '++':
         case '--':
-            parse_check_op(__parse_token_pre_type === 'op' ? op + '#' : '#' + op);
+            parse_check_op(__parse_is_pre_token_var ? '#' + op : op + '#');
             break;
         default :
             parse_check_op(op);
             break;
     }
+    __parse_is_pre_token_var = (op === ')' || op === ']');
 }
 
 function parse_check_op(op) {
@@ -183,7 +208,7 @@ function parse_expr() {
                     case 'true':
                     case 'false':
                         parse_push_node(new ConstantGrammarNode(__parse_token_value === 'true'));
-                        __parse_token_pre_type = 'num';
+                        __parse_is_pre_token_var = true;
                         break;
                     case 'in':
                         if(__parse_op_stack.length !== 0
@@ -193,24 +218,24 @@ function parse_expr() {
                             throw 'grammar wrong: in';
                         }
                         __parse_in_node = __parse_node_stack.pop().var_name;
+                        __parse_is_pre_token_var = false;
                         break;
                     default:
                         parse_push_node(new VariableGrammarNode(__parse_token_value));
-                        __parse_token_pre_type = 'var';
+                        __parse_is_pre_token_var = true;
                         break;
                 }
                 break;
             case 'num':
                 parse_push_node(new ConstantGrammarNode(Number(__parse_token_value)));
-                __parse_token_pre_type = 'num';
+                __parse_is_pre_token_var = true;
                 break;
             case 'str':
                 parse_push_node(new ConstantGrammarNode(__parse_token_value));
-                __parse_token_pre_type = 'str';
+                __parse_is_pre_token_var = true;
                 break;
             case 'op':
                 parse_meet_op(__parse_token_value);
-                __parse_token_pre_type = 'op';
                 break;
             default :
                 break;
@@ -228,51 +253,90 @@ function parse_reduce_op(op) {
             parse_deal_op(cur_op);
         }
     }
-    var last_node, last_pre_node;
-    if(op === '('
-        && cur_op === '('
-        && parse_op_last() === 'F') {
-        last_node =  __parse_node_stack[__parse_node_stack.length-1];
-        if(last_node && last_node.type !== 'argument' || last_node.nodes.length >0) {
-            last_pre_node = __parse_node_stack[__parse_node_stack.length-2];
-            if(!last_pre_node || last_pre_node.type === 'argument' || last_pre_node.nodes.length) {
-                throw 'something strange wrong';
+}
+
+function parse_deal_op_F() {
+    var node_b = parse_pop_node();
+    var node_a = parse_pop_node();
+    var ctx = parse_op_last() === '.';
+    if(node_b.type === 'array') {
+        var cont = true;
+        for(var i=0;i<node_b.nodes.length;i++) {
+            if(!parse_is_constant(node_b.nodes[i])) {
+                cont = false;
+                break;
             }
-            last_pre_node.merge(last_node);
-            parse_pop_node();
+        }
+        if(cont) {
+            //如果参数列表全部是常数，则转成常数Node
+            node_b = new ConstantGrammarNode(node_b._exec());
+        }
+    } else if(!parse_is_constant(node_b)) {
+        throw 'parse_deal_op_F: something strange wrong.'
+    }
+
+    if(ctx && node_a.type === 'variable') {
+        node_a = new ConstantGrammarNode(node_a.var_name);
+    }
+    var tmp = new FunctionCallGrammarNode(node_a, node_b);
+    if(ctx) {
+        __parse_op_stack.pop();
+        node_b = parse_pop_node();
+        if(parse_is_constant(node_b) && parse_is_constant(tmp.nodes[0]) && parse_is_constant(tmp.nodes[1])) {
+            //诸如 '[1,2,3,4,5,6].slice(2,5).join("")'这样可以直接计算的函数调用，则直接计算。
+            tmp = new ConstantGrammarNode(node_b.value[tmp.nodes[0].value].apply(node_b.value, tmp.nodes[1].value));
+        } else {
+            tmp.context = node_b;
         }
     }
+    parse_push_node(tmp);
 }
 
 function parse_deal_op(op) {
     var node_a, node_b, tmp;
     switch (op) {
         case 'F':
-            node_b = parse_pop_node();
+            parse_deal_op_F();
+            break;
+        case 'A':
             node_a = parse_pop_node();
-            parse_push_node(new FunctionCallGrammarNode(node_a, node_b));
+            tmp = new ArrayGrammarNode([]);
+            node_b = true;
+            while(node_a.type !== 'empty') {
+                tmp.nodes.unshift(node_a);
+                if(!parse_is_constant(node_a)) {
+                    node_b = false;
+                }
+                node_a = parse_pop_node();
+            }
+            if(node_b) {
+                //如果所有元素都是常数，则优化成ConstantGrammarNode。
+                tmp = new ConstantGrammarNode(tmp._exec());
+            }
+            parse_push_node(tmp);
             break;
         case ',':
-            node_b = parse_pop_node();
-            node_a = parse_pop_node();
-            if(node_a.type === 'argument') {
-                tmp = node_a;
-            } else {
-                tmp = new ArgumentGrammarNode(node_a);
-            }
-            tmp.merge(node_b);
-            parse_push_node(tmp);
+            //node_b = parse_pop_node();
+            //node_a = parse_pop_node();
+            //if(node_a.type === 'array') {
+            //    tmp = node_a;
+            //} else {
+            //    tmp = new ArrayGrammarNode(node_a);
+            //}
+            //tmp.concat(node_b);
+            //parse_push_node(tmp);
+            //元素分隔不作任何处理。
             break;
         case '.':
             node_b = parse_pop_node();
             node_a = parse_pop_node();
-            tmp = node_b.type==='variable' ? new ConstantGrammarNode(node_b.var_name) : node_b;
-            parse_push_node(new PropertyGrammarNode(node_a, tmp));
-            break;
-        case '[]':
-            node_b = parse_pop_node();
-            node_a = parse_pop_node();
-            parse_push_node(new PropertyGrammarNode(node_a, node_b));
+            node_b = node_b.type==='variable' ? new ConstantGrammarNode(node_b.var_name) : node_b;
+            if(parse_is_constant(node_a) && parse_is_constant(node_b)) {
+                tmp = new ConstantGrammarNode(node_a.value[node_b.value]);
+            } else {
+                tmp = new PropertyGrammarNode(node_a, node_b);
+            }
+            parse_push_node(tmp);
             break;
         case '?' :
         case ':' :
@@ -336,7 +400,7 @@ function parse_deal_op(op) {
             node_b = parse_pop_node();
             node_a = parse_pop_node();
             tmp = new CalcGrammarNode(op, node_a, node_b);
-            if(node_a.type === 'constant' && node_b.type === 'constant') {
+            if(parse_is_constant(node_a) && parse_is_constant(node_b)) {
                 /*
                  * 如果是两个常数运算，在parse期间就把数据算出来。这是一个很小的优化。
                  */
@@ -345,13 +409,11 @@ function parse_deal_op(op) {
             parse_push_node(tmp);
             break;
     }
-
 }
 
 function parse_op_last() {
     return __parse_op_stack.length > 0 ? __parse_op_stack[__parse_op_stack.length-1] : null;
 }
-
 
 function parse_pop_node() {
     if(__parse_node_stack.length===0) {
@@ -363,4 +425,8 @@ function parse_pop_node() {
 function parse_push_node(node) {
     node.need_cached = __parse_node_need_cache;
     __parse_node_stack.push(node);
+}
+
+function parse_is_constant(node) {
+    return node.type === 'constant';
 }

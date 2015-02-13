@@ -84,13 +84,17 @@ function listen_refresh_expr_node(node) {
      * 如果node.cached===false，说明当前node及其父亲树都已经被refresh过了，
      *   不需要再次遍历。这是一个简单的优化。
      */
-    if(node.cached === false) {
-        return;
+    function re_loop(node) {
+        if(!node || node.cached === false) {
+            return;
+        }
+        node.cached = false;
+        re_loop(node.parent);
     }
-    if(node.parent) {
-        listen_refresh_expr_node(node.parent);
-    }
+
     node.cached = false;
+    re_loop(node.parent);
+
 }
 
 LazyExprListener.prototype = {

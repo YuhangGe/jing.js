@@ -197,7 +197,7 @@ function environment_watch_expr_loop(expr_node, watch_array, var_tree) {
         var_tree[vn.join('.')] = expr_node;
     } else {
         for(var i=0;i<expr_node.nodes.length;i++) {
-            environment_watch_expr_loop(expr_node.nodes[i]);
+            environment_watch_expr_loop(expr_node.nodes[i], watch_array, var_tree);
         }
     }
 
@@ -214,7 +214,7 @@ function environment_watch_expression(env, expr, callback, data, lazy_time) {
     }
 
     var is_lazy = lazy_time !== false;
-    var listener = is_lazy ? new LazyExprListener(var_tree, expr, callback, data, $isNumber(lazy_time) ? lazy_time : 0) : new ImmListener(callback, data);
+    var listener = is_lazy ? new LazyExprListener(var_tree, expr, env, callback, data, $isNumber(lazy_time) ? lazy_time : 0) : new ImmExprListener(var_tree, expr, env, callback, data);
 
     for (var i = 0; i < watch_array.length; i++) {
         environment_watch_items(env, watch_array[i], listener, is_lazy);

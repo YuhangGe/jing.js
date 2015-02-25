@@ -40,7 +40,7 @@ directive_create('j-model', function() {
         //todo check expr can be set. That is, expr.type is 'variable' or 'property'
 
         var inner = new JInputModel(element, env, expr);
-        directive_put_inner(ele, inner);
+        directive_put_inner(element, inner);
         inner.run();
 
     };

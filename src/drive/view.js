@@ -67,12 +67,10 @@ function drive_render_view(ele, env) {
     ele.textContent = expr.exec(env);
 
     environment_watch_expression(env, expr, drive_view_observer, {
-        ele : ele,
-        exp : expr,
-        env : env
+        ele : ele
     }, 10);
 }
 
-function drive_view_observer(event, data) {
-    data.ele.textContent = data.exp.exec(data.env);
+function drive_view_observer(change_list, data) {
+    data.ele.textContent = change_list[0].cur_value;
 }

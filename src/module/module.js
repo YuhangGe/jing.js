@@ -4,13 +4,6 @@
 var __module_table = {};
 var __root_module = new Module('jing', null);
 
-/**
- * directive的environment类型，
- *
- */
-var __ENV_TYPE_INHERIT = 0;
-var __ENV_TYPE_CREATE = 1;
-var __ENV_TYPE_PARENT = 2;
 
 function Module(name, parent) {
     var __ = {};
@@ -99,22 +92,7 @@ $defineGetterSetter(__module_prototype, 'path', function path() {
 $defineGetterSetter(__module_prototype, 'root', function root() {
     return this.parent ? this.parent.root : this
 });
-$defineProperty(__module_prototype, 'drive', function drive(element) {
-    if(this.parent) {
-        throw 'function "drive" can only be applied to root Module';
-    }
-    var root_scope = new Scope('jing.scope.' + this.path + __scope_counter++);
-    __root_scope_table[this.path] = root_scope;
 
-    setTimeout($bind(this, function() {
-        for(var i=0;i<this.__.runs.length;i++) {
-            this.__.runs[i](this, __root_scope_table[this.path]);
-        }
-        drive_parse_element(element, this, root_scope);
-    }), 0);
-
-    return this;
-});
 $defineProperty(__module_prototype, 'factory', function factory(name, func) {
     var fac;
     if(!func) {
@@ -175,21 +153,6 @@ $defineProperty(__module_prototype, 'directive', function directive(name, scope_
         directive_register(dire);
         return this;
     }
-});
-$defineProperty(__module_prototype, 'init', function(func) {
-    if(this.parent) {
-        throw 'function "init" can only be applied to root Module';
-    }
-    if(typeof func === 'function') {
-        this.__.runs.push(func);
-    }
-    return this;
-});
-$defineProperty(__module_prototype, 'conf', function(options) {
-    for(var kn in options) {
-        this.__.config[kn] = options[kn];
-    }
-    return this;
 });
 
 $defineProperty(__module_prototype, 'env', function(name, func) {

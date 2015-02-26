@@ -190,7 +190,7 @@ function environment_watch_expr_loop(expr_node, watch_array, var_tree) {
 
     if(expr_node.type === 'variable') {
         var vn = [expr_node.var_name];
-        if(expr_node.parent.type === 'property') {
+        if(expr_node.parent && expr_node.parent.type === 'property') {
             expr_prop(expr_node.parent, vn);
         }
         watch_array.push(vn);

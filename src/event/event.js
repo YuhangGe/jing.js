@@ -28,7 +28,7 @@ function event_global_handler(event) {
     var event_name = event.type;
     var event_ele = event.target || event.srcElement || event.originalTarget;
 
-    var et, ls, jid, i;
+    var et, handler, jid, i;
     var table = __event_table.on;
     if(!$hasProperty(table, event_name)) {
         return;
@@ -39,11 +39,11 @@ function event_global_handler(event) {
 
 
     while(!event_is_stop(event) && event_ele) {
-        jid = $attr(event_ele, 'id');
+        jid = event_ele.id;
         if(jid && $hasProperty(et, jid)) {
-            ls = et[jid];
-            for(i=0;i<ls.length;i++) {
-                ls[i].call(event_ele, event);
+            handler = et[jid];
+            for(i=0;i<handler.length;i++) {
+                handler[i].call(event_ele, event);
             }
         }
         event_ele = event_ele.parentElement;
@@ -65,13 +65,13 @@ function event_on(ele, event_name, handler) {
     } else {
         et = table[event_name];
     }
-    var ls;
+    var handler_list;
     if(!$hasProperty(et, jid)) {
-        ls = et[jid] = [];
+        handler_list = et[jid] = [];
     } else {
-        ls = et[jid];
+        handler_list = et[jid];
     }
-    ls.push(handler);
+    handler_list.push(handler);
 }
 
 function event_on_remove() {

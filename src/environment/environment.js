@@ -7,15 +7,6 @@ function Environment(name, parent) {
         parent : parent ? parent : null
     });
 }
-//
-//function environment_init_props(env) {
-//    var k;
-//    for(k in env) {
-//        if(k !== '__') {
-//
-//        }
-//    }
-//}
 
 var __env_prototype = Environment.prototype;
 $defineGetterSetter(__env_prototype, '$name', function() {

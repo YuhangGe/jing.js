@@ -15,7 +15,7 @@ function drive_get_view_expr(txt) {
             piece_array.push(new ConstantGrammarNode(txt.substring(piece_start, piece.index)));
         }
         piece_start = piece.index + piece[0].length;
-        piece_array.push(parse_expression(piece[0]));
+        piece_array.push(parse_expression(piece[0], true));
     }
     if(piece && piece_start < txt.length) {
         piece_array.push(new ConstantGrammarNode(txt.substring(piece_start)));

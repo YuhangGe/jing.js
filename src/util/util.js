@@ -190,8 +190,9 @@ function $timeout(func, time) {
 function log() {
     console.log.apply(console, arguments);
 }
+
 function $isArray(obj) {
-    return obj instanceof Array;
+    return Array.isArray(obj); // obj instanceof Array;
 }
 
 function $merge(src, options) {

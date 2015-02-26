@@ -35,7 +35,6 @@ function drive_run_directive(element, drive_module, directive, env, val) {
 }
 
 function drive_render_element(ele, attr, drive_module, env) {
-    $assert(attr);
     var i,
         item, directive, cur_env = env;
 
@@ -51,7 +50,6 @@ function drive_render_element(ele, attr, drive_module, env) {
 
     item = attr.getNamedItem('j-env');
     if(item !== null) {
-        cur_env = env.$child();
         directive_deal_j_env(ele, attr, drive_module, cur_env);
     }
 
@@ -91,7 +89,7 @@ function drive_render_element(ele, attr, drive_module, env) {
         item = attr[i];
         directive = __directive_short_table[item.name];
         if(directive) {
-            drive_run_directive(ele, drive_module, directive.module, cur_env, item.value);
+            drive_run_directive(ele, drive_module, directive, cur_env, item.value);
         }
     }
 

@@ -128,19 +128,21 @@ function $hasAttr(ele, attr_name) {
         return ele.hasAttribute(attr_name);
     }
 }
-function $env(ele, data) {
-    if(typeof data !== 'undefined') {
-        ele.__JING_ENV__ = data;
-    } else {
-        return ele.__JING_ENV__;
-    }
-}
+
 function $each(arr, func) {
     for(var i=0;i<arr.length;i++) {
         if(func(arr[i], arr[i], i)===false) {
             return;
         }
     }
+}
+function $map(array, func) {
+    var len = array.length,
+        new_array = new Array(len);
+    for(var i=0;i<len;i++) {
+        new_array[i] = func(array[i], i);
+    }
+    return new_array;
 }
 function $in(obj, func) {
     for(var kn in obj) {

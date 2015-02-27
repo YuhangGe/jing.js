@@ -4,11 +4,7 @@ function PropertyGrammarNode(var_node, prop_node) {
 parse_inherit_node(PropertyGrammarNode, function(scope) {
     var variable = this.nodes[0].exec(scope),
         prop_name = this.nodes[1].exec(scope);
-    if(variable === null) {
-        return null
-    } else {
-        return $hasProperty(variable, prop_name) ? variable[prop_name] : null;
-    }
+    return !variable ? null : variable[prop_name];
 }, {
     increment : function(scope, is_add, is_prefix) {
         var variable = this.nodes[0].exec(scope),

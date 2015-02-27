@@ -24,14 +24,11 @@ $defineGetterSetter(__env_prototype, '$root', function() {
 });
 
 $defineProperty(__env_prototype, '$child', function(name) {
-    if(!name) {
-        name = this.__.parent ? this.__.parent.name + '.' + __scope_counter++ : 'jing.scope.' + __scope_counter++;
-    }
     var cd = this.__.children;
     if($hasProperty(cd, name)) {
         return cd[name];
     } else {
-        var cs = new Scope(name, this);
+        var cs = new Environment(name, this);
         $defineProperty(cd, name, cs, false, true);
         return cs;
     }

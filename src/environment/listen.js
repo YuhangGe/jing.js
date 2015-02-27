@@ -12,24 +12,25 @@ ImmListener.prototype = {
     }
 };
 
-function ImmExprListener(var_tree, expr, env, handler, data, lazy_time) {
+function ImmExprListener(var_tree, expr, env, handler, data) {
     this.handler = handler;
     this.data = data;
     this.expr = expr;
     this.var_tree = var_tree;
     this.env = env;
-    this.pre_value = expr.exec(env);
-    this.cur_value = this.pre_value;
+    this.pre_value = null;
+    this.cur_value = null;
+    this.compare = true;
 }
 ImmExprListener.prototype = {
-    notify : function(var_name, cur_value, pre_value) {
+    notify : function(var_name) {
         var n = this.var_tree[var_name];
         if(!n) {
             return;
         }
         listen_refresh_expr_node(n);
         this.cur_value = this.expr.exec(this.env);
-        if(this.cur_value === this.pre_value) {
+        if(this.compare && this.cur_value === this.pre_value) {
             return;
         }
         this.handler([{
@@ -76,8 +77,8 @@ function LazyExprListener(var_tree, expr, env, handler, data, lazy_time) {
     this.expr = expr;
     this.var_tree = var_tree;
     this.env = env;
-    this.pre_value = expr.exec(env);
-    this.cur_value = this.pre_value;
+    this.pre_value = null;
+    this.cur_value = null;
 }
 function listen_refresh_expr_node(node) {
     /*

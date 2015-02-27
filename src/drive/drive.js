@@ -28,6 +28,8 @@
 //    return parent_scope;
 //}
 
+var __drive_insert_b = [];
+
 function drive_run_directive(element, drive_module, directive, env, val) {
     directive_initialize(directive);
     var link_func = directive.link_func;
@@ -93,6 +95,19 @@ function drive_render_element(ele, attr, drive_module, env) {
         }
     }
 
+    /*
+     * 使用递归的方式遍历DOM树。目前来看性能是可以保障的。
+     */
+    var chs = ele.childNodes;
+    for(i=0;i<chs.length;i++) {
+        var ce = chs[i];
+        if(ele.nodeName==='UL' && ce.nodeType === 1) {
+            log(ce);
+        }
+        drive_parse_element(ce, drive_module, cur_env);
+    }
+
+
 }
 
 function drive_parse_element(ele, drive_module, env) {
@@ -102,14 +117,7 @@ function drive_parse_element(ele, drive_module, env) {
     switch (ele.nodeType) {
         case 1:
             // Element
-            var new_env = drive_render_element(ele, ele.attributes, drive_module, env);
-            /*
-             * 使用递归的方式遍历DOM树。目前来看性能是可以保障的。
-             */
-            var chs = ele.childNodes;
-            for(var i=0;i<chs.length;i++) {
-                drive_parse_element(chs[i], drive_module, new_env ? new_env : env);
-            }
+            drive_render_element(ele, ele.attributes, drive_module, env);
             break;
         case 3:
             // #text

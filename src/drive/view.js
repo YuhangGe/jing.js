@@ -64,11 +64,13 @@ function drive_render_view(ele, env) {
         return;
     }
 
-    ele.textContent = expr.exec(env);
+        var listener = environment_watch_expression(env, expr, drive_view_observer, {
+            ele : ele
+        }, 10);
 
-    environment_watch_expression(env, expr, drive_view_observer, {
-        ele : ele
-    }, 10);
+
+
+    ele.textContent = listener.cur_value;
 }
 
 function drive_view_observer(change_list, data) {

@@ -10,9 +10,18 @@ function module_apply_drive() {
         }
         r_list = d_item.module.__.runs;
         for(j=0;j<r_list.length;j++) {
-            r_list[j](d_item.module, d_item.env);
+            r_list[j].call(d_item.env, d_item.module, d_item.env);
         }
+
+        __drive_insert_b.length = 0;
+
         drive_parse_element(d_item.ele, d_item.module, d_item.env);
+
+        $each(__drive_insert_b, function(it) {
+            it.pos.parentNode.insertBefore(it.ele, it.pos);
+        });
+        __drive_insert_b.length = 0;
+
         d_item.init = true;
     }
 }

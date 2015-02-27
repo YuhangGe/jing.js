@@ -48,7 +48,7 @@ function ImmEmitter(node) {
 ImmEmitter.prototype = {
     notify : function() {
         this.cur_value = this.node.val();
-        if(this.cur_value === this.pre_value) {
+        if(!this.cur_value instanceof JArray && this.cur_value === this.pre_value) {
             return;
         }
         for(var i=0;i<this.listeners.length;i++) {

@@ -213,7 +213,7 @@ function parse_expr() {
                     case 'in':
                         if(__parse_op_stack.length !== 0
                             || __parse_node_stack.length !== 1
-                            || __parse_node_stack[0].type !== 'var'
+                            || __parse_node_stack[0].type !== 'variable'
                             || __parse_in_node !== null) {
                             throw 'grammar wrong: in';
                         }

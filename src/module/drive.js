@@ -19,6 +19,9 @@ function module_apply_drive() {
 
         $each(__drive_insert_b, function(it) {
             it.pos.parentNode.insertBefore(it.ele, it.pos);
+            //log(it.ele.parentElement);
+            //log(it.ele.parentNode);
+            //it.pos.parentElement.removeChild(it.ele);
         });
         __drive_insert_b.length = 0;
 

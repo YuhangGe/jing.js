@@ -278,15 +278,22 @@ function parse_deal_op_F() {
     if(ctx && node_a.type === 'variable') {
         node_a = new ConstantGrammarNode(node_a.var_name);
     }
-    var tmp = new FunctionCallGrammarNode(node_a, node_b);
+    var tmp = new FunctionCallGrammarNode(null, node_a, node_b);
+    /*
+     * tmp.nodes是函数调用的三个部分：
+     *    nodes[0]是调用上下文，caller
+     *    nodes[1]是函数名，callee
+     *    nodes[2]是函数调用参数，arguments
+     */
     if(ctx) {
         __parse_op_stack.pop();
         node_b = parse_pop_node();
-        if(parse_is_constant(node_b) && parse_is_constant(tmp.nodes[0]) && parse_is_constant(tmp.nodes[1])) {
+        if(parse_is_constant(node_b) && parse_is_constant(tmp.nodes[1]) && parse_is_constant(tmp.nodes[2])) {
             //诸如 '[1,2,3,4,5,6].slice(2,5).join("")'这样可以直接计算的函数调用，则直接计算。
-            tmp = new ConstantGrammarNode(node_b.value[tmp.nodes[0].value].apply(node_b.value, tmp.nodes[1].value));
+            tmp = new ConstantGrammarNode(node_b.value[tmp.nodes[1].value].apply(node_b.value, tmp.nodes[2].value));
         } else {
-            tmp.context = node_b;
+            tmp.nodes[0] = node_b;
+            node_b.parent = tmp;
         }
     }
     parse_push_node(tmp);

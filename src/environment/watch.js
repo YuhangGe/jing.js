@@ -35,11 +35,11 @@ function environment_declare_obj(p, var_name, value, emit_node) {
 
         if($isObject(props[var_name]) && $isObject(val)) {
             var en = this[__env_emit_name][var_name];
-            environment_redeclare_var(en, val);
+            environment_redeclare_var(en, val, pv);
         }
-        log(this);
-        log(pv);
-        log(val);
+        //log(this);
+        //log(pv);
+        //log(val);
 
         props[var_name] = val;
         this[__env_emit_name][var_name].notify();
@@ -73,14 +73,15 @@ function environment_declare_arr(p, idx_str, emit_node) {
     return v;
 }
 
-function environment_redeclare_var(emit_node, obj) {
+function environment_redeclare_var(emit_node, obj, p_obj) {
     var var_name, cs = emit_node.children, val, ps, v;
-
+    var obj_em = obj[__env_emit_name],
+        p_obj_em = p_obj[__env_emit_name];
     for(var_name in cs) {
         if(obj instanceof JArray && /^\d+$/.test(var_name)) {
-            if(!$hasProperty(obj[__env_emit_name], var_name)) {
+            if(!$hasProperty(obj_em, var_name) && $hasProperty(p_obj_em, var_name)) {
                 v = environment_declare_arr(obj, var_name, emit_node);
-                environment_redeclare_var(cs[var_name], v);
+                environment_redeclare_var(cs[var_name], v, p_obj[var_name]);
             }
         } else {
             if(!$hasProperty(obj, var_name)) {
@@ -99,7 +100,7 @@ function environment_redeclare_var(emit_node, obj) {
             val = obj[var_name];
             delete obj[var_name];
             v = environment_declare_obj(obj, var_name, val, cs[var_name]);
-            environment_redeclare_var(cs[var_name], v);
+            environment_redeclare_var(cs[var_name], v, p_obj[var_name]);
         }
     }
 }
@@ -232,11 +233,14 @@ function environment_watch_expr_loop(expr_node, watch_array, var_tree) {
             expr_prop(expr_node.parent, vn);
         }
         watch_array.push(vn);
-        var_tree[vn.join('.')] = expr_node;
-    } else {
-        if(expr_node.type === 'function') {
-            environment_watch_expr_loop(expr_node.context, watch_array, var_tree);
+        var path = vn.join('.'), n_arr = var_tree[path];
+        if(!n_arr) {
+            n_arr = var_tree[path] = [];
         }
+        if(n_arr.indexOf(expr_node)<0) {
+            n_arr.push(expr_node);
+        }
+    } else {
         for(var i=0;i<expr_node.nodes.length;i++) {
             environment_watch_expr_loop(expr_node.nodes[i], watch_array, var_tree);
         }

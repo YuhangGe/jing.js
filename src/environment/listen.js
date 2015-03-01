@@ -64,6 +64,7 @@ LazyListener.prototype = {
             pre_value : pre_value,
             cur_value : cur_value
         });
+        var me = this;
         this.timeout = setTimeout(this.delegate, this.lazy);
     },
     deal : function() {
@@ -100,26 +101,29 @@ function listen_refresh_expr_node(node) {
 
 LazyExprListener.prototype = {
     deal : function() {
-        var i, c, n, k;
+        var i, c, n_arr, j, k;
         for(i=0;i<this.changes.length;i++) {
             c = this.changes[i];
-            n = this.var_tree[c.var_name];
-            if(!n) {
+            n_arr = this.var_tree[c.var_name];
+            if(!n_arr) {
                 continue;
             }
-            n.cached = false;
+            for(j=0;j<n_arr.length;j++) {
+                n_arr[j].cached = false;
+                listen_refresh_expr_node(n_arr[j]);
+            }
         }
-        for(k in this.var_tree) {
-            listen_refresh_expr_node(this.var_tree[k]);
-        }
+        //for(k in this.var_tree) {
+        //    listen_refresh_expr_node(this.var_tree[k]);
+        //}
         this.changes.length = 0;
+        log(this.expr);
+        return;
         this.cur_value = this.expr.exec(this.env);
-        if(this.cur_value === this.pre_value) {
+        if(!$isJArray(this.cur_value) && this.cur_value === this.pre_value) {
             return;
         }
         this.handler([{
-            expr : this.expr,
-            env : this.env,
             pre_value : this.pre_value,
             cur_value : this.cur_value
         }], this.data);

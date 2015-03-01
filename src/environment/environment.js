@@ -118,6 +118,16 @@ function environment_def_props(name, value) {
     }
 }
 
+function environment_create_child(env, c_name) {
+    var cd = env.__.children;
+    var cs = new Environment(c_name, this);
+    /*
+     * 这里的第4个参数一定要为true，才能覆盖。
+     */
+    $defineProperty(cd, c_name, cs, true, false);
+    return cs;
+}
+
 //
 //function environment_create(parent) {
 //    var name = this.__.parent ? this.__.parent.name + '.' + __env_counter++ : 'jing.scope.' + __env_counter++;

@@ -196,7 +196,18 @@ function log() {
 function $isArray(obj) {
     return Array.isArray(obj); // obj instanceof Array;
 }
-
+function $isJArray(obj) {
+    return obj instanceof JArray;
+}
+function $$before(new_ele, ele) {
+    ele.parentNode.insertBefore(new_ele, ele);
+}
+function $$remove(ele) {
+    ele.parentNode.removeChild(ele);
+}
+function $$append(parent, ele) {
+    parent.appendChild(ele);
+}
 function $merge(src, options) {
     if(!options) {
         return src;

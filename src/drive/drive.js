@@ -37,8 +37,7 @@ function drive_run_directive(element, drive_module, directive, env, val) {
 }
 
 function drive_render_element(ele, attr, drive_module, env) {
-    var i,
-        item, directive, cur_env = env;
+    var i, item, directive, cur_env = env;
 
 
     item = attr.getNamedItem('j-async-env');
@@ -50,10 +49,6 @@ function drive_render_element(ele, attr, drive_module, env) {
         return;
     }
 
-    item = attr.getNamedItem('j-env');
-    if(item !== null) {
-        directive_deal_j_env(ele, attr, drive_module, cur_env);
-    }
 
     item = attr.getNamedItem('j-include');
     if(item !== null) {
@@ -95,18 +90,23 @@ function drive_render_element(ele, attr, drive_module, env) {
         }
     }
 
+    item = attr.getNamedItem('j-env');
+    if(item !== null) {
+        cur_env = env.$child(item.value);
+        directive_deal_j_env(ele, attr, drive_module, cur_env);
+    }
+
     /*
      * 使用递归的方式遍历DOM树。目前来看性能是可以保障的。
      */
     var chs = ele.childNodes;
     for(i=0;i<chs.length;i++) {
         var ce = chs[i];
-        if(ele.nodeName==='UL' && ce.nodeType === 1) {
-            log(ce);
-        }
+        //if(ele.nodeName==='UL' && ce.nodeType === 1) {
+        //    log(ce);
+        //}
         drive_parse_element(ce, drive_module, cur_env);
     }
-
 
 }
 
@@ -127,5 +127,4 @@ function drive_parse_element(ele, drive_module, env) {
             //ignore other.
             break;
     }
-
 }

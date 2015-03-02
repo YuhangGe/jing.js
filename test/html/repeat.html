@@ -1,0 +1,7 @@
+<div>
+    <ul>
+        <li>First Line</li>
+        <li j-repeat="boy in boys">{{boy.name}},{{boy.age}}</li>
+        <li><input j-model="name"/><input j-model="age"/><button j-on="add()">Add</button></li>
+    </ul>
+</div>

@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Test</title>
+    <link rel="stylesheet" href="../bower_components/mocha/mocha.css">
+</head>
+<body>
+<div id="mocha">
+
+</div>
+
+<script type="text/javascript" src="../bower_components/jquery/dist/jquery.min.js"></script>
+<script type="text/javascript" src="../bower_components/mocha/mocha.js"></script>
+<script type="text/javascript" src="../bower_components/chai/chai.js"></script>
+<script>mocha.setup('bdd')</script>
+<script type="text/javascript">
+    for(var kn in chai) {
+        if(!window[kn]) {
+            window[kn] = chai[kn];
+        }
+    }
+</script>
+
+<!--JING SOURCE FILES-->
+
+<!--<script type="text/javascript" src="cases/env/watch/expr.js"></script>-->
+<!--<script type="text/javascript" src="cases/env/watch/array.js"></script>-->
+
+<script type="text/javascript">
+//    (function() {
+        jing.module('MyApp').env('E1', function(module, $scope) {
+            $scope.boy = {
+                girl : {
+                    name : 'jing',
+                    say : function() {
+                        console.log(this);
+
+                    }
+                }
+            };
+            $scope.fn = function() {
+
+                console.log(this);
+
+                this.boy.girl.say();
+            }
+        }).env('E2', function() {
+            this.e2_msg = 'e2222';
+        }).env('E3', function() {
+            var root_env = this.root;
+
+            this.e3_msg = 'e3333';
+            this.f = function() {
+                root_env.msg = 'changed from e3';
+            }
+        }).factory('S1', function() {
+            var list = [];
+            for(var i=0;i<50;i++) {
+                list.push({
+                    name : 'xiaoge:' + i,
+                    age : 24 + i,
+                    girls : [{
+                        name : 'jing:' + i + ':1',
+                        age : 24 + i
+                    }, {
+                        name : 'jing:' + i + ':2',
+                        age : 24 + i
+                    }]
+                })
+            }
+            return list;
+        }).env('E4', function(module) {
+
+            this.list = module.require('S1');
+            this.index = 1;
+            this.inc = function() {
+                this.index++;
+                log(this.index);
+            };
+
+            this.append = function(name, idx) {
+                this.list.push({
+                    name : name + idx,
+                    age : 888,
+                    girls : []
+                });
+            };
+
+            this.unshift = function(name) {
+                this.list.unshift({
+                    name : 'sdsd',
+                    age : 323,
+                    girls : []
+                });
+            };
+
+
+        }).init(function(module, env) {
+
+            env.msg = 'hello';
+            this.uu = 'good';
+
+
+        }).drive(document.body);
+//    })();
+</script>
+
+<script>
+//    mocha.checkLeaks();
+//    mocha.globals(['jQuery']);
+//    mocha.run();
+</script>
+
+<div id="main">
+    <!--<p>{{msg}}</p>-->
+    <!--<p><button j-click="msg='love jing'">Set Message</button></p>-->
+    <!--<p><input type="text" j-model="msg"/></p>-->
+    <!--<div j-env="E1">-->
+        <!--<p>{{boy.girl.name}}</p>-->
+        <!--<p><button j-click="fn()">Click</button></p>-->
+        <!--<p><button j-click="boy.girl.say()">Click2</button></p>-->
+    <!--</div>-->
+    <!--<div j-env="E2">-->
+        <!--<div j-env="E3">-->
+            <!--<p>{{e2_msg}}, {{msg}}, {{e3_msg}}</p>-->
+            <!--<p><button j-click="f()">E3 Func</button></p>-->
+        <!--</div>-->
+    <!--</div>-->
+    <div j-env="E4">
+        <h4>Simple</h4>
+        <ul>
+            <li j-repeat="boy in list.slice(index, index+5)">
+                <p>{{boy.name}}, {{boy.age}}</p>
+            </li>
+        </ul>
+        <p>
+            <button j-click="index-=5">上一页</button>
+            <button j-click="index+=5">下一页</button>
+        </p>
+        <!--<h4>j-repeat</h4>-->
+        <!--<ul>-->
+            <!--<li>First Line, {{list.slice(0, 1)[0].name}}</li>-->
+            <!--<li>-->
+                <!--<p>First Boy: {{list[0].name}}, {{list[0].age}}</p>-->
+            <!--</li>-->
+            <!--<li j-repeat="boy in list.slice(1, list.length-2)">-->
+                <!--<p>{{boy.name}}, {{boy.age}}</p>-->
+                <!--<ul>-->
+                    <!--<li j-repeat="girl in boy.girls">{{girl.name}}, {{girl.age * 100}}</li>-->
+                <!--</ul>-->
+            <!--</li>-->
+            <!--<li>-->
+                <!--<p>Last Boy: {{list[list.length-1].name}}, {{list[list.length-1].age}}</p>-->
+            <!--</li>-->
+        <!--</ul>-->
+        <!--<span>{{list[list.length-1].name + ' ' + list[list.length-1].age}}</span>-->
+        <div>
+            <button j-click="unshift('shift')">Shift</button>
+            <button j-click="append('jing', list.length)">Append</button>
+        </div>
+    </div>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,1579 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" ng-app="MyApp">
+<head>
+    <script type="text/javascript" src="../../bower_components/angular/angular.min.js"></script>
+    <script type="text/javascript">
+        angular.module('MyApp', []).controller('Ctrl', ['$scope', function($scope) {
+            $scope.name = 'xiaoge';
+        }]);
+    </script>
+
+    <title>cnBeta.COM_中文业界资讯站</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta http-equiv="Cache-Control" content="max-age=300" />
+    <meta http-equiv="X-UA-Compatible" content="IE=EmulateIE9" >
+    <meta name="keywords" content="数码,通信,互联网,手机,业界,科技,媒体,资讯,IT新闻,言论平台,CB,cnBeta" />
+    <meta name="description" content="cnBeta.COM是互联网IT新闻业界的后起之秀,是国内领先的即时科技资讯站点和网友交流平台。消息速度快，报导立场公正中立，网友讨论气氛浓厚，在IT业界拥有独特的影响力。" />
+    <meta name="resource-type" content="document" />
+    <meta name="copyright" content="(c)2003-2014 cnBeta.COM" />
+    <meta name="author" content="cnBeta" />
+    <meta name="robots" content="index, follow" />
+    <meta name="revisit-after" content="1 days" />
+    <meta name="rating" content="general" />
+    <link rel="shortcut icon" href="/favicon.ico" type="image/x-icon" />
+    <link rel="alternate" type="application/rss+xml" title="RSS 2.0" href="/backend.php" />
+    <link rel="alternate" type="application/atom+xml" title="ATOM 1.0" href="/backend.php?atom" />
+    </head>
+<body ng-controller="Ctrl">
+
+<header class="wrapper global_head">
+    <nav class="tiny_bar">
+        <div class="cb_login" id="cb_login"></div>
+        <ul class="cb_rss">
+            <li><a class="mr5" style="color:#bb9502;font-weight:bold" href="/deliver" target="_blank">投递资讯</a>
+                <a class="mr5" style="font-weight:bold" href="http://m.cnbeta.com/" target="_blank">移动版</a>
+                <a class="mr5" href="http://www.cnbeta.com/ios" target="_blank">iOS阅读</a>
+                <a class="mr5" style="font-weight:bold" href="http://www.cnbeta.com/assets/mobile/android.cnbeta.apk" target="_blank">Android客户端</a>
+                <a href="mailto:ugmbbc@gmail.com?subject=投递资讯：">邮箱爆料</a></li>
+            <li><a href="/backend.php" target="_blank" title="订阅本站资讯"><i class="head icon_feed"></i>订阅资讯</a></li>
+            <li><a href="/commentrss.php" target="_blank" title="订阅本站精彩评论"><i class="head icon_feed"></i>订阅评论</a></li>
+            <li><iframe id="sina_follow" src="" allowtransparency="true" scrolling="no" border="0" frameborder="0" align="absmiddle" style="width:125px;height:22px;border:none;overflow:hidden;"></iframe></li>
+        </ul>
+    </nav>
+    <h1 class="head cnbeta_logo"><a href="/">cnBeta.COM_中文业界资讯站<div id="cnbeta_logo_cover" class="cnbeta_logo_cover"></div></a></h1>
+    <nav class="global_navi">
+        <div id="cb_search">
+            <form action="http://so.cnbeta.com/cse/search" target="_blank">
+                <input name="s" type="hidden" value="14146556968177638016">
+                <input type="text" name="q" size="30" class="search_key">
+                <button type="submit" value="" class="search_btn head">搜索</button></form>
+        </div>
+        <ul class="main_navi fl">
+            <li class="current">
+                <a href="http://www.cnbeta.com/">首页</a>                                    </li>
+            <li class="">
+                <a href="http://www.cnbeta.com/deliver" target="_blank" style="color:#ffcc00;">投稿</a>                                    </li>
+            <li class="">
+                <a href="http://www.cnbeta.com/demohour.html" target="_blank">玩意儿</a>                                    </li>
+            <li class="">
+                <a href="http://job.cnbeta.com/" target="_blank">招聘</a>                                    </li>
+            <li class="">
+                <a href="http://www.cnbeta.com/topics/306.htm">互动</a>                                    </li>
+            <li class=" dropdown">
+                <a href="http://www.cnbeta.com/topics.htm">主题</a>                                        <ul class="sub_navi" style="display:">
+                <li><a href="http://www.cnbeta.com/topics/70.htm">硬件</a></li>
+                <li><a href="http://www.cnbeta.com/topics/453.htm">人物</a></li>
+                <li><a href="http://www.cnbeta.com/topics/9.htm">苹果</a></li>
+                <li><a href="http://www.cnbeta.com/topics/371.htm">三星</a></li>
+                <li><a href="http://www.cnbeta.com/topics/448.htm">科学</a></li>
+                <li><a href="http://www.cnbeta.com/topics/379.htm">iPhone</a></li>
+                <li><a href="http://www.cnbeta.com/topics/436.htm">魅族</a></li>
+                <li><a href="http://www.cnbeta.com/topics/243.htm">手机</a></li>
+                <li><a href="http://www.cnbeta.com/topics/519.htm">nubia</a></li>
+                <li><a href="http://www.cnbeta.com/topics/52.htm">谷歌</a></li>
+                <li><a href="http://www.cnbeta.com/topics/39.htm">游戏</a></li>
+                <li><a href="http://www.cnbeta.com/topics/197.htm">索尼</a></li>
+                <li><a href="http://www.cnbeta.com/topics/45.htm">警告</a></li>
+                <li><a href="http://www.cnbeta.com/topics/4.htm">微软</a></li>
+                <li><a href="http://www.cnbeta.com/topics/353.htm">电商</a></li>
+                <li><a href="http://www.cnbeta.com/topics/281.htm">支付</a></li>
+                <li><a href="http://www.cnbeta.com/topics/444.htm">Android</a></li>
+                <li><a href="http://www.cnbeta.com/topics/517.htm">红牛手机</a></li>
+                <li><a href="http://www.cnbeta.com/topics/85.htm">XBOX</a></li>
+                <li><a href="http://www.cnbeta.com/topics/439.htm">HTC</a></li>
+                <li><a href="http://www.cnbeta.com/topics/83.htm">LG</a></li>
+                <li><a href="http://www.cnbeta.com/topics/260.htm">最新消息</a></li>
+                <li><a href="http://www.cnbeta.com/topics/487.htm">小米</a></li>
+                <li><a href="http://www.cnbeta.com/topics/138.htm">通信技术</a></li>
+                <li><a href="http://www.cnbeta.com/topics/464.htm">iPad</a></li>
+                <li><a href="http://www.cnbeta.com/topics/411.htm">黑莓</a></li>
+                <li><a href="http://www.cnbeta.com/topics/469.htm">虚拟现实</a></li>
+                <li><a href="http://www.cnbeta.com/topics/184.htm">Windows Phone</a></li>
+                <li><a href="http://www.cnbeta.com/topics/506.htm">Windows 8.1</a></li>
+                <li><a href="http://www.cnbeta.com/topics/144.htm">Netbook 上网本 / 平板 / Ultrabook</a></li>
+                <li><a href="http://www.cnbeta.com/topics.htm">更多...</a></li>
+            </ul>
+            </li>
+            <li class="">
+                <a href="http://www.cnbeta.com/top10.htm">排行</a>                                    </li>
+            <li class="">
+                <a href="http://www.cnbeta.com/about/index.htm">关于</a>                                    </li>
+        </ul>
+    </nav>
+</header>
+<section class="wrapper"><div class="content_box" style="text-align:center;">
+    <!-- 广告位：CBV4-980x90 -->
+    <div class="main_content">
+        <div class="content_box main_content_left">
+            <div class="cb_box hd_main" style="">
+                <div class="slide">
+                    <div class="slide_area" style="position:relative">
+                        <div style="width:240px;height:371px;background:#fff;position:absolute;z-index:999">
+                            <dl>
+                                <ins class="adsbygoogle"
+                                     style="display:inline-block;width:240px;height:390px"
+                                     data-ad-client="ca-pub-9066977823953139"
+                                     data-ad-slot="9883530213"></ins>
+                               </dl>
+                        </div>
+                        <div class="">
+                            <dl>
+                                <dt class="imgbox240x310"><a href="/articles/362433.htm" target="_blank"><img src="http://static.cnbetacdn.com/frontend/201501/8388022881f2cde.jpg" /></a></dt>
+                                <dd><a href="/articles/362433.htm" target="_blank">至美外观旗舰性能 OPPO R1C发布</a></dd>
+                            </dl>
+                        </div>
+                        <div class="">
+                            <dl>
+                                <dt class="imgbox240x310"><a href="/articles/361069.htm" target="_blank"><img src="http://static.cnbetacdn.com/frontend/201501/876c827103af0e1.jpg" /></a></dt>
+                                <dd><a href="/articles/361069.htm" target="_blank">[独家]微软Spartan浏览器真实谍照 搜索/Cortana未来大整合</a></dd>
+                            </dl>
+                        </div>
+                        <div class="">
+                            <dl>
+                                <dt class="imgbox240x310"><a href="/articles/361883.htm" target="_blank"><img src="http://static.cnbetacdn.com/frontend/201501/4d212bc8709d897.jpg" /></a></dt>
+                                <dd><a href="/articles/361883.htm" target="_blank">香港一男子身绑94部iPhone入境被海关查获</a></dd>
+                            </dl>
+                        </div>
+                        <div class="">
+                            <dl>
+                                <dt class="imgbox240x310"><a href="/articles/362789.htm" target="_blank"><img src="http://static.cnbetacdn.com/frontend/201501/5024b13d280cdca.jpg" /></a></dt>
+                                <dd><a href="/articles/362789.htm" target="_blank">[图文直播]小米2015年春季旗舰新品发布会</a></dd>
+                            </dl>
+                        </div>
+                    </div>
+                    <ul class="slide_nav">
+                        <li><a>1</a></li>
+                        <li><a>2</a></li>
+                        <li><a>3</a></li>
+                        <li><a>4</a></li>
+                        <li><a>5</a></li>
+                    </ul>
+                </div>
+                <div class="headline">
+                    <div id="hot">
+                        <dl>
+                            <dt class="ft"><a href="/articles/362893.htm" target="_blank">谷歌将停止接受谷歌眼镜订单并关闭Explorer</a></dt>
+                            <dd>
+                                <div class="imgbox100x70">
+                                    <a href="/articles/362893.htm" target="_blank"><img src="http://static.cnbetacdn.com/frontend/201501/382af409b0afcea.jpg" /></a>
+                                </div>
+                                <ul class="top_text">
+                                    <li><a href="http://www.cnbeta.com/articles/362917.htm" target="_blank">iPod 之父 Tony Fadell 将负责谷歌眼镜部门</a></li><li><a href="http://www.cnbeta.com/articles/350889.htm" target="_blank">谷歌眼镜：我在探索，你们却谈生死</a></li><li><a href="http://www.cnbeta.com/articles/350389.htm" target="_blank">《连线》：如何拯救谷歌眼镜？现在就终结它</a></li>                            </ul>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt class=""><a href="/articles/362929.htm" target="_blank">微信最土豪理财用户年赚4.5万 本金近百万</a></dt>
+                            <dd>
+                                <div class="imgbox100x70">
+                                    <a href="/articles/362929.htm" target="_blank"><img src="http://static.cnbetacdn.com/frontend/201501/37d761916b9b5d2.png" /></a>
+                                </div>
+                                <ul class="top_text">
+                                    <li><a href="http://www.cnbeta.com/articles/360509.htm" target="_blank">报告称2014年Q4宝宝类理财规模缩水557亿元 首次负增长</a></li><li><a href="http://www.cnbeta.com/articles/348557.htm" target="_blank">银行降息令存款吸引力下降 恐被“宝宝”理财品分流</a></li><li><a href="http://www.cnbeta.com/articles/359457.htm" target="_blank">天弘居最大基金公司宝座 98%规模来自余额宝</a></li>                            </ul>
+                            </dd>
+                        </dl>
+                        <dl>
+                            <dt class=""><a href="/articles/362789.htm" target="_blank">2299/3299元 - 小米Note骁龙810新品发布</a></dt>
+                            <dd>
+                                <div class="imgbox100x70">
+                                    <a href="/articles/362789.htm" target="_blank"><img src="http://static.cnbetacdn.com/frontend/201501/7164e49d49ad1d6.jpg" /></a>
+                                </div>
+                                <ul class="top_text">
+                                    <li><a href="http://www.cnbeta.com/articles/362755.htm" target="_blank">新一代高通骁龙810芯片将带来哪些提升？</a></li><li><a href="http://www.cnbeta.com/articles/362859.htm" target="_blank">真相竟是这样：小米Note原名“小米5”</a></li><li><a href="http://www.cnbeta.com/articles/362847.htm" target="_blank">[评论]昂贵小米Note顺利出世的商业逻辑</a></li>                            </ul>
+                            </dd>
+                        </dl>
+                    </div>
+                    <div id="concern_switch" class="headline_more" style="display:none">+ 点击查看更多要闻推荐</div>
+                </div>
+                <div class="clear"></div>
+            </div>
+            <!-- concern start -->
+            <div id="concern_box" class="mt5" style="display:none">
+                <div class="cb_box">
+                    <div class="part_tit">
+                        <ul id="focus_nav" class="tit_nav"><li class="current"><a>今日必读</a></li><li><a>一周热推</a></li><li><a class="last">一周热议</a></li></ul>
+                        <span class="fr"><div id="concern_pin" class="pin" title="钉一下">钉</div></span>
+                    </div>
+                    <div class="focus" id="today_read">
+                        <div class="items_area">
+                            <div class="items ml">
+                                <dl class="big">
+                                    <dt><a href="http://aos.prf.hn/click/camref:100lcC/" target="_blank">[图]4G版iPad Air 2/mini 3行货开卖 3788元起售</a></dt>
+                                    <dd>
+                                        <div class="img imgbox100x70">
+                                            <a href="http://aos.prf.hn/click/camref:100lcC/" target="_blank"><img src="http://static.cnbetacdn.com/slide/2014/1028/1414460557.jpg" /></a>
+                                        </div>
+                                        <div class="desc"><p><p>12月11日，苹果4G版本iPad Air 2和iPad min 3在中国正式发售。iPad Air 2和iPad min 3都支持TD-LTE和FDD-LTE双4G网络标准，向下兼容TD-SCDMA、DC-HSDPA、HSPA+等其他网络。<strong><a data-link="1" href="http://aos.prf.hn/click/camref:100lcC/creativeref:305225" target="_blank">iPad Air</a> 2 WLAN + Cellular版支持TD-LTE和FDD-LTE，16GB售价4488元，64GB售价5188元，128GB售价5888元。</strong></p><span class="blue"><a target="_blank" href="http://aos.prf.hn/click/camref:100lcC/">[详细]</a></span></p></div>
+                                    </dd>
+                                </dl>
+                                <ul class="sublist"><li><a href="/articles/362421.htm" target="_blank">不是小米5 - 小米新旗舰或确定为小米Note</a></li><li><a href="/articles/362921.htm" target="_blank">清华大学魏少军：中国如何补齐CPU这一环？</a></li><li><a href="/articles/362937.htm" target="_blank">苹果新编程语言Swift采纳率飙升</a></li></ul>                    </div>
+                            <div class="items mr">
+                                <dl class="big">
+                                    <dt><a href="/articles/362889.htm" target="_blank">苹果新专利：iPhone Home键转换成游戏摇杆</a></dt>
+                                    <dd>
+                                        <div class="img imgbox100x70">
+                                            <a href="/articles/362889.htm" target="_blank"><img src="http://static.cnbetacdn.com/thumb/mini/article/2015/0116/f27bc7b5bb229a6.png_100x100.png" /></a>
+                                        </div>
+                                        <div class="desc"><p>今天美国专利和商标局公布了苹果的新专利，揭示了iPhone或iPad的home键可以变成一个游戏摇杆。专利申请...<span class="blue"><a target="_blank" href="/articles/362889.htm">[详细]</a></span></p></div>
+                                    </dd>
+                                </dl>
+                                <ul class="sublist"><li><a href="/articles/362839.htm" target="_blank">[图]双面玻璃+2299元起 小米Note真机试玩</a></li><li><a href="/articles/362519.htm" target="_blank">老罗好诚恳 锤子向一加手机郑重道歉</a></li><li><a href="/articles/362399.htm" target="_blank">奶茶妹妹怒了：首次发法律声明维权</a></li></ul>                    </div>
+                        </div>                </div>
+                    <div class="clear"></div>
+                    <div class="focus none" id="good_read">
+                        <div class="items_area">
+                            <div class="items ml">
+                                <dl class="big">
+                                    <dt><a href="/articles/336613.htm" target="_blank">经典！周星驰《大话西游》20年后重新上映</a></dt>
+                                    <dd>
+                                        <div class="img imgbox100x70">
+                                            <a href="/articles/336613.htm" target="_blank"><img src="http://static.cnbetacdn.com/newsimg/2014/1014/31_1kf8$TxXY.jpg_180x132.jpg" /></a>
+                                        </div>
+                                        <div class="desc"><p>“曾经有一份真挚的感情摆在我的面前我没有珍惜，等我失去的时候才追悔莫及，人间最痛苦的事莫过于此。如果上天能给我一次再来一次的机会，我会对哪个女孩说三个<span class="blue"><a target="_blank" href="/articles/336613.htm">[详细]</a></span></p></div>
+                                    </dd>
+                                </dl>
+                                <ul class="sublist"><li><a href="/articles/361355.htm" target="_blank">[图]Metro靠边站？Windows 10或迎来“动态任务栏”</a></li><li><a href="/articles/362145.htm" target="_blank">[视频]Marvel放出《复仇者联盟2：奥创纪元》第二条预告片</a></li><li><a href="/articles/361193.htm" target="_blank">华为荣耀6 Plus 视频评测</a></li></ul>                    </div>
+                            <div class="items mr">
+                                <dl class="big">
+                                    <dt><a href="/articles/338817.htm" target="_blank">[视频+图文直播]魅族阿里巴巴战略合作发布会</a></dt>
+                                    <dd>
+                                        <div class="img imgbox100x70">
+                                            <a href="/articles/338817.htm" target="_blank"><img src="http://static.cnbetacdn.com/newsimg/2014/1021/91_1413871076.jpg_600x600.jpg_180x132.jpg" /></a>
+                                        </div>
+                                        <div class="desc"><p>北京时间10月21日下午，魅族将在北京JW万豪酒店举办发布会，宣布阿里巴巴达成战略合作。按照邀请函上的描述“双方将整合优势资源展开战略合作，在更多领域<span class="blue"><a target="_blank" href="/articles/338817.htm">[详细]</a></span></p></div>
+                                    </dd>
+                                </dl>
+                                <ul class="sublist"><li><a href="/articles/360621.htm" target="_blank">腾讯反悔？ QQ“轻聊版”已从下载页面消失</a></li><li><a href="/articles/360307.htm" target="_blank">12寸MacBook Air全面揭秘：变化之大让你瞠目结舌</a></li><li><a href="/articles/360975.htm" target="_blank">马云随性“被消费” 为误伤京东致歉</a></li></ul>                    </div>
+                        </div>                </div>
+                    <div class="clear"></div>
+                    <div class="focus none" id="comment_read">
+                        <div class="items_area">
+                            <div class="items ml">
+                                <dl class="big">
+                                    <dt><a href="/articles/337167.htm" target="_blank">谷歌发多款Nexus新品 Android Lollipop正式亮相</a></dt>
+                                    <dd>
+                                        <div class="img imgbox100x70">
+                                            <a href="/articles/337167.htm" target="_blank"><img src="http://static.cnbetacdn.com/newsimg/2014/1016/25_1kfLqW5ae.png_180x132.png" /></a>
+                                        </div>
+                                        <div class="desc">谷歌本周三发布了多款Nexus产品，其中包括Nexus 9平板电脑，Nexus 6大屏智能手机和Nexus Player流媒体播放器。Nexus
+                                            <span class="blue"><a target="_blank" href="/articles/337167.htm"> [详细]</a></span></div>
+                                    </dd>
+                                </dl>
+                                <ul class="sublist"><li><a href="/articles/362819.htm" target="_blank">小米为什么要发2000元以上的Note？</a></li><li><a href="/articles/362473.htm" target="_blank">3998元？小米自曝的新旗舰价格你信么</a></li><li><a href="/articles/361881.htm" target="_blank">原来8年前的一代iPhone那么差</a></li></ul>                    </div>
+                            <div class="items mr">
+                                <dl class="big">
+                                    <dt><a href="/articles/337751.htm" target="_blank">中医把脉验孕准不准？</a></dt>
+                                    <dd>
+                                        <div class="img imgbox100x70">
+                                            <a href="/articles/337751.htm" target="_blank"><img src="http://static.cnbetacdn.com/newsimg/2014/1017/52_1413517107.jpg_180x132.jpg" /></a>
+                                        </div>
+                                        <div class="desc">近段时间，有关“中医诊脉验孕”的网络约赌赚足了眼球。其实，中医诊脉验孕古而有之，如今到现代社会中来评判，诊脉验孕的准确性是否会受到挑战？请关注——中医<span class="blue"><a target="_blank" href="/articles/337751.htm"> [详细]</a></span></div>
+                                    </dd>
+                                </dl>
+                                <ul class="sublist"><li><a href="/articles/361595.htm" target="_blank">仓木麻衣斥资2亿举办纪念演唱会 采用8K摄影机拍摄和192Khz录音</a></li><li><a href="/articles/361597.htm" target="_blank">MIUI主题均价6块 有人一年为此花了6000多块</a></li><li><a href="/articles/361469.htm" target="_blank">小米5真机首曝光 机身确认更薄更宽</a></li></ul>                    </div>
+                        </div>                </div>
+                    <div class="clear"></div>
+                </div>
+            </div>
+            <!-- concern end -->
+            <div class="mt5" style="text-align:center;">
+                <!-- 广告位：CBV4-662x80 首页 -->
+
+            <div class="mt5" style="text-align:center;">
+            </div>
+            <div class="mt5 allinfo">
+                <nav class="blue_bar">
+                    <i style="display:none" class="new J_realtime" data-auto-times="0" data-auto="0"><span></span></i>
+                    <ul id="all_news_nav">
+                        <li><a data-type="all">全部资讯</a></li>
+                        <li>|</li>
+                        <li><a data-type="dig">人气推荐</a></li>
+                        <li>|</li>
+                        <li><a data-type="soft">软件版</a></li>
+                        <li>|</li>
+                        <li><a data-type="industry">业界版</a></li>
+                        <li>|</li>
+                        <li><a data-type="interact">互动版</a></li>
+                    </ul>
+                    <div class="show_type"></div>
+                    <div class="fr" style="padding:0px 6px 0 0">今日更新文章 <em>67</em> 篇，网友评论 <em>528</em> 条</div>
+                </nav>
+                <div class="all_news_wildlist" id="all_news_list" current-type="all">
+                    <div class="alllist" id="allnews_all" data-page="1" data-stop="0">
+                        <input type="hidden" name="latest_sid" value="363015" />
+                        <div class="items_area">
+                            <div class="item" id="J_allItem_363015">
+                                <div class="hd">
+                                    <div class="title">
+                                        <a target="_blank" href="/articles/363015.htm">反恐仍需监听全民通话数据 NSA尚无替代方案</a>
+                                        <div class="tj">
+                                            <span>teikaei  发布于<em>2015-01-16 10:01:29</em> | </span>
+                                            <span><em>39</em> 次阅读</span>
+                                        </div>
+                                    </div>
+                                    <div class="picno"><div class="pic"><a target="_blank" href="/articles/363015.htm"><img width="100" height="100" src="http://static.cnbetacdn.com/topics/11-12-14 08-53-40.gif" /></a></div></div><span class="newsinfo"><p>北京时间1月16日早间消息，<strong>美国联邦政府周四发布的一项研究结果显示，尽管遭到人权保护人士的反对，但目前还没有有效的方法可以代替政府对所有通话基础数据的大规模搜集活动。</strong>在美国国家安全局(以下简称“NSA”)前雇员爱德华·斯诺登(Edward Snowden)披露“棱镜门”之后，美国总统奥巴马曾经要求该国情报机构展开评估，寻找是否还有其他方式监视恐怖分子的通信信息，而不必全面搜集所有美国人的基础通话数据。</p></span>
+                                </div>
+                                <div class="clear"></div>
+                                <div class="tools repeat">
+                                    <div class="time"><a target = "_blank" href = "http://www.demohour.com/projects/352592?referer=cnbeta"><b>使用星空果，彻底告别漫游费</b></a></div>
+                                    <ul class="gray">
+                                        <li><b><a target="_blank" href="/articles/363015.htm">详细内容</a></b></li>
+                                        <li>已有<em>0</em>个意见&nbsp;&nbsp;|</li>
+                                        <li><em>0</em>次推荐&nbsp;&nbsp;|</li>
+                                        <li><em>0</em>次打分&nbsp;&nbsp;|</li>
+                                        <li>事件分:<em>0</em>分&nbsp;&nbsp;|</li>
+                                        <li>质量分:<em>0</em>分</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="item" id="J_allItem_363013">
+                                <div class="hd">
+                                    <div class="title">
+                                        <a target="_blank" href="/articles/363013.htm">任天堂宣布2月13日发布新3DS和3DS XL：1238元</a>
+                                        <div class="tj">
+                                            <span>teikaei  发布于<em>2015-01-16 10:00:55</em> | </span>
+                                            <span><em>163</em> 次阅读</span>
+                                        </div>
+                                    </div>
+                                    <div class="picno"><div class="pic"><a target="_blank" href="/articles/363013.htm"><img width="100" height="100" src="http://static.cnbetacdn.com/thumb/mini/article/2015/0116/f23d2c6a9a7f243_100x100.jpg" /></a></div></div><span class="newsinfo"><p><strong>1月16日消息，日本游戏厂商任天堂通过Twitter宣布，两款新一代游戏掌机产品3DS和3DS XL将于2月13日正式发布。</strong>任天堂欧洲Twitter账号公布了新一代3DS和3DS XL于2月13日在欧洲发布的消息，而任天堂美国账号则透露，大屏幕的3DS XL建议零售价为199.99美元（折合人民币1238元），但未披露小屏幕的3DS的发布会时间和售价。</p></span>
+                                </div>
+                                <div class="clear"></div>
+                                <div class="tools repeat">
+                                    <div class="time"><a target = "_blank" href = "http://aos.prf.hn/click/camref:100lcC/creativeref:305223"><b><font color = "red">苹果 Apple Store</font></b></a></div>
+                                    <ul class="gray">
+                                        <li><b><a target="_blank" href="/articles/363013.htm">详细内容</a></b></li>
+                                        <li>已有<em>1</em>个意见&nbsp;&nbsp;|</li>
+                                        <li><em>0</em>次推荐&nbsp;&nbsp;|</li>
+                                        <li><em>0</em>次打分&nbsp;&nbsp;|</li>
+                                        <li>事件分:<em>0</em>分&nbsp;&nbsp;|</li>
+                                        <li>质量分:<em>0</em>分</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="item" id="J_allItem_363011">
+                                <div class="hd">
+                                    <div class="title">
+                                        <a target="_blank" href="/articles/363011.htm">[视频]罕见熔浆流入海洋近距离视频 - 让人既兴奋又紧张</a>
+                                        <div class="tj">
+                                            <span>teikaei  发布于<em>2015-01-16 10:00:00</em> | </span>
+                                            <span><em>193</em> 次阅读</span>
+                                        </div>
+                                    </div>
+                                    <div class="picno"><div class="pic"><a target="_blank" href="/articles/363011.htm"><img width="100" height="100" src="http://static.cnbetacdn.com/thumb/mini/article/2015/0116/8774651a7d9a992.png_100x100.png" /></a></div></div><span class="newsinfo"><p>据外媒报道，当人们开始有了互联网之后，他们去户外探访户外的时间也由此变得越来越少。不过没有关系，YouTube可以为我们带来探索外面世界的窗口，比如说下面这段熔浆流入海洋的视频。也许我们已经在自然科学课堂中或历史频道看过火山爆发或是熔浆流动的场景，但这种以近距离原生态的拍摄方式却是很少看到的。</p></span>
+                                </div>
+                                <div class="clear"></div>
+                                <div class="tools repeat">
+                                    <div class="time"><a target = "_blank" href = "http://www.efly.cc/bgp.php?=guanggao"><b>全网覆盖 睿江BGP带你遨游</b></a></div>
+                                    <ul class="gray">
+                                        <li><b><a target="_blank" href="/articles/363011.htm">详细内容</a></b></li>
+                                        <li>已有<em>0</em>个意见&nbsp;&nbsp;|</li>
+                                        <li><em>0</em>次推荐&nbsp;&nbsp;|</li>
+                                        <li><em>0</em>次打分&nbsp;&nbsp;|</li>
+                                        <li>事件分:<em>0</em>分&nbsp;&nbsp;|</li>
+                                        <li>质量分:<em>0</em>分</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="item cooperation"></div>                                            <div class="item" id="J_allItem_363009">
+                            <div class="hd">
+                                <div class="title">
+                                    <a target="_blank" href="/articles/363009.htm">[视频]新视频透露截图功能即将登陆Xbox主机</a>
+                                    <div class="tj">
+                                        <span>study875 发布于<em>2015-01-16 09:59:57</em> | </span>
+                                        <span><em>38</em> 次阅读</span>
+                                    </div>
+                                </div>
+                                <div class="picno"><div class="pic"><a target="_blank" href="/articles/363009.htm"><img width="100" height="100" src="http://static.cnbetacdn.com/topics/13-05-22 10-44-13.gif" /></a></div></div><span class="newsinfo"><p><strong>微软Xbox部门负责人Phil Spencer近日公布的新视频透露截图功能即将登陆Xbox游戏主机，</strong>但在视频中他并未确定该功能具体的上线时间，不过暗示在本月21日举行的Windows 10发布会上会透露与主机相关的内容。</p></span>
+                            </div>
+                            <div class="clear"></div>
+                            <div class="tools repeat">
+                                <div class="time"><a target = "_blank" href = "http://cloud.sudu.cn/view/33"><b>华夏名网最适合网站的云 5折抢购</b></a></div>
+                                <ul class="gray">
+                                    <li><b><a target="_blank" href="/articles/363009.htm">详细内容</a></b></li>
+                                    <li>已有<em>0</em>个意见&nbsp;&nbsp;|</li>
+                                    <li><em>0</em>次推荐&nbsp;&nbsp;|</li>
+                                    <li><em>2</em>次打分&nbsp;&nbsp;|</li>
+                                    <li>事件分:<em>-5</em>分&nbsp;&nbsp;|</li>
+                                    <li>质量分:<em>-5</em>分</li>
+                                </ul>
+                            </div>
+                        </div>
+                            <div class="item" id="J_allItem_363007">
+                                <div class="hd">
+                                    <div class="title">
+                                        <a target="_blank" href="/articles/363007.htm">[视频]Xbox One售价调回349美元 未来展望</a>
+                                        <div class="tj">
+                                            <span>KungfuDogg 发布于<em>2015-01-16 09:54:42</em> | </span>
+                                            <span><em>245</em> 次阅读</span>
+                                        </div>
+                                    </div>
+                                    <div class="picno"><div class="pic"><a target="_blank" href="/articles/363007.htm"><img width="100" height="100" src="http://static.cnbetacdn.com/thumb/mini/article/2015/0116/ec1267ab95f5183.jpg_100x100.jpg" /></a></div></div><span class="newsinfo"><p><br/></p><p><strong>今天，微软Xbox部门主管Phil Spencer发布了一则视频，宣布了在假期特价销售的Xbox
+                                    One主机将于明日调回349美元原价。</strong>同时也预热了下周即将举行的Windows
+                                    10发布活动将会对游戏部分做介绍，<strong>称游戏迷们可以期待Xbox和Window 10会带来很多游戏方面的改进。微软称他们有一个Xbox
+                                        One销售“创纪录”的假期，感谢大家的支持。</strong></p></span>
+                                </div>
+                                <div class="clear"></div>
+                                <div class="tools repeat">
+                                    <div class="time"><a target = "_blank" href = "http://www.wdw6.com/"><b>万达网络 - 服务器租用托管</b></a></div>
+                                    <ul class="gray">
+                                        <li><b><a target="_blank" href="/articles/363007.htm">详细内容</a></b></li>
+                                        <li>已有<em>0</em>个意见&nbsp;&nbsp;|</li>
+                                        <li><em>0</em>次推荐&nbsp;&nbsp;|</li>
+                                        <li><em>2</em>次打分&nbsp;&nbsp;|</li>
+                                        <li>事件分:<em>-5</em>分&nbsp;&nbsp;|</li>
+                                        <li>质量分:<em>-5</em>分</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="item" id="J_allItem_363005">
+                                <div class="hd">
+                                    <div class="title">
+                                        <a target="_blank" href="/articles/363005.htm">[图]游戏白痴玩超级马里奥世界476次通关无果 线上寻求帮助</a>
+                                        <div class="tj">
+                                            <span>study875 发布于<em>2015-01-16 09:49:48</em> | </span>
+                                            <span><em>1050</em> 次阅读</span>
+                                        </div>
+                                    </div>
+                                    <div class="picno"><div class="pic"><a target="_blank" href="/articles/363005.htm"><img width="100" height="100" src="http://static.cnbetacdn.com/thumb/mini/article/2015/0116/708a1d2661da0a6.png_100x100.png" /></a></div></div><span class="newsinfo"><p>一位匿名人士在洛杉矶Craigslist（网上大型免费分类广告网站）上发布求助信息，标题为<a target="_blank" href="http://losangeles.craigslist.org/lac/cpg/4845778515.html">“游戏白痴求助想把SNES主机上《超级马里奥世界》（Super Mario World）的香草穹顶关卡（Vanilla Dome）打通关。”</a>并分享了游戏中图片和布局。</p></span>
+                                </div>
+                                <div class="clear"></div>
+                                <div class="tools repeat">
+                                    <div class="time"><a target = "_blank" href = "http://m.cnbeta.com/"><b>cnBeta.COM 移动版</b></a></div>
+                                    <ul class="gray">
+                                        <li><b><a target="_blank" href="/articles/363005.htm">详细内容</a></b></li>
+                                        <li>已有<em>3</em>个意见&nbsp;&nbsp;|</li>
+                                        <li><em>0</em>次推荐&nbsp;&nbsp;|</li>
+                                        <li><em>2</em>次打分&nbsp;&nbsp;|</li>
+                                        <li>事件分:<em>5</em>分&nbsp;&nbsp;|</li>
+                                        <li>质量分:<em>5</em>分</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="item" id="J_allItem_363003">
+                                <div class="hd">
+                                    <div class="title">
+                                        <a target="_blank" href="/articles/363003.htm">[图+视频]国产最强芯之一 64位八核RK3368处理器登场</a>
+                                        <div class="tj">
+                                            <span>teikaei  发布于<em>2015-01-16 09:45:16</em> | </span>
+                                            <span><em>1280</em> 次阅读</span>
+                                        </div>
+                                    </div>
+                                    <div class="picno"><div class="pic"><a target="_blank" href="/articles/363003.htm"><img width="100" height="100" src="http://static.cnbetacdn.com/thumb/mini/article/2015/0116/63e014919924d88.jpg_100x100.jpg" /></a></div></div><span class="newsinfo"><p><strong>前段时间的 CES 2015 国际消费电子展会上，中国的 ARM 处理器厂商两强之一的瑞芯微（Rockchip），正式公布了自家首款 64 位八核心的移动处理芯片解决方案 RK3368。</strong>从展会上现场情况来看，瑞芯微的 RK3288 整套方案还处于原型阶段，因为现场展示时仍没有完美成品，而是把主要部件分离开来相连接，包括一块单独的 RK3699 芯片主板，以及一块 7.85 英寸 2048×1536 分辨率的触摸屏显示器。</p></span>
+                                </div>
+                                <div class="clear"></div>
+                                <div class="tools repeat">
+                                    <div class="time"><a target = "_blank" href = "http://www.cnbeta.com/ios"><b>cnBeta官方iOS客户端</b></a></div>
+                                    <ul class="gray">
+                                        <li><b><a target="_blank" href="/articles/363003.htm">详细内容</a></b></li>
+                                        <li>已有<em>4</em>个意见&nbsp;&nbsp;|</li>
+                                        <li><em>0</em>次推荐&nbsp;&nbsp;|</li>
+                                        <li><em>6</em>次打分&nbsp;&nbsp;|</li>
+                                        <li>事件分:<em>5</em>分&nbsp;&nbsp;|</li>
+                                        <li>质量分:<em>5</em>分</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="item" id="J_allItem_363001">
+                                <div class="hd">
+                                    <div class="title">
+                                        <a target="_blank" href="/articles/363001.htm">特斯拉公布Model X传动系统选项 鹰翼车门将保留</a>
+                                        <div class="tj">
+                                            <span>KungfuDogg 发布于<em>2015-01-16 09:40:54</em> | </span>
+                                            <span><em>789</em> 次阅读</span>
+                                        </div>
+                                    </div>
+                                    <div class="picno"><div class="pic"><a target="_blank" href="/articles/363001.htm"><img width="100" height="100" src="http://static.cnbetacdn.com/thumb/mini/article/2015/0116/872ddfb89086c5c.jpg_100x100.jpg" /></a></div></div><span class="newsinfo"><p>为了保证Model S的产能，Model X中型多用途SUV的出货一再延期，特斯拉曾在去年11月宣布，第一批Model
+                                    X车型的投产将推迟至2015年底。<strong>而现在预订该车的车主只能等到2016年才能提车。对于习惯推迟的特斯拉迷们，也有几则好消息。近日特斯拉澄清了之前
+                                        的报道，称Model X将保留其最具有特色的鹰翼式后车门，而且官网也公布了Model
+                                        X的传动系统选项，采用了双电机全轮驱动的系统可以提供60kWh乃至85kWh的电池性能选择，性能相当抢眼。</strong></p></span>
+                                </div>
+                                <div class="clear"></div>
+                                <div class="tools repeat">
+                                    <div class="time"><a target = "_blank" href = "http://www.verycloud.cn/"><b>VeryCloud云主机/CDN</b></a></div>
+                                    <ul class="gray">
+                                        <li><b><a target="_blank" href="/articles/363001.htm">详细内容</a></b></li>
+                                        <li>已有<em>3</em>个意见&nbsp;&nbsp;|</li>
+                                        <li><em>0</em>次推荐&nbsp;&nbsp;|</li>
+                                        <li><em>4</em>次打分&nbsp;&nbsp;|</li>
+                                        <li>事件分:<em>10</em>分&nbsp;&nbsp;|</li>
+                                        <li>质量分:<em>10</em>分</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="item" id="J_allItem_362999">
+                                <div class="hd">
+                                    <div class="title">
+                                        <a target="_blank" href="/articles/362999.htm">[视频]Lumia设备迎来Denim更新：支持语音激活Cortana</a>
+                                        <div class="tj">
+                                            <span>raymon725 发布于<em>2015-01-16 09:31:10</em> | </span>
+                                            <span><em>484</em> 次阅读</span>
+                                        </div>
+                                    </div>
+                                    <div class="picno"><div class="pic"><a target="_blank" href="/articles/362999.htm"><img width="100" height="100" src="http://static.cnbetacdn.com/thumb/mini/article/2015/0116/eba8cd388546d22_100x100.jpg" /></a></div></div><span class="newsinfo"><p><strong>微软已经为Lumia设备推出了Denim更新，并且带来了语音激活Cortana、开始屏幕上的动态文件夹(live folders)、以及增强的概览屏幕等功能。</strong>至于Lumia Icon、1520、930、以及830用户，该更新还带来了Lumia Camera应用的改进(快门速度和其它新功能)。微软表示，本次更新仅面向有限数量的设备推出，根据设备型号的不同，收到OTA推送通知的时间也会有先有后。<br/></p></span>
+                                </div>
+                                <div class="clear"></div>
+                                <div class="tools repeat">
+                                    <div class="time"><a target = "_blank" href = "http://t.cn/8svNwhe"><b>京东让利上新季</b></a></div>
+                                    <ul class="gray">
+                                        <li><b><a target="_blank" href="/articles/362999.htm">详细内容</a></b></li>
+                                        <li>已有<em>5</em>个意见&nbsp;&nbsp;|</li>
+                                        <li><em>1</em>次推荐&nbsp;&nbsp;|</li>
+                                        <li><em>2</em>次打分&nbsp;&nbsp;|</li>
+                                        <li>事件分:<em>-5</em>分&nbsp;&nbsp;|</li>
+                                        <li>质量分:<em>-5</em>分</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="item" id="J_allItem_362997">
+                                <div class="hd">
+                                    <div class="title">
+                                        <a target="_blank" href="/articles/362997.htm">借鉴Apple Watch？三星或为新款智能手表配备旋钮按键</a>
+                                        <div class="tj">
+                                            <span>raymon725 发布于<em>2015-01-16 09:30:47</em> | </span>
+                                            <span><em>419</em> 次阅读</span>
+                                        </div>
+                                    </div>
+                                    <div class="picno"><div class="pic"><a target="_blank" href="/articles/362997.htm"><img width="100" height="100" src="http://static.cnbetacdn.com/topics/d807a9ee35b0a33.png" /></a></div></div><span class="newsinfo"><p><strong>根据最近汇总的一些报告，我们得知三星正在筹划推出一款采用了圆形表盘的智能手表产品。</strong>此外，不止一名消息人士称，三星会借鉴一些来自苹果的元素，并使用硬件来巧妙地呈现屏幕内容。据说这款设备的代号为“奥比斯”(Orbis)，并且会在下个月的移动世界大会(MWC 2015)上亮相。但是显然，该公司不大可能将Apple Watch上的“Crown”(旋钮按键)原样照抄过来。</p></span>
+                                </div>
+                                <div class="clear"></div>
+                                <div class="tools repeat">
+                                    <div class="time"><a target = "_blank" href = "http://www.verycloud.cn/"><b>VeryCloud云主机/CDN</b></a></div>
+                                    <ul class="gray">
+                                        <li><b><a target="_blank" href="/articles/362997.htm">详细内容</a></b></li>
+                                        <li>已有<em>3</em>个意见&nbsp;&nbsp;|</li>
+                                        <li><em>0</em>次推荐&nbsp;&nbsp;|</li>
+                                        <li><em>0</em>次打分&nbsp;&nbsp;|</li>
+                                        <li>事件分:<em>0</em>分&nbsp;&nbsp;|</li>
+                                        <li>质量分:<em>0</em>分</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="item" id="J_allItem_362995">
+                                <div class="hd">
+                                    <div class="title">
+                                        <a target="_blank" href="/articles/362995.htm">富翁布兰森携手高通赞助前谷歌高管卫星互联网OneWeb项目</a>
+                                        <div class="tj">
+                                            <span>study875 发布于<em>2015-01-16 09:29:30</em> | </span>
+                                            <span><em>185</em> 次阅读</span>
+                                        </div>
+                                    </div>
+                                    <div class="picno"><div class="pic"><a target="_blank" href="/articles/362995.htm"><img width="100" height="100" src="http://static.cnbetacdn.com/thumb/mini/article/2015/0116/28da63668ee7f42.jpg_100x100.jpg" /></a></div></div><span class="newsinfo"><p>去年10月维珍银河（Virgin Galactic）的SpaceShip Two载人飞船坠毁，造成一死一重伤的悲剧面前具有传奇色彩的亿万富翁理查德·布兰森（Richard Branson）依然对太空旅行充满信息，近日这名对火箭有狂热偏好的亿万富翁再次斥资数十亿美元投资新项目--前谷歌卫星项目高管Greg Wyler的卫星-网络公司OneWeb。</p></span>
+                                </div>
+                                <div class="clear"></div>
+                                <div class="tools repeat">
+                                    <div class="time"><a target = "_blank" href = "http://t.cn/8svNwhe"><b>京东让利上新季</b></a></div>
+                                    <ul class="gray">
+                                        <li><b><a target="_blank" href="/articles/362995.htm">详细内容</a></b></li>
+                                        <li>已有<em>0</em>个意见&nbsp;&nbsp;|</li>
+                                        <li><em>0</em>次推荐&nbsp;&nbsp;|</li>
+                                        <li><em>0</em>次打分&nbsp;&nbsp;|</li>
+                                        <li>事件分:<em>0</em>分&nbsp;&nbsp;|</li>
+                                        <li>质量分:<em>0</em>分</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="item" id="J_allItem_362993">
+                                <div class="hd">
+                                    <div class="title">
+                                        <a target="_blank" href="/articles/362993.htm">小行星2004 BL86将1月26日近距离飞掠地球</a>
+                                        <div class="tj">
+                                            <span>teikaei  发布于<em>2015-01-16 09:28:29</em> | </span>
+                                            <span><em>277</em> 次阅读</span>
+                                        </div>
+                                    </div>
+                                    <div class="picno"><div class="pic"><a target="_blank" href="/articles/362993.htm"><img width="100" height="100" src="http://static.cnbetacdn.com/thumb/mini/article/2015/0116/a78f6f54fbfea9f_100x100.gif" /></a></div></div><span class="newsinfo"><p>北京时间1月16日消息，据国外媒体报道，<strong>1月26日，一颗名为2004 BL86的小行星将飞掠过地球，届时它与地球的距离大约只有三倍的地月距离。</strong>从反射的亮度来看，天文学家估计它大小约为0.5公里。在如此近的距离，这样 大的小行星飞掠地球还是已知的第一次。下一次类似的事件将发生在2027年，小行星1999 AN10将飞掠地球。</p></span>
+                                </div>
+                                <div class="clear"></div>
+                                <div class="tools repeat">
+                                    <div class="time"></div>
+                                    <ul class="gray">
+                                        <li><b><a target="_blank" href="/articles/362993.htm">详细内容</a></b></li>
+                                        <li>已有<em>0</em>个意见&nbsp;&nbsp;|</li>
+                                        <li><em>0</em>次推荐&nbsp;&nbsp;|</li>
+                                        <li><em>0</em>次打分&nbsp;&nbsp;|</li>
+                                        <li>事件分:<em>0</em>分&nbsp;&nbsp;|</li>
+                                        <li>质量分:<em>0</em>分</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="item" id="J_allItem_362991">
+                                <div class="hd">
+                                    <div class="title">
+                                        <a target="_blank" href="/articles/362991.htm">网商拒绝“七日无理由退货”处罚办法将于3月15日实施</a>
+                                        <div class="tj">
+                                            <span>teikaei  发布于<em>2015-01-16 09:27:49</em> | </span>
+                                            <span><em>657</em> 次阅读</span>
+                                        </div>
+                                    </div>
+                                    <div class="picno"><div class="pic"><a target="_blank" href="/articles/362991.htm"><img width="100" height="100" src="http://static.cnbetacdn.com/thumb/mini/article/2015/0116/cff0447d21c4a3e_100x100.jpg" /></a></div></div><span class="newsinfo"><p>1月16日消息，《侵害消费者权益行为处罚办法》(以下简称《处罚办法》)将于3月15日实施。昨日，国家工商总局消保局局长杨红灿对《处罚办法》进行了解读。<strong>针对网络购物等非现场购物，《处罚办法》细化了经营者不履行“7日无理由退货”的具体情形，对此行为《处罚办法》明确规定将按照规定进行处罚。</strong>杨红灿表示，《处罚办法》对经营者不履行法律、法规规定义务的行为明确了相应的处罚以及行政处罚的原则和程序。</p></span>
+                                </div>
+                                <div >
+                                    <p>{{name}}</p>
+                                    <br/>
+                                    <br/>
+                                </div>
+                                <div class="clear"></div>
+                                <div class="tools repeat">
+                                    <div class="time"></div>
+                                    <ul class="gray">
+                                        <li><b><a target="_blank" href="/articles/362991.htm">详细内容</a></b></li>
+                                        <li>已有<em>3</em>个意见&nbsp;&nbsp;|</li>
+                                        <li><em>0</em>次推荐&nbsp;&nbsp;|</li>
+                                        <li><em>10</em>次打分&nbsp;&nbsp;|</li>
+                                        <li>事件分:<em>25</em>分&nbsp;&nbsp;|</li>
+                                        <li>质量分:<em>25</em>分</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="item" id="J_allItem_362989">
+                                <div class="hd">
+                                    <div class="title">
+                                        <a target="_blank" href="/articles/362989.htm">堪称太空版《权力的游戏》-《太空无垠》预告片发布</a>
+                                        <div class="tj">
+                                            <span>teikaei  发布于<em>2015-01-16 09:25:52</em> | </span>
+                                            <span><em>758</em> 次阅读</span>
+                                        </div>
+                                    </div>
+                                    <div class="picno"><div class="pic"><a target="_blank" href="/articles/362989.htm"><img width="100" height="100" src="http://static.cnbetacdn.com/thumb/mini/article/2015/0116/9dbfdb6fb37e3d9.gif_100x100.gif" /></a></div></div><span class="newsinfo"><p><strong>如果你看过《权力的游戏》，那么你一定会把它列入你心目中的最佳电视剧榜单里。现在看来，这份榜单又要多一个成员了，它就是《太空无垠(The Expanse)》。</strong>这部剧被认为是太空版的《权力的游戏》改编自James S.A. Corey（的科幻小说《巨魔苏醒(Leviathan Wakes)》，该部小说曾在2012年获得了轨迹奖最佳科幻小说奖，并入围了该年的雨果奖最佳小说奖。</p></span>
+                                </div>
+                                <div class="clear"></div>
+                                <div class="tools repeat">
+                                    <div class="time"></div>
+                                    <ul class="gray">
+                                        <li><b><a target="_blank" href="/articles/362989.htm">详细内容</a></b></li>
+                                        <li>已有<em>7</em>个意见&nbsp;&nbsp;|</li>
+                                        <li><em>3</em>次推荐&nbsp;&nbsp;|</li>
+                                        <li><em>0</em>次打分&nbsp;&nbsp;|</li>
+                                        <li>事件分:<em>0</em>分&nbsp;&nbsp;|</li>
+                                        <li>质量分:<em>0</em>分</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="item" id="J_allItem_362987">
+                                <div class="hd">
+                                    <div class="title">
+                                        <a target="_blank" href="/articles/362987.htm">[图]未来路口没有红绿灯：科学家提出“虚拟红绿灯”构想</a>
+                                        <div class="tj">
+                                            <span>study875 发布于<em>2015-01-16 09:12:17</em> | </span>
+                                            <span><em>1529</em> 次阅读</span>
+                                        </div>
+                                    </div>
+                                    <div class="picno"><div class="pic"><a target="_blank" href="/articles/362987.htm"><img width="100" height="100" src="http://static.cnbetacdn.com/thumb/mini/article/2015/0116/135de95375d0971.png_100x100.png" /></a></div></div><span class="newsinfo"><p>红绿灯是构成城市交通必不可少的重要部分，尤其是在交叉路口确定该由哪方的车辆先行，从而确保交通安全减少事故的发生。但随着汽车的增多，城市交通成为急需解决的难题，<strong>为此在Ozan Tonguz的带领下来自卡内基·麦隆大学的科学团队提出了“虚拟红绿灯”的构想，从原有固定路口的红绿灯转移到汽车内部，通过虚拟的LED灯指示来确定是否能够行驶，根据模拟能有效减少40%的拥堵时间，从而让城市交通变得更加顺畅。</strong></p></span>
+                                </div>
+                                <div class="clear"></div>
+                                <div class="tools repeat">
+                                    <div class="time"></div>
+                                    <ul class="gray">
+                                        <li><b><a target="_blank" href="/articles/362987.htm">详细内容</a></b></li>
+                                        <li>已有<em>17</em>个意见&nbsp;&nbsp;|</li>
+                                        <li><em>0</em>次推荐&nbsp;&nbsp;|</li>
+                                        <li><em>4</em>次打分&nbsp;&nbsp;|</li>
+                                        <li>事件分:<em>10</em>分&nbsp;&nbsp;|</li>
+                                        <li>质量分:<em>8</em>分</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="item" id="J_allItem_362985">
+                                <div class="hd">
+                                    <div class="title">
+                                        <a target="_blank" href="/articles/362985.htm">[图]谷歌向开发者馈赠“GLASS VOL 1”数码图鉴</a>
+                                        <div class="tj">
+                                            <span>study875 发布于<em>2015-01-16 09:10:04</em> | </span>
+                                            <span><em>509</em> 次阅读</span>
+                                        </div>
+                                    </div>
+                                    <div class="picno"><div class="pic"><a target="_blank" href="/articles/362985.htm"><img width="100" height="100" src="http://static.cnbetacdn.com/thumb/mini/article/2015/0116/8dbfabbf3fd509a.jpeg_100x100.jpeg" /></a></div></div><span class="newsinfo"><p>为感谢Google Glass探索者的陪伴和支持，近日谷歌向这些开发者馈赠了名为“GLASS VOL 1”的数码图鉴，展示了Glass项目一路走来经历的风雨和历史时刻，并表示这并非是智能设备这条道路的重点，而恰恰要开启新的篇章。在这本图鉴的扉页上写道：“要探索新领域，有时我们需要抛开地图”，在书中还包含了一封感谢信和Glass创始人的创立故事。</p></span>
+                                </div>
+                                <div class="clear"></div>
+                                <div class="tools repeat">
+                                    <div class="time"></div>
+                                    <ul class="gray">
+                                        <li><b><a target="_blank" href="/articles/362985.htm">详细内容</a></b></li>
+                                        <li>已有<em>2</em>个意见&nbsp;&nbsp;|</li>
+                                        <li><em>1</em>次推荐&nbsp;&nbsp;|</li>
+                                        <li><em>0</em>次打分&nbsp;&nbsp;|</li>
+                                        <li>事件分:<em>0</em>分&nbsp;&nbsp;|</li>
+                                        <li>质量分:<em>0</em>分</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="item" id="J_allItem_362983">
+                                <div class="hd">
+                                    <div class="title">
+                                        <a target="_blank" href="/articles/362983.htm">台积电今年年中投产16nm FinFET已无望</a>
+                                        <div class="tj">
+                                            <span>teikaei  发布于<em>2015-01-16 09:06:09</em> | </span>
+                                            <span><em>1105</em> 次阅读</span>
+                                        </div>
+                                    </div>
+                                    <div class="picno"><div class="pic"><a target="_blank" href="/articles/362983.htm"><img width="100" height="100" src="http://static.cnbetacdn.com/thumb/mini/article/2015/0116/fde42b51b2d1d0a_100x100.jpg" /></a></div></div><span class="newsinfo"><p>20nm轻松拿下苹果所有订单，台积电一时间豪情万丈，号称要在2015年初量产16nm FinFET，创下半导体史上两代工艺量产时间最接近的记录，但现实是残酷的。在去年晚些时候，台积电曾宣布16nm工艺已开始试产，将在2015年年中投入量产，已经比最初目标晚了小半年。
+
+                                    而<strong>来自台湾《电子时报》的消息称，台积电已经将16nm设备安装的时间推迟到2015年下半年了，而原来希望能在上半年完成。</strong></p></span>
+                                </div>
+                                <div class="clear"></div>
+                                <div class="tools repeat">
+                                    <div class="time"></div>
+                                    <ul class="gray">
+                                        <li><b><a target="_blank" href="/articles/362983.htm">详细内容</a></b></li>
+                                        <li>已有<em>3</em>个意见&nbsp;&nbsp;|</li>
+                                        <li><em>1</em>次推荐&nbsp;&nbsp;|</li>
+                                        <li><em>4</em>次打分&nbsp;&nbsp;|</li>
+                                        <li>事件分:<em>-10</em>分&nbsp;&nbsp;|</li>
+                                        <li>质量分:<em>-10</em>分</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="item" id="J_allItem_362981">
+                                <div class="hd">
+                                    <div class="title">
+                                        <a target="_blank" href="/articles/362981.htm">这一把赌对了：MySpace已在新社交热潮下转型并复活</a>
+                                        <div class="tj">
+                                            <span>raymon725 发布于<em>2015-01-16 09:03:35</em> | </span>
+                                            <span><em>1747</em> 次阅读</span>
+                                        </div>
+                                    </div>
+                                    <div class="picno"><div class="pic"><a target="_blank" href="/articles/362981.htm"><img width="100" height="100" src="http://static.cnbetacdn.com/thumb/mini/article/2015/0116/00ad44bd7569ba8.jpg_100x100.jpg" /></a></div></div><span class="newsinfo"><p>早在Facebook、Twitter、以及Instagram出现之前，MySpace曾是许多年轻人的在线社交乐园。然而由于定位调整不够及时，该网站很遗憾地差点被后浪拍死在了沙滩上，并且几经易手。<strong>2011年的时候，Specific Media以3500万美元的价格，从新闻集团那里买来了MySpace，并尝试将它转型为专注于音乐和娱乐的平台。现在看来，这么做是正确的。</strong><br/></p></span>
+                                </div>
+                                <div class="clear"></div>
+                                <div class="tools repeat">
+                                    <div class="time"></div>
+                                    <ul class="gray">
+                                        <li><b><a target="_blank" href="/articles/362981.htm">详细内容</a></b></li>
+                                        <li>已有<em>3</em>个意见&nbsp;&nbsp;|</li>
+                                        <li><em>0</em>次推荐&nbsp;&nbsp;|</li>
+                                        <li><em>0</em>次打分&nbsp;&nbsp;|</li>
+                                        <li>事件分:<em>0</em>分&nbsp;&nbsp;|</li>
+                                        <li>质量分:<em>0</em>分</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="item" id="J_allItem_362979">
+                                <div class="hd">
+                                    <div class="title">
+                                        <a target="_blank" href="/articles/362979.htm">LG G4传言再起：配备骁龙810 1600万像素相机</a>
+                                        <div class="tj">
+                                            <span>KungfuDogg 发布于<em>2015-01-16 09:01:15</em> | </span>
+                                            <span><em>1896</em> 次阅读</span>
+                                        </div>
+                                    </div>
+                                    <div class="picno"><div class="pic"><a target="_blank" href="/articles/362979.htm"><img width="100" height="100" src="http://static.cnbetacdn.com/thumb/mini/article/2015/0116/ff27b76c17c4012_100x100.jpg" /></a></div></div><span class="newsinfo"><p>今日，一则来自希腊的传言再度让我们的眼光放向LG今年即将推出旗舰机型G4，<strong>根据来自安卓系统文件的解析截屏显示，LG
+                                    G4将配备1600万像素的摄像机</strong>，拍摄图片的最高分辨率将达5312X2988，传感器的比例为16:9。<strong>此外，还有信息显示G4将会采用高通即将发布
+                                    的高端64位处理器骁龙810 SoC</strong>，既然LG已经宣布G Flex 2中将采用该处理芯片，旗舰机型G4没有理由不配备最好的处理芯片。</p></span>
+                                </div>
+                                <div class="clear"></div>
+                                <div class="tools repeat">
+                                    <div class="time"></div>
+                                    <ul class="gray">
+                                        <li><b><a target="_blank" href="/articles/362979.htm">详细内容</a></b></li>
+                                        <li>已有<em>5</em>个意见&nbsp;&nbsp;|</li>
+                                        <li><em>0</em>次推荐&nbsp;&nbsp;|</li>
+                                        <li><em>2</em>次打分&nbsp;&nbsp;|</li>
+                                        <li>事件分:<em>5</em>分&nbsp;&nbsp;|</li>
+                                        <li>质量分:<em>5</em>分</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="item" id="J_allItem_362977">
+                                <div class="hd">
+                                    <div class="title">
+                                        <a target="_blank" href="/articles/362977.htm">比特币价格跌至173美元 单日跌幅近30%</a>
+                                        <div class="tj">
+                                            <span>teikaei  发布于<em>2015-01-16 09:01:08</em> | </span>
+                                            <span><em>1061</em> 次阅读</span>
+                                        </div>
+                                    </div>
+                                    <div class="picno"><div class="pic"><a target="_blank" href="/articles/362977.htm"><img width="100" height="100" src="http://static.cnbetacdn.com/thumb/mini/article/2015/0116/17661cc7cdc5991.jpg_100x100.jpg" /></a></div></div><span class="newsinfo"><p>据外媒报道，<strong>美国当地时间周三，加密货币--比特币的价格再创新低，从一天前的224美元跌至173美元，降幅近30%。</strong>出现这种现象的因素有多个，其中一个重要的原因则是挖矿成本的不断走高，一些囤币者不得不卖掉手上的比特币，这就导致市面上出现了大量的比特币，于是这种货币的价格开始出现下跌。</p></span>
+                                </div>
+                                <div class="clear"></div>
+                                <div class="tools repeat">
+                                    <div class="time"></div>
+                                    <ul class="gray">
+                                        <li><b><a target="_blank" href="/articles/362977.htm">详细内容</a></b></li>
+                                        <li>已有<em>7</em>个意见&nbsp;&nbsp;|</li>
+                                        <li><em>1</em>次推荐&nbsp;&nbsp;|</li>
+                                        <li><em>4</em>次打分&nbsp;&nbsp;|</li>
+                                        <li>事件分:<em>-10</em>分&nbsp;&nbsp;|</li>
+                                        <li>质量分:<em>-10</em>分</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="item" id="J_allItem_362975">
+                                <div class="hd">
+                                    <div class="title">
+                                        <a target="_blank" href="/articles/362975.htm">[图]《我的世界》即将发布《辛普森一家》素材包 售价1.99美元</a>
+                                        <div class="tj">
+                                            <span>teikaei  发布于<em>2015-01-16 08:49:15</em> | </span>
+                                            <span><em>1211</em> 次阅读</span>
+                                        </div>
+                                    </div>
+                                    <div class="picno"><div class="pic"><a target="_blank" href="/articles/362975.htm"><img width="100" height="100" src="http://static.cnbetacdn.com/thumb/mini/article/2015/0116/95b786c1576503f.jpg_100x100.jpg" /></a></div></div><span class="newsinfo"><p>据外媒报道，<strong>日前，《我的世界》官方宣布，他们将在下个月月底发布《辛普森一家》素材包。</strong>当中包括了辛普森一家人--Homer、Marge、Bart、Lisa、Maggie，以及斯普林菲尔德小学的19位人气人物。不过比较遗憾的是，现在，《我的世界》只在Xbox One和Xbox 360上推出了这个素材下载包，其他平台的玩家估计还要等上一段时间了。</p></span>
+                                </div>
+                                <div class="clear"></div>
+                                <div class="tools repeat">
+                                    <div class="time"></div>
+                                    <ul class="gray">
+                                        <li><b><a target="_blank" href="/articles/362975.htm">详细内容</a></b></li>
+                                        <li>已有<em>8</em>个意见&nbsp;&nbsp;|</li>
+                                        <li><em>1</em>次推荐&nbsp;&nbsp;|</li>
+                                        <li><em>5</em>次打分&nbsp;&nbsp;|</li>
+                                        <li>事件分:<em>15</em>分&nbsp;&nbsp;|</li>
+                                        <li>质量分:<em>10</em>分</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="item" id="J_allItem_362973">
+                                <div class="hd">
+                                    <div class="title">
+                                        <a target="_blank" href="/articles/362973.htm">[视频]《乐高大电影》导演自制乐高版小金人 主题曲入围</a>
+                                        <div class="tj">
+                                            <span>KungfuDogg 发布于<em>2015-01-16 08:41:55</em> | </span>
+                                            <span><em>943</em> 次阅读</span>
+                                        </div>
+                                    </div>
+                                    <div class="picno"><div class="pic"><a target="_blank" href="/articles/362973.htm"><img width="100" height="100" src="http://static.cnbetacdn.com/thumb/mini/article/2015/0116/305fb822480f439.jpg_100x100.jpg" /></a></div></div><span class="newsinfo"><p>一年一度的奥斯卡奖又将来临，不过最佳动画电影的提名出来后可能令不少乐高迷稍显失望，票房大受肯定的《乐高大电影》没能入
+                                    围最近动画电影的角逐。<strong>但是其导演Phillip
+                                        Lord倒是颇为乐观，他发推表示“没关系，我帮自己做了个（小金人）”，推文附图为一个乐高玩具搭建的奥斯卡小金人奖。当然没关系了，毕竟全球4.69
+                                        亿的票房早已经让该电影为乐高最成功的广告。</strong></p></span>
+                                </div>
+                                <div class="clear"></div>
+                                <div class="tools repeat">
+                                    <div class="time"></div>
+                                    <ul class="gray">
+                                        <li><b><a target="_blank" href="/articles/362973.htm">详细内容</a></b></li>
+                                        <li>已有<em>0</em>个意见&nbsp;&nbsp;|</li>
+                                        <li><em>0</em>次推荐&nbsp;&nbsp;|</li>
+                                        <li><em>3</em>次打分&nbsp;&nbsp;|</li>
+                                        <li>事件分:<em>10</em>分&nbsp;&nbsp;|</li>
+                                        <li>质量分:<em>5</em>分</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="item" id="J_allItem_362971">
+                                <div class="hd">
+                                    <div class="title">
+                                        <a target="_blank" href="/articles/362971.htm">脑子一热挑战“八斤哥” 3斤白酒下肚 差点丢了命</a>
+                                        <div class="tj">
+                                            <span>teikaei  发布于<em>2015-01-16 08:40:42</em> | </span>
+                                            <span><em>3679</em> 次阅读</span>
+                                        </div>
+                                    </div>
+                                    <div class="picno"><div class="pic"><a target="_blank" href="/articles/362971.htm"><img width="100" height="100" src="http://static.cnbetacdn.com/topics/97823206d522f55.jpg" /></a></div></div><span class="newsinfo"><p>继舶来品“冰桶挑战”风靡全国之后，最近，“网络斗酒”又接踵而至。“一斤哥、两斤哥、三斤哥……八斤哥”，挑战者喝酒就像喝白开水，还拍成视频发到网上炫耀。似乎一夜之间，全国人民都在上演拼酒大赛的终极对决。<strong>义乌有个跑销售的小伙子，扬言要挑战“八斤哥”，结果3斤白酒下肚就醉了。第二天被人发现时，因为呕吐物吸入肺部，连呼吸都没了。幸好送医及时，救回一条命。</strong></p></span>
+                                </div>
+                                <div class="clear"></div>
+                                <div class="tools repeat">
+                                    <div class="time"></div>
+                                    <ul class="gray">
+                                        <li><b><a target="_blank" href="/articles/362971.htm">详细内容</a></b></li>
+                                        <li>已有<em>13</em>个意见&nbsp;&nbsp;|</li>
+                                        <li><em>2</em>次推荐&nbsp;&nbsp;|</li>
+                                        <li><em>13</em>次打分&nbsp;&nbsp;|</li>
+                                        <li>事件分:<em>-35</em>分&nbsp;&nbsp;|</li>
+                                        <li>质量分:<em>-26</em>分</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="item" id="J_allItem_362969">
+                                <div class="hd">
+                                    <div class="title">
+                                        <a target="_blank" href="/articles/362969.htm">Windows Insider邮件预告：Windows 10将与新版使用条款一同到来</a>
+                                        <div class="tj">
+                                            <span>raymon725 发布于<em>2015-01-16 08:39:46</em> | </span>
+                                            <span><em>1619</em> 次阅读</span>
+                                        </div>
+                                    </div>
+                                    <div class="picno"><div class="pic"><a target="_blank" href="/articles/362969.htm"><img width="100" height="100" src="http://static.cnbetacdn.com/thumb/mini/article/2015/0116/ae90a2c37bed8d0_100x100.jpg" /></a></div></div><span class="newsinfo"><p><strong>微软已经向Windows Insider项目的参与者发去了一封邮件，其中提到了“使用条款”将于1月21日那天发生改变。此外，如果安装了本月发布的新版本，就意味着自动接受新条款。</strong>至于条款的变更细节，我们暂时还不太清楚，感兴趣的网友可以关注下微软Insider项目主站上的使用条款页面(目前仍然为2014年9月11日发布并生效的版本)。<br/></p></span>
+                                </div>
+                                <div class="clear"></div>
+                                <div class="tools repeat">
+                                    <div class="time"></div>
+                                    <ul class="gray">
+                                        <li><b><a target="_blank" href="/articles/362969.htm">详细内容</a></b></li>
+                                        <li>已有<em>1</em>个意见&nbsp;&nbsp;|</li>
+                                        <li><em>0</em>次推荐&nbsp;&nbsp;|</li>
+                                        <li><em>0</em>次打分&nbsp;&nbsp;|</li>
+                                        <li>事件分:<em>0</em>分&nbsp;&nbsp;|</li>
+                                        <li>质量分:<em>0</em>分</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="item" id="J_allItem_362967">
+                                <div class="hd">
+                                    <div class="title">
+                                        <a target="_blank" href="/articles/362967.htm">《利维坦》制片人：不会向盗版下载者追究责任 希望其为慈善捐款</a>
+                                        <div class="tj">
+                                            <span>teikaei  发布于<em>2015-01-16 08:38:34</em> | </span>
+                                            <span><em>1329</em> 次阅读</span>
+                                        </div>
+                                    </div>
+                                    <div class="picno"><div class="pic"><a target="_blank" href="/articles/362967.htm"><img width="100" height="100" src="http://static.cnbetacdn.com/thumb/mini/article/2015/0116/52081a83a49a0ae.jpg_100x100.jpg" /></a></div></div><span class="newsinfo"><p>据外媒报道，很多影片在还没有获得奥斯卡正式的获奖提名之前就已经在美国遭到泄露，来自俄罗斯的《利维坦（Leviathan）》就是当中一部。该部影片刚刚获得了美国金球奖最佳外语片。据悉，俄罗斯文化部也参与了《利维坦》的投资。按理说，当影片制作团队看到自己的电影以盗版的渠道被传播出去时，他们一定会恨得咬牙切齿，但《利维坦》除外。</p></span>
+                                </div>
+                                <div class="clear"></div>
+                                <div class="tools repeat">
+                                    <div class="time"></div>
+                                    <ul class="gray">
+                                        <li><b><a target="_blank" href="/articles/362967.htm">详细内容</a></b></li>
+                                        <li>已有<em>7</em>个意见&nbsp;&nbsp;|</li>
+                                        <li><em>1</em>次推荐&nbsp;&nbsp;|</li>
+                                        <li><em>8</em>次打分&nbsp;&nbsp;|</li>
+                                        <li>事件分:<em>25</em>分&nbsp;&nbsp;|</li>
+                                        <li>质量分:<em>15</em>分</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="item" id="J_allItem_362965">
+                                <div class="hd">
+                                    <div class="title">
+                                        <a target="_blank" href="/articles/362965.htm">物联网与机器人：谁代表智能家居的未来？</a>
+                                        <div class="tj">
+                                            <span>raymon725 发布于<em>2015-01-16 08:35:30</em> | </span>
+                                            <span><em>672</em> 次阅读</span>
+                                        </div>
+                                    </div>
+                                    <div class="picno"><div class="pic"><a target="_blank" href="/articles/362965.htm"><img width="100" height="100" src="http://static.cnbetacdn.com/thumb/mini/article/2015/0116/c824acc4ad9e6f4_100x100.jpg" /></a></div></div><span class="newsinfo"><p><strong>美国科技新闻网站CNET最近发表文章称，高科技产业再次走到一个岔路口：对于未来的智能家居，我们需要一台中央计算机，告诉我们什么时候擦地板，什么时候清洁窗户和煮早餐？还是需要一台全能型机器人，帮助我们完成这些家务活。</strong>这也是说，我们的生活会出现类似贾维斯（Jarvis）这样的智能控制中心？还
+                                    是会有一个像罗西（Rosie）这样的机器人，无时无刻不在，而且会做各种家务？</p></span>
+                                </div>
+                                <div class="clear"></div>
+                                <div class="tools repeat">
+                                    <div class="time"></div>
+                                    <ul class="gray">
+                                        <li><b><a target="_blank" href="/articles/362965.htm">详细内容</a></b></li>
+                                        <li>已有<em>4</em>个意见&nbsp;&nbsp;|</li>
+                                        <li><em>0</em>次推荐&nbsp;&nbsp;|</li>
+                                        <li><em>2</em>次打分&nbsp;&nbsp;|</li>
+                                        <li>事件分:<em>3</em>分&nbsp;&nbsp;|</li>
+                                        <li>质量分:<em>-1</em>分</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="item" id="J_allItem_362963">
+                                <div class="hd">
+                                    <div class="title">
+                                        <a target="_blank" href="/articles/362963.htm">[视频]iPhone 6终极测试--来自10万英尺高空的摔落</a>
+                                        <div class="tj">
+                                            <span>study875 发布于<em>2015-01-16 08:35:17</em> | </span>
+                                            <span><em>3986</em> 次阅读</span>
+                                        </div>
+                                    </div>
+                                    <div class="picno"><div class="pic"><a target="_blank" href="/articles/362963.htm"><img width="100" height="100" src="http://static.cnbetacdn.com/thumb/mini/article/2015/0116/779ebd92b201d17.jpg_100x100.jpg" /></a></div></div><span class="newsinfo"><p>每当新产品发布之后，国外媒体最热衷做的事情就是对这款产品的耐用度进行测试，除常规的摔落、浸水和防刮之外也衍生出如射击、搅拌、锤砸等各种酷刑。<strong>近日配件厂商 Urban Armor Gear 为凸显自家iPhone保护套的强悍实力，利用气球、带两台GoPro相机、GPS定位和备用相机的飞行器将iPhone送上了10万英尺的高空，在气球裂开后开始自由下落，那么这台iPhone能够存活下来吗？请看下面这段视频。</strong></p></span>
+                                </div>
+                                <div class="clear"></div>
+                                <div class="tools repeat">
+                                    <div class="time"></div>
+                                    <ul class="gray">
+                                        <li><b><a target="_blank" href="/articles/362963.htm">详细内容</a></b></li>
+                                        <li>已有<em>10</em>个意见&nbsp;&nbsp;|</li>
+                                        <li><em>6</em>次推荐&nbsp;&nbsp;|</li>
+                                        <li><em>41</em>次打分&nbsp;&nbsp;|</li>
+                                        <li>事件分:<em>-11</em>分&nbsp;&nbsp;|</li>
+                                        <li>质量分:<em>-19</em>分</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="item" id="J_allItem_362961">
+                                <div class="hd">
+                                    <div class="title">
+                                        <a target="_blank" href="/articles/362961.htm">为对抗Uber 洛杉矶将强制出租车装打车应用</a>
+                                        <div class="tj">
+                                            <span>ugmbbc 发布于<em>2015-01-16 08:32:06</em> | </span>
+                                            <span><em>441</em> 次阅读</span>
+                                        </div>
+                                    </div>
+                                    <div class="picno"><div class="pic"><a target="_blank" href="/articles/362961.htm"><img width="100" height="100" src="http://static.cnbetacdn.com/thumb/mini/article/2015/0116/c8d6907d6514e5b.jpg_100x100.jpg" /></a></div></div><span class="newsinfo"><p><strong>洛杉矶官员周四决定，将强制要求当地出租车司机使用一款与Uber类似的应用，使得乘客可以使用智能手机打车，借此帮助正规出租车与专车服务竞争。</strong>这项要
+                                    求是为应对出租车行业面临的最新冲击而做出的反应：随着Uber、Lyft和Sidecar等专车服务的不断发展，用户也拥有了更低价、更高效的服务可供
+                                    选择。</p></span>
+                                </div>
+                                <div class="clear"></div>
+                                <div class="tools repeat">
+                                    <div class="time"></div>
+                                    <ul class="gray">
+                                        <li><b><a target="_blank" href="/articles/362961.htm">详细内容</a></b></li>
+                                        <li>已有<em>0</em>个意见&nbsp;&nbsp;|</li>
+                                        <li><em>1</em>次推荐&nbsp;&nbsp;|</li>
+                                        <li><em>0</em>次打分&nbsp;&nbsp;|</li>
+                                        <li>事件分:<em>0</em>分&nbsp;&nbsp;|</li>
+                                        <li>质量分:<em>0</em>分</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="item" id="J_allItem_362959">
+                                <div class="hd">
+                                    <div class="title">
+                                        <a target="_blank" href="/articles/362959.htm">[评论]别居高临下嘲笑“庞麦郎们”</a>
+                                        <div class="tj">
+                                            <span>ugmbbc 发布于<em>2015-01-16 08:30:53</em> | </span>
+                                            <span><em>4185</em> 次阅读</span>
+                                        </div>
+                                    </div>
+                                    <div class="picno"><div class="pic"><a target="_blank" href="/articles/362959.htm"><img width="100" height="100" src="http://static.cnbetacdn.com/topics/201fc12d7e546a0.png" /></a></div></div><span class="newsinfo"><p>这两天，一篇题为《惊惶庞麦郎》的报道在网络上热传。报道的主人公是一位名叫庞麦郎的年轻人，他是
+                                    “网络神曲”《我的滑板鞋》的演唱者。看过这篇报道的读者，有人听过他的歌，也有人根本不知道这个人，不过都难免对庞麦郎产生这些印象：怪诞、浅薄、无
+                                    知……是的，相貌平平却自认“很帅”，把陕西汉中当成“魅力之都”，这颠覆了人们对娱乐明星的认知，更折射了“城里人”和农村进城“屌丝”的价值观冲突。</p></span>
+                                </div>
+                                <div class="clear"></div>
+                                <div class="tools repeat">
+                                    <div class="time"></div>
+                                    <ul class="gray">
+                                        <li><b><a target="_blank" href="/articles/362959.htm">详细内容</a></b></li>
+                                        <li>已有<em>18</em>个意见&nbsp;&nbsp;|</li>
+                                        <li><em>4</em>次推荐&nbsp;&nbsp;|</li>
+                                        <li><em>28</em>次打分&nbsp;&nbsp;|</li>
+                                        <li>事件分:<em>-20</em>分&nbsp;&nbsp;|</li>
+                                        <li>质量分:<em>-20</em>分</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="item" id="J_allItem_362957">
+                                <div class="hd">
+                                    <div class="title">
+                                        <a target="_blank" href="/articles/362957.htm">我国成为世界核电在建规模最大国</a>
+                                        <div class="tj">
+                                            <span>ugmbbc 发布于<em>2015-01-16 08:29:42</em> | </span>
+                                            <span><em>2120</em> 次阅读</span>
+                                        </div>
+                                    </div>
+                                    <div class="picno"><div class="pic"><a target="_blank" href="/articles/362957.htm"><img width="100" height="100" src="http://static.cnbetacdn.com/topics/china.gif" /></a></div></div><span class="newsinfo"><p><strong>1月15日，为纪念中国核工业创建60周年，由中国核工业集团、中国核工业建设集团、中国工程物理研究院联合主办的“新时期建设巩固国防推进核能可持续发展”座谈会在北京召开。</strong>核工业是国防建设和国家安全的基石。今年1月15日，是中国核工业创建60周年。60年来，我国核工业实现了原子弹、氢弹、核潜艇等一系列里程碑式跨越发展，支撑起了民族自立的脊梁，使我国战略核力量得到巩固和提升，为国家振兴和民族复兴奠定了坚实的基础。</p></span>
+                                </div>
+                                <div class="clear"></div>
+                                <div class="tools repeat">
+                                    <div class="time"></div>
+                                    <ul class="gray">
+                                        <li><b><a target="_blank" href="/articles/362957.htm">详细内容</a></b></li>
+                                        <li>已有<em>0</em>个意见&nbsp;&nbsp;|</li>
+                                        <li><em>2</em>次推荐&nbsp;&nbsp;|</li>
+                                        <li><em>46</em>次打分&nbsp;&nbsp;|</li>
+                                        <li>事件分:<em>-55</em>分&nbsp;&nbsp;|</li>
+                                        <li>质量分:<em>-45</em>分</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="item" id="J_allItem_362955">
+                                <div class="hd">
+                                    <div class="title">
+                                        <a target="_blank" href="/articles/362955.htm">长电-星科迎新单 联发科MT6795 封测启动</a>
+                                        <div class="tj">
+                                            <span>ugmbbc 发布于<em>2015-01-16 08:28:16</em> | </span>
+                                            <span><em>2096</em> 次阅读</span>
+                                        </div>
+                                    </div>
+                                    <div class="picno"><div class="pic"><a target="_blank" href="/articles/362955.htm"><img width="100" height="100" src="http://static.cnbetacdn.com/thumb/mini/article/2015/0116/501b0e9369bd356_100x100.jpg" /></a></div></div><span class="newsinfo"><p>近日，从台湾传出消息，由于长电收购新加坡星科金朋后会出现较长合并磨合期，恐将出现转单效应，短期利好台湾封测厂。芯片大厂联发科是星科金朋的主要客户之一，集微网从产业链得到的最新消息指出，联发科MT6795处理器由台积电制造后由星科金朋进行封测。目前来看，台湾媒体所担心的转单状况并未出现。</p></span>
+                                </div>
+                                <div class="clear"></div>
+                                <div class="tools repeat">
+                                    <div class="time"></div>
+                                    <ul class="gray">
+                                        <li><b><a target="_blank" href="/articles/362955.htm">详细内容</a></b></li>
+                                        <li>已有<em>1</em>个意见&nbsp;&nbsp;|</li>
+                                        <li><em>0</em>次推荐&nbsp;&nbsp;|</li>
+                                        <li><em>4</em>次打分&nbsp;&nbsp;|</li>
+                                        <li>事件分:<em>10</em>分&nbsp;&nbsp;|</li>
+                                        <li>质量分:<em>10</em>分</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="item" id="J_allItem_362953">
+                                <div class="hd">
+                                    <div class="title">
+                                        <a target="_blank" href="/articles/362953.htm">[图+视频]邦德神器：伪装成USB充电头的KeySweeper键盘记录仪</a>
+                                        <div class="tj">
+                                            <span>raymon725 发布于<em>2015-01-16 08:26:01</em> | </span>
+                                            <span><em>2373</em> 次阅读</span>
+                                        </div>
+                                    </div>
+                                    <div class="picno"><div class="pic"><a target="_blank" href="/articles/362953.htm"><img width="100" height="100" src="http://static.cnbetacdn.com/thumb/mini/article/2015/0116/1bb57420d8213af_100x100.jpg" /></a></div></div><span class="newsinfo"><p>在电影中，每当邦德要去执行任务的时候，总会随身携带一些花哨的小玩意，并且在关键的时刻发挥重要的作用。当然，作为特工设备，它们必须要将自己的真面目掩藏在不起眼的外表之下。<strong>不过本文要介绍的，却是一款名叫“KeySweeper”的小装置——虽然它看起来就是个手机充电器，但却不仅仅是个USB充电器。</strong>作为一款键盘记录器，它的主要工作就是搜寻附近的无线键盘信号。</p></span>
+                                </div>
+                                <div class="clear"></div>
+                                <div class="tools repeat">
+                                    <div class="time"></div>
+                                    <ul class="gray">
+                                        <li><b><a target="_blank" href="/articles/362953.htm">详细内容</a></b></li>
+                                        <li>已有<em>9</em>个意见&nbsp;&nbsp;|</li>
+                                        <li><em>4</em>次推荐&nbsp;&nbsp;|</li>
+                                        <li><em>2</em>次打分&nbsp;&nbsp;|</li>
+                                        <li>事件分:<em>5</em>分&nbsp;&nbsp;|</li>
+                                        <li>质量分:<em>5</em>分</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="item" id="J_allItem_362951">
+                                <div class="hd">
+                                    <div class="title">
+                                        <a target="_blank" href="/articles/362951.htm">苹果零售主管谈在华开店一事 称中国是一个巨大且重要的市场</a>
+                                        <div class="tj">
+                                            <span>teikaei  发布于<em>2015-01-16 08:21:58</em> | </span>
+                                            <span><em>1297</em> 次阅读</span>
+                                        </div>
+                                    </div>
+                                    <div class="picno"><div class="pic"><a target="_blank" href="/articles/362951.htm"><img width="100" height="100" src="http://static.cnbetacdn.com/thumb/mini/article/2015/0116/5bca7a8b46217b2.jpg_100x100.jpg" /></a></div></div><span class="newsinfo"><p>据悉，本月10日，苹果在河南省郑州市的零售店正式开业。等到24日，杭州西湖苹果零售店也将开张。其实，在农历过年前，苹果会在我们国内连开5家新店。对此，苹果新晋零售主管、昔日巴宝莉CEO Angela Ahrendts告诉媒体：<strong>“我们会在中国新年前开设5家新店。其中四家对于我们来说，都是全新的城市。”</strong></p></span>
+                                </div>
+                                <div class="clear"></div>
+                                <div class="tools repeat">
+                                    <div class="time"></div>
+                                    <ul class="gray">
+                                        <li><b><a target="_blank" href="/articles/362951.htm">详细内容</a></b></li>
+                                        <li>已有<em>8</em>个意见&nbsp;&nbsp;|</li>
+                                        <li><em>0</em>次推荐&nbsp;&nbsp;|</li>
+                                        <li><em>4</em>次打分&nbsp;&nbsp;|</li>
+                                        <li>事件分:<em>-5</em>分&nbsp;&nbsp;|</li>
+                                        <li>质量分:<em>-5</em>分</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="item" id="J_allItem_362949">
+                                <div class="hd">
+                                    <div class="title">
+                                        <a target="_blank" href="/articles/362949.htm">80%-90%的Galaxy S6将使用三星自家14纳米Exynos处理器</a>
+                                        <div class="tj">
+                                            <span>study875 发布于<em>2015-01-16 08:19:09</em> | </span>
+                                            <span><em>2274</em> 次阅读</span>
+                                        </div>
+                                    </div>
+                                    <div class="picno"><div class="pic"><a target="_blank" href="/articles/362949.htm"><img width="100" height="100" src="http://static.cnbetacdn.com/thumb/mini/article/2015/0105/be72fafd6ed4fc6.jpg_100x100.jpg" /></a></div></div><span class="newsinfo"><p>援引Digitimes报道对于即将到来的Galaxy S系列旗舰智能手机，三星将会大幅减少使用高通的骁龙810处理器，转而使用三星自家的Exynos处理器，主要原因是因为骁龙810处理器存在过热问题。<strong>根据业内人士透露Galaxy S6继续走双处理器路线，不过在首发的时候有80%到90%的设备使用自家的14纳米制程处理器，而在高通解决骁龙810的过热问题之后，三星则会调整两个版本的产量。</strong></p></span>
+                                </div>
+                                <div class="clear"></div>
+                                <div class="tools repeat">
+                                    <div class="time"></div>
+                                    <ul class="gray">
+                                        <li><b><a target="_blank" href="/articles/362949.htm">详细内容</a></b></li>
+                                        <li>已有<em>5</em>个意见&nbsp;&nbsp;|</li>
+                                        <li><em>0</em>次推荐&nbsp;&nbsp;|</li>
+                                        <li><em>21</em>次打分&nbsp;&nbsp;|</li>
+                                        <li>事件分:<em>15</em>分&nbsp;&nbsp;|</li>
+                                        <li>质量分:<em>10</em>分</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="item" id="J_allItem_362947">
+                                <div class="hd">
+                                    <div class="title">
+                                        <a target="_blank" href="/articles/362947.htm">功能强大的RocketStor 5411D多功能扩展坞将推出</a>
+                                        <div class="tj">
+                                            <span>KungfuDogg 发布于<em>2015-01-16 08:17:05</em> | </span>
+                                            <span><em>551</em> 次阅读</span>
+                                        </div>
+                                    </div>
+                                    <div class="picno"><div class="pic"><a target="_blank" href="/articles/362947.htm"><img width="100" height="100" src="http://static.cnbetacdn.com/thumb/mini/article/2015/0116/c8de20b6901823d_100x100.jpg" /></a></div></div><span class="newsinfo"><p><strong>存储外设厂商HighPoint推出RocketStor 5411D
+                                    USB3.0扩展坞产品，功能相当强大，集多个USB3.0接口，读卡器以及SATA硬盘底座以及通用充电站于一体。</strong>包含的三个USB
+                                    3.0端口能够提供USB外设的连接，也能成为USB设备提供通用充电。内置音频和耳机插头适用于录音设备和耳机，甚至有一个以太网接口，用户可以通过本
+                                    地网络访问其连接的USB设备，RocketStor 5411D
+                                    USB3.0扩展坞产品将在1月中旬于HighPoint指定经销商出售，售价119美元。</p></span>
+                                </div>
+                                <div class="clear"></div>
+                                <div class="tools repeat">
+                                    <div class="time"></div>
+                                    <ul class="gray">
+                                        <li><b><a target="_blank" href="/articles/362947.htm">详细内容</a></b></li>
+                                        <li>已有<em>0</em>个意见&nbsp;&nbsp;|</li>
+                                        <li><em>0</em>次推荐&nbsp;&nbsp;|</li>
+                                        <li><em>3</em>次打分&nbsp;&nbsp;|</li>
+                                        <li>事件分:<em>-10</em>分&nbsp;&nbsp;|</li>
+                                        <li>质量分:<em>-5</em>分</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="item" id="J_allItem_362945">
+                                <div class="hd">
+                                    <div class="title">
+                                        <a target="_blank" href="/articles/362945.htm">[视频]Elon Musk决定为AI安全科研投资1000万美元</a>
+                                        <div class="tj">
+                                            <span>teikaei  发布于<em>2015-01-16 08:07:43</em> | </span>
+                                            <span><em>412</em> 次阅读</span>
+                                        </div>
+                                    </div>
+                                    <div class="picno"><div class="pic"><a target="_blank" href="/articles/362945.htm"><img width="100" height="100" src="http://static.cnbetacdn.com/thumb/mini/article/2015/0116/1619a302e334ef5_100x100.png" /></a></div></div><span class="newsinfo"><p>此前，Elon Musk曾表达过对AI技术的担忧，他认为，AI的发展不仅会引发如《终结者》影片中的可怕情景，而且它所产生的威胁可能还要大于核武器。现在看来这位特斯拉、SpaceX CEO准备行动。据悉，<strong>日前，Musk决定向AI安全性科研项目投资1000万美元。</strong></p></span>
+                                </div>
+                                <div class="clear"></div>
+                                <div class="tools repeat">
+                                    <div class="time"></div>
+                                    <ul class="gray">
+                                        <li><b><a target="_blank" href="/articles/362945.htm">详细内容</a></b></li>
+                                        <li>已有<em>1</em>个意见&nbsp;&nbsp;|</li>
+                                        <li><em>1</em>次推荐&nbsp;&nbsp;|</li>
+                                        <li><em>0</em>次打分&nbsp;&nbsp;|</li>
+                                        <li>事件分:<em>0</em>分&nbsp;&nbsp;|</li>
+                                        <li>质量分:<em>0</em>分</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="item" id="J_allItem_362943">
+                                <div class="hd">
+                                    <div class="title">
+                                        <a target="_blank" href="/articles/362943.htm">2011年MacBook Pro花屏事件有新进展 多州加入诉讼行列</a>
+                                        <div class="tj">
+                                            <span>study875 发布于<em>2015-01-16 08:01:57</em> | </span>
+                                            <span><em>1459</em> 次阅读</span>
+                                        </div>
+                                    </div>
+                                    <div class="picno"><div class="pic"><a target="_blank" href="/articles/362943.htm"><img width="100" height="100" src="http://static.cnbetacdn.com/thumb/mini/article/2014/0514/92_1400034475.png_100x100.png" /></a></div></div><span class="newsinfo"><p>自2012年起不断有消费者反馈在购买2011年款Macbook Pro之后出现白屏、花屏、线状条纹、无限重启等问题，随后在2013年集中爆发，为此引发了一场针对苹果的集体诉讼。今天该诉讼案件得到新的进展，<strong>由Whitfield和Bryson &amp; Mason LLP代理法律团队向诉讼成员的公开信中透露包括美国加利福尼亚州，科罗拉多州，佛罗里达州，伊利诺伊州，印第安纳州，波多黎各和佛蒙特州同样加入到诉讼的行列中，并指责苹果公司对于这些受害者置若罔闻。</strong></p></span>
+                                </div>
+                                <div class="clear"></div>
+                                <div class="tools repeat">
+                                    <div class="time"></div>
+                                    <ul class="gray">
+                                        <li><b><a target="_blank" href="/articles/362943.htm">详细内容</a></b></li>
+                                        <li>已有<em>1</em>个意见&nbsp;&nbsp;|</li>
+                                        <li><em>0</em>次推荐&nbsp;&nbsp;|</li>
+                                        <li><em>16</em>次打分&nbsp;&nbsp;|</li>
+                                        <li>事件分:<em>23</em>分&nbsp;&nbsp;|</li>
+                                        <li>质量分:<em>22</em>分</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="item" id="J_allItem_362941">
+                                <div class="hd">
+                                    <div class="title">
+                                        <a target="_blank" href="/articles/362941.htm">ComputeLab发布MintBox迷你PC：专为Linux系统玩家打造</a>
+                                        <div class="tj">
+                                            <span>raymon725 发布于<em>2015-01-16 07:58:49</em> | </span>
+                                            <span><em>2306</em> 次阅读</span>
+                                        </div>
+                                    </div>
+                                    <div class="picno"><div class="pic"><a target="_blank" href="/articles/362941.htm"><img width="100" height="100" src="http://static.cnbetacdn.com/thumb/mini/article/2015/0116/93fa0d99f655e55_100x100.png" /></a></div></div><span class="newsinfo"><p>说到Linux桌面设备，最常见的选择还是买套Windows设备，然后将系统换成你所喜欢的Linux发行版。尽管高阶玩家可以多费些时间精力去捣鼓更有技术含量的机器，但是这么做代价或许会非常高昂。<strong>不过今天，ComputeLab推出了一款超迷你的Linux桌面PC产品，它就是MintBox Mini。</strong>顾名思义，这是一款专为Linux系统玩家而打造的设备。<br/></p></span>
+                                </div>
+                                <div class="clear"></div>
+                                <div class="tools repeat">
+                                    <div class="time"></div>
+                                    <ul class="gray">
+                                        <li><b><a target="_blank" href="/articles/362941.htm">详细内容</a></b></li>
+                                        <li>已有<em>6</em>个意见&nbsp;&nbsp;|</li>
+                                        <li><em>2</em>次推荐&nbsp;&nbsp;|</li>
+                                        <li><em>2</em>次打分&nbsp;&nbsp;|</li>
+                                        <li>事件分:<em>2</em>分&nbsp;&nbsp;|</li>
+                                        <li>质量分:<em>2</em>分</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="item" id="J_allItem_362939">
+                                <div class="hd">
+                                    <div class="title">
+                                        <a target="_blank" href="/articles/362939.htm">Nexus 10/7的Android 5.0.2版系统已经出现</a>
+                                        <div class="tj">
+                                            <span>ugmbbc 发布于<em>2015-01-16 07:46:47</em> | </span>
+                                            <span><em>2462</em> 次阅读</span>
+                                        </div>
+                                    </div>
+                                    <div class="picno"><div class="pic"><a target="_blank" href="/articles/362939.htm"><img width="100" height="100" src="http://static.cnbetacdn.com/thumb/mini/article/2015/0116/82adedfcc610825.jpg_100x100.jpg" /></a></div></div><span class="newsinfo"><p>不到一个月前，Google突然放出了Android 5.0.2，但是仅限于Nexus 7 2012 Wi-Fi这一个版本，根据更新日志发现应该是为该平板专门推出的。今天，<strong>Android 5.0.2再次出现，同时更新给了Nexus 10、Nexus 7 2013 Wi-Fi。</strong>两款亲儿子平板的新系统原厂镜像(底包)已经公布，<strong>编译版本号还是相同的LRX22G</strong>，但是具体更细内容不详，估计还是一些特定Bug的修复和细节的完善。</p></span>
+                                </div>
+                                <div class="clear"></div>
+                                <div class="tools repeat">
+                                    <div class="time"></div>
+                                    <ul class="gray">
+                                        <li><b><a target="_blank" href="/articles/362939.htm">详细内容</a></b></li>
+                                        <li>已有<em>7</em>个意见&nbsp;&nbsp;|</li>
+                                        <li><em>1</em>次推荐&nbsp;&nbsp;|</li>
+                                        <li><em>0</em>次打分&nbsp;&nbsp;|</li>
+                                        <li>事件分:<em>0</em>分&nbsp;&nbsp;|</li>
+                                        <li>质量分:<em>0</em>分</li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="item" id="J_allItem_362937">
+                                <div class="hd">
+                                    <div class="title">
+                                        <a target="_blank" href="/articles/362937.htm">苹果新编程语言Swift采纳率飙升</a>
+                                        <div class="tj">
+                                            <span>KungfuDogg 发布于<em>2015-01-16 07:45:16</em> | </span>
+                                            <span><em>4690</em> 次阅读</span>
+                                        </div>
+                                    </div>
+                                    <div class="picno"><div class="pic"><a target="_blank" href="/articles/362937.htm"><img width="100" height="100" src="http://static.cnbetacdn.com/thumb/mini/article/2015/0116/3839f88a3ed2399.jpg_100x100.jpg" /></a></div></div><span class="newsinfo"><p><strong>据国外媒体报道，苹果去年夏天推出的编程语言Swift的采纳率排名迅速上升。开发者们因为苹果的金字招牌对这种语言趋之若鹜。</strong>根据研究和分析公司RedMonk的语言排名，Swift的排名从刚刚推出时的第68名跃升至第22名。该排名的目的是衡量程序员对不同语言的兴趣。该公司表示Swift这种增长速度是前所未有的。</p></span>
+                                </div>
+                                <div class="clear"></div>
+                                <div class="tools repeat">
+                                    <div class="time"></div>
+                                    <ul class="gray">
+                                        <li><b><a target="_blank" href="/articles/362937.htm">详细内容</a></b></li>
+                                        <li>已有<em>2</em>个意见&nbsp;&nbsp;|</li>
+                                        <li><em>3</em>次推荐&nbsp;&nbsp;|</li>
+                                        <li><em>13</em>次打分&nbsp;&nbsp;|</li>
+                                        <li>事件分:<em>2</em>分&nbsp;&nbsp;|</li>
+                                        <li>质量分:<em>-4</em>分</li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="clear"></div>
+                        <div class="loading" style="text-align:center;display:none"><i class="loading48" style="margin:16px 0 5px;"></i></div>
+                        <div style="display:none" class="read_more"><a href="/topics.htm" target="_blank"><button class="more">点击查看更多...</button></a></div>
+                        <div style="float: left;width: 630px;" id="linkpager"></div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="alllist" id="allnews_dig" data-page="1" data-stop="0">
+                        <div class="items_area"></div>
+                        <div class="loading" style="text-align:center;display:none"><i class="loading48" style="margin:16px 0 5px;"></i></div>
+                        <div style="display:none" class="read_more"><a href="/top10.htm" target="_blank"><button class="more">点击查看更多...</button></a></div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="alllist" id="allnews_soft" data-page="1" data-stop="0">
+                        <div class="items_area"></div>
+                        <div class="loading" style="text-align:center;display:none"><i class="loading48" style="margin:16px 0 5px;"></i></div>
+                        <div style="display:none" class="read_more"><a href="/soft.htm" target="_blank"><button class="more">点击查看更多...</button></a></div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="alllist" id="allnews_industry" data-page="1" data-stop="0">
+                        <div class="items_area"></div>
+                        <div class="loading" style="text-align:center;display:none"><i class="loading48" style="margin:16px 0 5px;"></i></div>
+                        <div style="display:none" class="read_more"><a href="/it.htm" target="_blank"><button class="more">点击查看更多...</button></a></div>
+                        <div class="clear"></div>
+                    </div>
+                    <div class="alllist" id="allnews_interact" data-page="1" data-stop="0">
+                        <div class="items_area"></div>
+                        <div class="loading" style="text-align:center;display:none"><i class="loading48" style="margin:16px 0 5px;"></i></div>
+                        <div style="display:none" class="read_more"><a href="/interact.htm" target="_blank"><button class="more">点击查看更多...</button></a></div>
+                        <div class="clear"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="clear"></div>
+        </div>
+        <div class="main_content_right">
+            <section class="cb_box" style="padding:1px 1px 9px;">
+                <div class="comments_box">
+                    <nav class="tab_gray pt5">
+                        <ul class="J_good_tab comments_nav">
+                            <li class="tab_item"><a class="current">精彩评论</a></li>                <li class="tab_item"><a>编辑推荐</a></li>                <li class="tab_item"><a>公告栏</a></li>
+                        </ul>
+                        <span id="J_expand" class="head icon_expand fr"></span>
+                    </nav>
+                    <div class="J_good_panel comments_list">
+                        <div class="comments_side comments_jh">
+                            <div id="comments_jh_area">
+                                <dl>
+                                    <dt>马云去吃一顿会不会从首富的位置下来?</dt>
+                                    <dd><span class="head jh_bottom"></span>来自<strong>湖北省武汉市</strong>的匿名人士对新闻:<a href="/articles/362527.htm" target="_blank">餐馆电脑扫描顾客样貌 长得好看可免单</a>的评论</dd>
+                                </dl>
+                                <dl>
+                                    <dt>阿司匹林就是外国人的板蓝根</dt>
+                                    <dd><span class="head jh_bottom"></span>来自<strong>浙江省杭州市</strong>的匿名人士对新闻:<a href="/articles/362525.htm" target="_blank">英研究：2050年前80岁以下人群或无人会死于癌症</a>的评论</dd>
+                                </dl>
+                                <dl>
+                                    <dt>(捅了JC一刀)哭笑道，我还没找到这个bug，让我再蹲半年</dt>
+                                    <dd><span class="head jh_bottom"></span>来自<strong>辽宁省大连市</strong>的匿名人士对新闻:<a href="/articles/362763.htm" target="_blank">美国监狱开编程课 囚犯出狱后可当计算机工程师</a>的评论</dd>
+                                </dl>
+                                <dl>
+                                    <dt>中国硅谷-&gt;电子卖场-&gt;宰人黑市-&gt;关门，这转换流程有点另类</dt>
+                                    <dd><span class="head jh_bottom"></span>来自<strong>山东省济南市</strong>的匿名人士对新闻:<a href="/articles/362583.htm" target="_blank">中关村e世界将关门 商户经营惨淡空置已1年多</a>的评论</dd>
+                                </dl>
+                                <dl>
+                                    <dt>去中关村这种地方，用8000能买到7000的电脑，已经很不错了，说明你很精明。。正常人只能买到4000的，有的人只能买到模型。。。</dt>
+                                    <dd><span class="head jh_bottom"></span>来自<strong>安徽省合肥市</strong>的匿名人士对新闻:<a href="/articles/362653.htm" target="_blank">大二男生网购手机被骗后失联 留遗书称“社会黑暗”</a>的评论</dd>
+                                </dl>
+                                <dl>
+                                    <dt>长得丑的去吃是不是会付双倍?</dt>
+                                    <dd><span class="head jh_bottom"></span>来自<strong>北京市</strong>的匿名人士对新闻:<a href="/articles/362527.htm" target="_blank">餐馆电脑扫描顾客样貌 长得好看可免单</a>的评论</dd>
+                                </dl>
+                                <dl>
+                                    <dt>强烈建议以后银行收取进门费，进营业厅要收10块钱。</dt>
+                                    <dd><span class="head jh_bottom"></span>来自<strong>广东省深圳市</strong>的匿名人士对新闻:<a href="/articles/362659.htm" target="_blank">且用且珍惜手机银行免费午餐越吃越少</a>的评论</dd>
+                                </dl>
+                                <dl>
+                                    <dt>阿里巴巴总统马云亲切接见韩国总统朴槿惠</dt>
+                                    <dd><span class="head jh_bottom"></span>来自<strong>河南省平顶山市</strong>的匿名人士对新闻:<a href="/articles/361747.htm" target="_blank">韩媒：阿里在韩建“阿里巴巴城”投资规模57亿</a>的评论</dd>
+                                </dl>
+                                <dl>
+                                    <dt>对于一个强迫正来说，有两个Program Files和Program Files(x86)文件夹是一件很讨厌的事情</dt>
+                                    <dd><span class="head jh_bottom"></span>来自<strong>甘肃省兰州市</strong>的匿名人士对新闻:<a href="/articles/361661.htm" target="_blank">微软证实32位Windows 10 绝不放弃上亿用户</a>的评论</dd>
+                                </dl>
+                                <dl>
+                                    <dt>花6千的可能是买下来破解吧</dt>
+                                    <dd><span class="head jh_bottom"></span>来自<strong>河南省郑州市</strong>的匿名人士对新闻:<a href="/articles/361597.htm" target="_blank">MIUI主题均价6块 有人一年为此花了6000多块</a>的评论</dd>
+                                </dl>
+                            </div>
+                            <div id="comments_page" data-page="1" style="padding:15px 15px 0px;height:20px;line-height:20px;">
+                                <span></span>
+                                <a id="comments_page_next" class="cb_more fr"></a>
+                            </div>
+                        </div>
+                        <div class="comments_side comments_recommended">
+                            <div id="comments_recommended_area">
+                                <dl>
+                                    <dt><a href="/articles/340837.htm">Office for Mac 16 路线图+各组件独家截图曝光:2015年上半年推出</a></a></dt>
+                                    <dd>相信很多Mac用户都在期待着微软OfficeforMac下一代产品，毕竟不仅仅是微软早就采用了Modern界面和Ribbon功能区来统一Office系列产品，连OSX桌面系统也经过“扁平化”的洗礼改头</dd>
+                                </dl>
+                                <dl>
+                                    <dt><a href="/articles/340427.htm">Outlook for Mac 16独家预览:全新现代化界面 云协同 多平台统一体验</a></a></dt>
+                                    <dd>随着OSXYosemite系统的正式推出，可以看出苹果桌面系统的未来发展趋势：更简约扁平化的现代风格界面，强调跨设备协同能力，与云平台结合更紧密。这几点似乎与微软的生产力套件发展方向如出一辙，cnBe</dd>
+                                </dl>
+                                <dl>
+                                    <dt><a href="/articles/339707.htm">苹果在线商店iPad/Mac四款新品已经开始销售</a></a></dt>
+                                    <dd>在开始出货iPhone6后不久，苹果上周发布的iPadAir2、mini3/RetinaiMac以及新版MacMini均已经通过我国监管部门的审核开始销售，iPadAir2的价格从3588元人民币起跳</dd>
+                                </dl>
+                                <dl>
+                                    <dt><a href="/articles/339269.htm">盘古越狱 for iOS 8 正式发布 暂不提供Cydia</a></a></dt>
+                                    <dd>在没有任何预告的情况下，盘古越狱foriOS8的下载页面突然出现在网络上，但点击下载链接却还没有生效，从描述上看，新版可直接越狱iOS8后的各个版本，并支持iPhone6/6Plus以及iPadAir</dd>
+                                </dl>
+                                <dl>
+                                    <dt><a href="/articles/338773.htm">代号“长尾黑颚猴”：Ubuntu 15.04代号确定为Vivid Vervet</a></a></dt>
+                                    <dd>作为世界上最流行且颇具影响力的Linux发行版之一，Ubuntu的每次大版本更新都会吸引社区和爱好者的大量目光。不过，Ubuntu在产品命名上却有些近乎“偏执”——第一个单词为形容词、第二个单词则是动</dd>
+                                </dl>
+                                <dl>
+                                    <dt><a href="/articles/338665.htm">内部爆料魅族阿里或联合推MX4定制机</a></a></dt>
+                                    <dd>21日，魅族将联合阿里巴巴举行战略合作发布会，而就在昨夜魅族市场部高级经理@张恒，在微博上曝光了一款新外观版本的MX4工程机，并宣称不确定公司是否量产。在这关头难免让人怀疑，这款“新品”与阿里巴巴有关</dd>
+                                </dl>
+                                <dl>
+                                    <dt><a href="/articles/337521.htm">[图文直播]苹果iPad Air/mini及Mac新品发布会</a></a></dt>
+                                    <dd>这也许是苹果历年来两次相隔时间最短的一次发布会，在月初发布iPhone6/6Plus并迅速在全球范围内引起轰动后，北京时间10月17日凌晨1点，苹果又将在美国库比提诺市苹果公司总部召开新品发布会，预计</dd>
+                                </dl>
+                                <dl>
+                                    <dt><a href="/articles/337167.htm">谷歌发多款Nexus新品 Android Lollipop正式亮相</a></a></dt>
+                                    <dd>谷歌本周三发布了多款Nexus产品，其中包括Nexus9平板电脑，Nexus6大屏智能手机和NexusPlayer流媒体播放器。Nexus9平板电脑由HTC代工，采用8.9英寸屏幕。而Nexus6由摩</dd>
+                                </dl>
+                                <dl>
+                                    <dt><a href="/articles/335357.htm">[预定入口]苹果中国在线商店开始预售iPhone 6/6 Plus</a></a></dt>
+                                    <dd>苹果今日宣布面向中国发布全新的iPhone产品线iPhone6和iPhone6Plus，这两款产品将与现有的iPhone5s和iPhone5c一起成为AppleiPhone产品线中的一员。新的iPho</dd>
+                                </dl>
+                                <dl>
+                                    <dt><a href="/articles/333479.htm">[下载]Windows 10技术预览版本已发布 现已可加入测试计划</a></a></dt>
+                                    <dd>Windows10技术预览版于北京时间今日凌晨发布，现在各位就可以加入微软的测试计划从而下载到改进后的系统，在这里需要提醒下大家，安装预览版时需要注意不要部署在生产环境中，因为它有可能会出现硬件不兼容</dd>
+                                </dl>
+                            </div>
+                            <div id="commend_page" data-page="1" style="padding:15px 15px 0px;height:20px;line-height:20px;">
+                                <span></span>
+                                <a id="commend_page_next" class="cb_more fr"></a>
+                            </div>
+                        </div>
+                        <div class="comments_side notice_box">
+                            <div class="notice">
+                                <p style="margin-top:10px;"><p><strong style="font-family: &#39;Classic Grotesque W01&#39;, Arial, &#39;Hiragino Sans GB&#39;, STHeiti, &#39;Microsoft YaHei&#39;, &#39;WenQuanYi Micro Hei&#39;, SimSun, sans-serif; line-height: 26px; background-color: rgb(255, 255, 255);">cnBeta.COM 移动版全新改版上线</strong>，随时随地可以阅览本站文章和评论，无需安装任何手机应用，触屏手机直接访问<a href="http://m.cnbeta.com/" target="_blank" style="color: rgb(0, 0, 0); text-decoration: none; cursor: pointer; font-weight: bold; font-family: &#39;Classic Grotesque W01&#39;, Arial, &#39;Hiragino Sans GB&#39;, STHeiti, &#39;Microsoft YaHei&#39;, &#39;WenQuanYi Micro Hei&#39;, SimSun, sans-serif; line-height: 26px; background-color: rgb(255, 255, 255);">http://m.cnbeta.com/</a>可体验更完整的站点功能。功能手机和套餐流量较小的用户可以从底部点击“普版”按钮进入纯文本手机站。<br/></p><p>我们还将持续完善移动版的功能，祝您用得愉快。</p></p>
+                                <p style="text-align:right;padding:8px;">cnBeta.COM<br />2014.01.09</p>
+                                <hr />
+                            </div>
+                            <div class="notice">
+                                <p style="margin-top:10px;"><p><span style="font-family: &#39;Classic Grotesque W01&#39;, Arial, &#39;Hiragino Sans GB&#39;, STHeiti, &#39;Microsoft YaHei&#39;, &#39;WenQuanYi Micro Hei&#39;, SimSun, sans-serif; line-height: 26px; background-color: rgb(255, 255, 255);">近期发现有不法人士冒充cnBeta.COM成员身份参加行业会议、新品发布会等活动，在此特别提请各厂商注意鉴别，以免上当受骗。cnBeta.COM团队成员不会主动要求参会，亦不会索取厂商的赠品和要求商务宴请。若有活动确需我方参与，请通过正常途径与我们取得</span><a href="http://www.cnbeta.com/about/contact.htm" target="_blank" style="color: rgb(0, 0, 0); text-decoration: none; cursor: pointer; font-weight: bold; font-family: &#39;Classic Grotesque W01&#39;, Arial, &#39;Hiragino Sans GB&#39;, STHeiti, &#39;Microsoft YaHei&#39;, &#39;WenQuanYi Micro Hei&#39;, SimSun, sans-serif; line-height: 26px; white-space: normal; background-color: rgb(255, 255, 255);">联系</a><span style="font-family: &#39;Classic Grotesque W01&#39;, Arial, &#39;Hiragino Sans GB&#39;, STHeiti, &#39;Microsoft YaHei&#39;, &#39;WenQuanYi Micro Hei&#39;, SimSun, sans-serif; line-height: 26px; background-color: rgb(255, 255, 255);">，本站派出人员参与的活动不会收取任何费用，也不会进行任何有偿文字写作和推广行为，特此声明。</span></p></p>
+                                <p style="text-align:right;padding:8px;">cnBeta.COM<br />2013.09.05</p>
+                                <hr />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+            <div class="mt5 ccenter" id="right1">
+            <div class="cbv">
+                <p>
+                    <!-- 广告位：CBV4-300x80 #1 -->
+                <p>
+                    <!-- 广告位：CBV4-300x80 #2 -->
+                <p><!-- 广告位：CBV4-300x80 首页右 #4 -->
+                <p>
+                    <!-- 广告位：CBV4-300x80 #3 -->
+            <!--rank-->
+            <div class="mt5 ccenter" id="right2">
+                <ins class="adsbygoogle"
+                     style="display:inline-block;width:300px;height:250px"
+                     data-ad-client="ca-pub-9066977823953139"
+                     data-ad-slot="2816154217"></ins>
+            <div class="mt5 ccenter" id="right3">
+                <p class="cbv"><!-- 广告位：CBV4 300x250 投票站下方 -->
+            <!--BFD：index-->
+            <div class="mt5">
+            </div>
+            <div class="mt5" id="dt_MRecVAV"></div>
+            <div class="mt5 ccenter" id="right4">
+                <div class="cbv">
+                </div>        </div>
+
+            <section class="mt5 cber hotcomments">
+                <header class="yellow_bar"><h4>CBer 热议</h4></header>
+                <div class="content_body cber_body yellow_body_v1">
+                    <dl>
+                        <dt>
+                            <span class="num">1</span>
+                        <h4><a href="/articles/362789.htm" target="_blank">评论：[图文直播]2299/3299元 - 小米Note - 2015年春季旗舰新品发布会</a></h4>
+                        <span class="fr"><i class="head icon_comment"></i>390</span>
+                        </dt>
+                    </dl>
+                    <dl>
+                        <dt>
+                            <span class="num">2</span>
+                        <h4><a href="/articles/362839.htm" target="_blank">评论：[图]双面玻璃+2299元起 小米Note真机试玩</a></h4>
+                        <span class="fr"><i class="head icon_comment"></i>144</span>
+                        </dt>
+                    </dl>
+                    <dl>
+                        <dt>
+                            <span class="num">3</span>
+                        <h4><a href="/articles/362819.htm" target="_blank">评论：小米为什么要发2000元以上的Note？</a></h4>
+                        <span class="fr"><i class="head icon_comment"></i>116</span>
+                        </dt>
+                    </dl>
+                    <dl>
+                        <dt>
+                            <span class="num">4</span>
+                        <h4><a href="/articles/361069.htm" target="_blank">评论：[独家]微软Spartan浏览器真实谍照 搜索/Cortana未来大整合</a></h4>
+                        <span class="fr"><i class="head icon_comment"></i>114</span>
+                        </dt>
+                    </dl>
+                    <dl>
+                        <dt>
+                            <span class="num">5</span>
+                        <h4><a href="/articles/362473.htm" target="_blank">评论：3998元？小米自曝的新旗舰价格你信么</a></h4>
+                        <span class="fr"><i class="head icon_comment"></i>101</span>
+                        </dt>
+                    </dl>
+                    <dl>
+                        <dt>
+                            <span class="num">6</span>
+                        <h4><a href="/articles/362421.htm" target="_blank">评论：不是小米5 - 小米新旗舰或确定为小米Note</a></h4>
+                        <span class="fr"><i class="head icon_comment"></i>98</span>
+                        </dt>
+                    </dl>
+                    <dl>
+                        <dt>
+                            <span class="num">7</span>
+                        <h4><a href="/articles/361881.htm" target="_blank">评论：原来8年前的一代iPhone那么差</a></h4>
+                        <span class="fr"><i class="head icon_comment"></i>95</span>
+                        </dt>
+                    </dl>
+                    <dl>
+                        <dt>
+                            <span class="num">8</span>
+                        <h4><a href="/articles/361751.htm" target="_blank">评论：苹果向电信版iPhone 6用户推送配置文件 可增强4G信号</a></h4>
+                        <span class="fr"><i class="head icon_comment"></i>93</span>
+                        </dt>
+                    </dl>
+                    <dl>
+                        <dt>
+                            <span class="num">9</span>
+                        <h4><a href="/articles/362585.htm" target="_blank">评论：高峰分解术奏效 12306告别网络“瘫痪”</a></h4>
+                        <span class="fr"><i class="head icon_comment"></i>91</span>
+                        </dt>
+                    </dl>
+                    <dl>
+                        <dt>
+                            <span class="num">10</span>
+                        <h4><a href="/articles/362537.htm" target="_blank">评论：深度联合CrossOver 将国产Windows应用移植到Linux</a></h4>
+                        <span class="fr"><i class="head icon_comment"></i>88</span>
+                        </dt>
+                    </dl>
+                </div>
+                <div class="clear"></div>
+            </section>
+            <div class="mt5" id="fixed_area" style="text-align:left;">
+                <div class="cbv">
+                    <div>
+                    </div>
+                </div>        </div>
+        </div>
+        <div class="clear"></div>
+    </div>
+    <div style="text-align:left;">
+        </div>
+<footer class="mt5 wrapper" id="footer">
+    <p>除非特别注明，本站所有文章均不代表本站观点。报道中出现的商标属于其合法持有人。<strong>请遵守理性，宽容，换位思考的原则。</strong></p>
+    <p>合作媒体与供稿人：
+        <a href="http://www.apppoo.com/">安卓应用谱</a>&nbsp;<a href="http://news.mydrivers.com/">驱动之家</a>&nbsp;<a href="http://www.bio360.net/">生物360</a>&nbsp;<a href="http://google.org.cn/">谷奥</a>&nbsp;<a href="http://www.feng.com/">威锋网</a><br />&nbsp;<a href="http://www.huxiu.com/">虎嗅网</a>&nbsp;<a href="http://www.ownlinux.org/">Ownlinux</a>&nbsp;<a href="http://www.leica.org.cn/">中文摄影杂志</a>&nbsp;<a href="http://www.geekpark.net/">极客公园</a>&nbsp;<a href="http://www.macx.cn/">MacX</a>&nbsp;<a href="http://imcn.me/">IMCN</a>&nbsp;<a href="http://www.kejimeixue.com/">科技美学</a>&nbsp;<a href="http://www.leiphone.com/">雷锋网</a>&nbsp;<a href="http://www.anzhuo.cn/">安卓中国</a>&nbsp;<a href="http://www.fengniao.com/">蜂鸟网</a>    </p>
+    <p>本站由<a href="http://www.verycloud.cn/" target="_blank">VeryCloud</a>云分发提供CDN加速，由<a href="http://www.dnspod.cn/" target="_blank">DNSPod</a>提供域名解析
+        <span class="sep">|</span> 部分节点提供: <a href="http://www.whozen.com/" target="_blank">互城网络</a>
+        <span class="sep">|</span><a href="http://www.sudu.cn/?suduckey=532" target="_blank">华夏名网</a>
+        <span class="sep">|</span><a href="http://www.hypo.cn/" target="_blank">海波网络</a>
+        <span class="sep">|</span><a href="http://www.wdw6.com/" target="_blank">万达网络</a>
+        <span class="sep">|</span><a href="http://www.efly.cc/bgp.php?=guanggao" target="_blank">睿江科技</a>
+    </p>
+    <p>&copy;2003-2015 cnBeta <a href="http://www.miibeian.gov.cn" target="_blank">浙ICP备11027646号</a>&nbsp;
+        <a href="/about/index.htm" target="_blank">关于我们</a>&nbsp;
+        <a href="/about/cooperation.htm" target="_blank">广告招租</a>&nbsp;
+        <a href="mailto:ugmbbc@gmail.com" target="_blank">报告不适当内容</a>
+    </p>
+    <span class="powered">Powered by cnBeta.COM | Created by ceallan</span>
+</footer>
+<div class="clear"></div>
+<div class="goToTop" id="backToTop"><a rel="nofollow" href="javascript:void(0)" class="toTop"></a></div>
+</body>
+</html>

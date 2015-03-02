@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test</title>
+    <meta charset="UTF-8">
+    <script src="../bower_components/jquery/dist/jquery.min.js"></script>
+    <script src="../bower_components/angular/angular.min.js"></script>
+    <script src="../src/util/util.js"></script>
+    <!--<script type="text/javascript" src="../dist/jing.js"></script>-->
+
+    <script type="text/javascript">
+        var app = angular.module('MyApp', []);
+        app.factory('S1', [function() {
+            var list = [];
+            for(var i=0;i<50;i++) {
+                list.push({
+                    name : 'xiaoge:' + i,
+                    age : 24 + i,
+                    girls : [{
+                        name : 'jing:' + i + ':1',
+                        age : 24 + i
+                    }, {
+                        name : 'jing:' + i + ':2',
+                        age : 24 + i
+                    }]
+                })
+            }
+            return list;
+        }]);
+        app.controller('Ctrl', ['$scope', '$rootScope', 'S1', function($scope, $rs, S1) {
+            $scope.boy = {
+                girl : {
+                    name : 'jing',
+                    say : function() {
+                        console.log(this);
+                    }
+                }
+            };
+            $scope.list = S1;
+            $scope.index = 0;
+            $scope.pp = function() {
+                this.index-=5;
+            };
+            $scope.np = function() {
+                this.index+=5;
+            };
+            $scope.append = function() {
+                this.list.unshift({
+                    name : 'unnnn',
+                    age : 32323
+                });
+            };
+
+            $scope.fn = function() {
+
+                console.log(this);
+                $scope.boy.girl.name = 'wang';
+
+                this.boy.girl.say();
+            }
+        }]).run(['$rootScope', function($rs) {
+            log('run');
+            $rs.msg = 'hello';
+        }]);
+
+        $(function() {
+            console.time('ttt');
+            angular.bootstrap($('#a1'), ['MyApp']);
+            console.timeEnd('ttt');
+//            angular.bootstrap($('#a2'), ['MyApp']);
+
+        });
+    </script>
+</head>
+<body>
+<div id="a1">
+    <p>{{msg}}</p>
+    <div ng-controller="Ctrl">
+        <p>{{boy.girl.name}}</p>
+        <p><button ng-click="fn()">Click</button></p>
+        <p><button ng-click="boy.girl.say()">Click2</button></p>
+
+        <ul>
+            <li ng-repeat="boy in list.slice(index, index+5)">{{boy.name}}, {{boy.age}}</li>
+        </ul>
+        <p><button ng-click="pp()">上一页</button><button ng-click="np()">下一页</button></p>
+        <p><button ng-click="append()">Append</button></p>
+    </div>
+</div>
+
+</body>
+</html>

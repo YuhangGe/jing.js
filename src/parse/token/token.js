@@ -1,196 +1,53 @@
-var __parse_token_no_action = -1;
-var __parse_token_unknow_char = -2;
-var __parse_token_unmatch_char = -3;
-
 var __parse_token_type = '';
 var __parse_token_value = '';
-var __parse_int_array = Int32Array;
-var __parse_token_TABLE = {
-    b: new __parse_int_array(18),
-    d: new __parse_int_array(18),
-    c: new __parse_int_array(29),
-    n: new __parse_int_array(29),
-    a: new __parse_int_array(18),
-    e: new __parse_int_array(256)
-};
+var __parse_token_EOF = false;
+var __parse_token_src = '';
 
-function __parse_token_str2arrs(strs, arrs) {
-    for(var j = 0; j < strs.length; j++) {
-        var str = strs[j], arr = arrs[j], t = str.charCodeAt(0), len = str.length, c = 0;
-        for(var i = 1; i < len; i++) {
-            if(t === 0)
-                arr[i - 1] = str.charCodeAt(i) - 1;
-            else {
-                var n = str.charCodeAt(i) - 1, v = str.charCodeAt(i + 1) - 1;
-                for(var k = 0; k < n; k++) {
-                    arr[c] = v;
-                    c++;
-                }
-                i++;
-            }
-        }
-    }
-}
-__parse_token_str2arrs(["\0\1\1\1\1\1\1\1\2\1\1\1\5\1\2\5\21", "\1\15\0\2\5\3\4\2\6", "\1\3\0\2\7\2\15\2\4\2\10\2\5\2\16\2\11\2\12\2\13\2\17\2\13\2\6\3\14\16\20\2\0","\0\0\0\1\1\1\4\1\5\1\1\13\1\13\6\14\14\3\2\7\15\10\10\16\17\11\12\14\2\13\0", "\0\2\1\6\2\2\5\1\1\1\1\3\4\1\1\1\0", "\1\12\1\5\16\24\1\2\16\2\6\2\2\2\1\2\15\2\2\2\11\5\2\2\3\2\2\2\4\2\14\2\2\13\13\3\2\2\10\2\5\2\7\2\2\2\1\33\15\2\2\2\1\3\2\2\15\2\1\33\15\2\1\2\12\2\1\2\2\x82\1"], [__parse_token_TABLE.b, __parse_token_TABLE.d, __parse_token_TABLE.c, __parse_token_TABLE.n, __parse_token_TABLE.a, __parse_token_TABLE.e]);
-
-var MAIN______DEFAULT = 15;
-
-var __parse_token_src = null,
-    __parse_token_idx = 0,
-    __parse_token_end = 0,
-    __parse_token_chr = -1;
-
-var __parse_token_state = 15;
-var __parse_token_EOF = true;
-
-function parse_token_init(src) {
-    __parse_token_src = src;
-    __parse_token_end = src.length;
-    __parse_token_idx = 0;
-    __parse_token_chr = -1;
-    __parse_token_EOF = false;
-}
+var __parse_token_regex = new RegExp(
+        //加减乘除，包括单目和双目预算以及赋值运算, +, ++, +=, -, --, -=, *, *=, /, /=, %, %=
+        "(?:\\+(?:\\+?)(?:=?))|(?:\\-(?:\\-?)(?:=?))|(?:\\*(?:=?))|(?:\\/(?:=?))|(?:%(?:=?))"
+        //逻辑运算, !, !=, !==, ~, ~=, &, &&, &=, |, ||, |=, ^, ^=
+        + "|(?:\\!(?:={0,2}))|(?:~(?:=?))|(?:&(?:&|=)?)|(?:\\|(?:\\||=)?)|(?:\\^(?:=?))"
+        //比较运算和逻辑运算，包括>, >>, >>>, >=, >>=, >>>=, <, <<, <=, <<=
+        + "|(?:>(?:>{0,2})(?:=?))|(?:<(?:<?)(?:=?))"
+        //等号，包括=, ==, ===
+        + "|(?:=(?:={0,2}))"
+        //括号和点号
+        + "|\\(|\\)|\\[|\\]|\\{|\\}|\\.|\\?|\\:|;|,"
+        //字符串
+        + "|(?:\"[^\"]+\")|(?:'[^']+')"
+        //数字
+        + "|(?:\\d+(?:\\.\\d+)?)"
+        //变量
+        + "|(?:[a-zA-Z$_][a-zA-Z0-9$_]*)"
+    , "g");
 
 function parse_token_lex() {
-    if(__parse_token_EOF) {
+    if (__parse_token_EOF) {
+        return;
+    }
+    var token = __parse_token_regex.exec(__parse_token_src);
+    if(!token) {
+        __parse_token_EOF = true;
         return;
     }
 
-    var _yylen = 0;
-    var state = __parse_token_state, action = __parse_token_no_action;
-    var pre_idx = __parse_token_idx, pre_action = __parse_token_no_action, pre_act_len = 0;
+    __parse_token_value = token[0];
+    var fc = __parse_token_value.charCodeAt(0);
 
-    while (true) {
-        if (__parse_token_read_ch() < 0) {
-            if (pre_action >= 0) {
-                action = pre_action;
-                _yylen = pre_act_len;
-                __parse_token_idx = pre_idx + pre_act_len;
-            } else if (pre_idx < __parse_token_end) {
-                action = __parse_token_unmatch_char;
-                __parse_token_idx = pre_idx + 1;
-            }
-            if (pre_idx >= __parse_token_end) {
-                __parse_token_EOF = true;
-            }
-            break;
-        } else {
-            _yylen++;
-        }
-        var eqc = __parse_token_TABLE.e[__parse_token_chr];
-        if (eqc === undefined) {
-            if (pre_action >= 0) {
-                action = pre_action;
-                _yylen = pre_act_len;
-                __parse_token_idx = pre_idx + pre_act_len;
-            } else
-                action = __parse_token_unknow_char;
-            break;
-        }
-        var offset, next = -1, s = state;
-
-        while (s >= 0) {
-            offset = __parse_token_TABLE.b[s] + eqc;
-            if (__parse_token_TABLE.c[offset] === s) {
-                next = __parse_token_TABLE.n[offset];
-                break;
-            } else {
-                s = __parse_token_TABLE.d[s];
-            }
-        }
-
-        if (next < 0) {
-            if (pre_action >= 0) {
-                action = pre_action;
-                _yylen = pre_act_len;
-                __parse_token_idx = pre_idx + pre_act_len;
-            } else {
-                action = __parse_token_unmatch_char;
-                __parse_token_idx = pre_idx + 1;
-            }
-            //跳出内层while，执行对应的action动作
-            break;
-        } else {
-            state = next;
-            action = __parse_token_TABLE.a[next];
-            if (action >= 0) {
-                /**
-                 * 如果action>=0，说明该状态为accept状态。
-                 */
-                pre_action = action;
-                pre_act_len = _yylen;
-            }
-        }
-    }
-    __parse_token_value = __parse_token_src.substr(pre_idx, _yylen);
-
-    parse_token_action(action);
-
-}
-
-
-function __parse_token_read_ch() {
-    if (__parse_token_idx >= __parse_token_end)
-        return __parse_token_chr = -1;
-    else {
-        __parse_token_chr = __parse_token_src[__parse_token_idx++].charCodeAt(0);
-        return __parse_token_chr;
+    if(fc === 39 || fc === 34) {
+        __parse_token_type = 'str';
+    } else if(fc>=48 && fc<=57) {
+        __parse_token_type = 'num';
+    } else if((fc>=97 && fc<=122) || (fc>=65 && fc<=90) || fc===36 || fc===95) {
+        __parse_token_type = 'var';
+    } else {
+        __parse_token_type = 'op';
     }
 }
 
-function parse_token_action (action) {
-    switch (action) {
-        case __parse_token_no_action:
-        case __parse_token_unknow_char:
-        case __parse_token_unmatch_char:
-            __parse_token_type = 'emp';
-
-            break;
-
-            case 1:
-
-    __parse_token_type = 'op';
-
-break;
-case 4:
-
-    __parse_token_type = 'emp';
-
-break;
-case 2:
-
-    __parse_token_type = 'var';
-
-break;
-case 3:
-
-    __parse_token_type = 'num';
-
-break;
-case 0:
-
-     __parse_token_type = 'op';
-
-break;
-case 5:
-
-    __parse_token_type = 'emp';
-
-break;
-
-
-
-    }
-}
-
-
-function parse_token_string(quote) {
-    var chr, idx = __parse_token_idx, e_idx = idx;
-    while((chr = __parse_token_src[e_idx]) && chr !== quote) {
-        e_idx++;
-    }
-    var not_end = chr === quote;
-    __parse_token_idx = not_end ? e_idx + 1 : e_idx;
-    __parse_token_EOF = not_end ? __parse_token_EOF : true;
-    return __parse_token_src.substring(idx, not_end ? e_idx: e_idx+1);
+function parse_token_init(src) {
+    __parse_token_src = src;
+    __parse_token_regex.exec(''); //clear state
+    __parse_token_EOF = false;
 }

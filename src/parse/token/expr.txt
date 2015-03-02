@@ -1,0 +1,1 @@
+index+=5;a>>=6;5+6.23+32;boy.girl.name += 'dsd';

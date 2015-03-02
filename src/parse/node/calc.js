@@ -1,5 +1,5 @@
 function CalcGrammarNode(operator, left_node, right_node) {
-    this.base('calc', [left_node, right_node]);
+    this.base('calc', right_node? [left_node, right_node] : [left_node]);
     this.operator = operator;
 }
 parse_inherit_node(CalcGrammarNode, function(scope) {

@@ -196,12 +196,11 @@ function parse_check_op(op) {
 
 function parse_expr() {
 
+    parse_token_lex();
+
     while(!__parse_token_EOF) {
-        parse_token_lex();
-        if(__parse_token_type === 'op' && ( __parse_token_value === '\'' || __parse_token_value==='"')) {
-            __parse_token_value = parse_token_string(__parse_token_value);
-            __parse_token_type = 'str';
-        }
+        //log(__parse_token_type, __parse_token_value);
+
         switch (__parse_token_type) {
             case 'var':
                 switch(__parse_token_value) {
@@ -240,6 +239,9 @@ function parse_expr() {
             default :
                 break;
         }
+
+        parse_token_lex();
+
     }
 }
 
@@ -311,6 +313,7 @@ function parse_deal_op(op) {
             node_b = true;
             while(node_a.type !== 'empty') {
                 tmp.nodes.unshift(node_a);
+                node_a.parent = tmp;
                 if(!parse_is_constant(node_a)) {
                     node_b = false;
                 }
@@ -351,7 +354,6 @@ function parse_deal_op(op) {
             node_a = parse_pop_node();
             parse_push_node(new ConditionGrammarNode(op, node_a, node_b));
             break;
-            break;
 
         case '++#':
         case '--#':
@@ -362,8 +364,8 @@ function parse_deal_op(op) {
         case '!':
         case '~':
             node_a = parse_pop_node();
-            tmp = new CalcGrammarNode(op, node_a, node_b);
-            if(node_a.type === 'number') {
+            tmp = new CalcGrammarNode(op, node_a);
+            if(parse_is_constant(node_a)) {
                 tmp = new ConstantGrammarNode(tmp.exec());
             }
             parse_push_node(tmp);

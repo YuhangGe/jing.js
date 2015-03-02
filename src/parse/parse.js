@@ -3,11 +3,11 @@ function GrammarNode(type, child_nodes) {
     this.nodes = child_nodes ? child_nodes : [];
     this.parent = null;
     for(var i=0;i<this.nodes.length;i++) {
-        try{
+        //try{
             this.nodes[i].parent = this;
-        } catch(e){
-            debugger;
-        }
+        //} catch(e){
+        //    debugger;
+        //}
     }
     /*
      * 以下成员用来对表达式的值进行缓存。

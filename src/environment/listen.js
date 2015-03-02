@@ -117,8 +117,8 @@ LazyExprListener.prototype = {
         //    listen_refresh_expr_node(this.var_tree[k]);
         //}
         this.changes.length = 0;
-        log(this.expr);
-        return;
+        //log(this.expr);
+        //return;
         this.cur_value = this.expr.exec(this.env);
         if(!$isJArray(this.cur_value) && this.cur_value === this.pre_value) {
             return;

@@ -1,21 +1,16 @@
-var __drive_expr_REG = /\{\{.+?\}\}/g;
-
-function RenderPiece(type, value) {
-    this.type = type;
-    this.value = value;
-}
+var __drive_view_expr_REG = /\{\{(.+?)\}\}/g;
 
 function drive_get_view_expr(txt) {
     var piece_start = 0;
     var piece_array = [];
     var piece;
 
-    while((piece = __drive_expr_REG.exec(txt))!==null) {
+    while((piece = __drive_view_expr_REG.exec(txt))!==null) {
         if(piece.index > piece_start) {
             piece_array.push(new ConstantGrammarNode(txt.substring(piece_start, piece.index)));
         }
         piece_start = piece.index + piece[0].length;
-        piece_array.push(parse_expression(piece[0], true));
+        piece_array.push(parse_expression(piece[1], true));
     }
     if(piece && piece_start < txt.length) {
         piece_array.push(new ConstantGrammarNode(txt.substring(piece_start)));

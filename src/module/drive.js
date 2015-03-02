@@ -2,6 +2,7 @@ var __module_dom_ready = false;
 var __module_drive_queue = {};
 
 function module_apply_drive() {
+    console.time('ttt');
     var id, d_item, r_list, j;
     for(id in __module_drive_queue) {
         d_item = __module_drive_queue[id];
@@ -27,6 +28,7 @@ function module_apply_drive() {
 
         d_item.init = true;
     }
+    console.timeEnd('ttt');
 }
 
 $on(document, 'DOMContentLoaded', function() {

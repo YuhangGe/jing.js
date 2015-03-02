@@ -23,15 +23,17 @@ function JRepeat(ele, attr, drive_module, key, env, expr) {
     this.render();
 }
 var __jrepeate_prototype = JRepeat.prototype;
-__jrepeate_prototype.update = function() {
+__jrepeate_prototype.update = function(new_value) {
     /*
      * 目前是简单地重新全部更新元素。是一种很低效率的方式。
+     *
      * todo 采用diff的思想，只更新发生变化的元素。
      */
     for(var i=0;i<this.dom_items.length;i++) {
         $$remove(this.dom_items[i]);
     }
     this.dom_items.length = 0;
+    this.val = new_value;
     this._get();
     $$before(this.frag, this.cmt);
 };
@@ -54,6 +56,10 @@ __jrepeate_prototype._get = function() {
             '@key' : i
         };
         r_env[this.key] = array[i];
+        /*
+         * 目前是对每一次复制的元素进行render，包括解析directive和view。
+         * todo 可以考虑复用directive和view，这样就不需要每次循环都去drive_render_view
+         */
         drive_render_element(r_ele, this.attr, this.module, r_env);
         frag.appendChild(r_ele);
         this.dom_items.push(r_ele);

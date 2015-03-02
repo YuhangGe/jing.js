@@ -6,7 +6,12 @@ Flexible javascript MVW framework
 当前项目还处于探索学习阶段！
 ------
 
-请查看demo/simple-data-binding.html文件。
+当前代码处理实验阶段，项目文件结构还略显混乱。使用如下步骤查看简单的效果。
+
+1. npm install
+2. grunt generate:template
+
+然后在浏览器中访问 `test/index.html`文件。
 
 模块化和命名约定
 ------

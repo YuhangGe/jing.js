@@ -22,7 +22,7 @@ function jarray_up(jarray) {
     e_tree = jarray.__.en.children;
     for(i=0;i<len;i++) {
         if(!$hasProperty(e_tree, i)) {
-            e_tree[i] = new EmitNode(i, jarray.__.en);
+            e_tree[i] = new EmitNode(i, jarray.__.en, jarray.__.en.env);
         }
         if(!$hasProperty(jarray, i)) {
             (function(idx) {

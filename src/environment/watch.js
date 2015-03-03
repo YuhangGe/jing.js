@@ -16,7 +16,6 @@ var __env_emit_name = '__$jing.0210.emit$__';
 function environment_declare_obj(p, var_name, value, emit_node) {
     var v = $isArray(value) ? new JArray(value, emit_node) : value;
     p[__env_prop_name][var_name] = v;
-    p[__env_emit_name][var_name] = emit_node;
     $defineGetterSetter(p, var_name, function () {
         return this[__env_prop_name][var_name];
     }, function (val) {
@@ -106,7 +105,7 @@ function environment_redeclare_var(emit_node, obj, p_obj) {
 }
 
 function environment_watch_each_var(p, var_name, emit_node) {
-    var ps, val;
+    var ps, val, et;
 
     if(p instanceof JArray) {
         if(var_name === 'length') {
@@ -121,7 +120,10 @@ function environment_watch_each_var(p, var_name, emit_node) {
     }
 
     if(!$hasProperty(p, __env_emit_name)) {
-        $defineProperty(p, __env_emit_name, {});
+        et = {};
+        $defineProperty(p, __env_emit_name, et);
+    } else {
+        et = p[__env_emit_name];
     }
     if (!$hasProperty(p, __env_prop_name)) {
         ps = {};
@@ -129,6 +131,7 @@ function environment_watch_each_var(p, var_name, emit_node) {
     } else {
         ps = p[__env_prop_name];
     }
+
     if (!$hasProperty(ps, var_name)) {
         if (!$hasProperty(p, var_name)) {
             throw 'property ' + var_name + ' not found.'
@@ -136,16 +139,20 @@ function environment_watch_each_var(p, var_name, emit_node) {
         val = p[var_name];
         delete p[var_name];
         environment_declare_obj(p, var_name, val, emit_node);
+        et[var_name] = emit_node;
+    } else if(!$hasProperty(et, var_name)) {
+        et[var_name] = emit_node;
     }
+
     return ps[var_name];
 }
 
 function environment_watch_items(env, var_array, listener, is_lazy) {
 
-    function get_node(parent, name) {
+    function get_node(parent, name, env) {
         var n = parent.children[name];
         if(!n) {
-            n = parent.children[name] = new EmitNode(name, parent);
+            n = parent.children[name] = new EmitNode(name, env, parent);
         }
         return n;
     }
@@ -154,19 +161,26 @@ function environment_watch_items(env, var_array, listener, is_lazy) {
         return;
     }
 
-    var p = env.$find(var_array[0]);
-    if(!p) {
+    var act_env = env.$find(var_array[0]);
+    if(!act_env) {
         throw 'variable ' + var_array[0] + ' not found!';
     }
-    var vn, i, e_tree = env.__.emit_tree;
-    var e_node, cp;
+    var p = act_env, vn, i, e_tree = env.__.emit_tree;
+    var e_node, cp, pen;
     for (i = 0; i < var_array.length; i++) {
         if (!$isObject(p)) {
             throw('$watch need object.');
         }
         vn = var_array[i];
-        e_node = get_node(e_tree, vn);
+        pen = p[__env_emit_name];
+
+        if(pen && $hasProperty(pen, vn) && pen[vn].env !== act_env) {
+            throw new Error('Object只能属于一个Environment，如果要修改其所属于的Environment，先调用env.$remove(obj)');
+        }
+
+        e_node = get_node(e_tree, vn, act_env);
         cp = environment_watch_each_var(p, vn, e_node);
+
         p = cp;
         e_tree = e_node;
     }

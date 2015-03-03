@@ -1,5 +1,6 @@
-function EmitNode(id, parent) {
+function EmitNode(id, env, parent) {
     this.id = id;
+    this.env = env;
     this.I_emitter = null;
     this.L_emitter = null;
     this.children = {};
@@ -8,6 +9,7 @@ function EmitNode(id, parent) {
 }
 EmitNode.prototype = {
     val : function(var_name) {
+
         var p = this.parent.val(this.id);
         if(p && !$isUndefined(var_name)) {
             return p[var_name];
@@ -25,6 +27,20 @@ EmitNode.prototype = {
         for(var k in this.children) {
             this.children[k].notify();
         }
+    },
+    destroy : function() {
+        if(this.I_emitter !== null) {
+            this.I_emitter.destroy();
+        }
+        if(this.L_emitter !== null) {
+            this.L_emitter.destroy();
+        }
+        for(var k in this.children) {
+            this.children[k].notify();
+        }
+        this.I_emitter = null;
+        this.L_emitter = null;
+        this.parent = null;
     }
 };
 
@@ -36,6 +52,12 @@ function RootEmitNode(env) {
 RootEmitNode.prototype = {
     val : function(var_name) {
         return this.env.$get(var_name);
+    },
+    destroy : function() {
+        for(var k in this.children) {
+            this.children[k].destroy();
+        }
+        this.env = null;
     }
 };
 
@@ -55,6 +77,15 @@ ImmEmitter.prototype = {
             this.listeners[i].notify(this.node.path, this.cur_value, this.pre_value);
         }
         this.pre_value = this.cur_value;
+    },
+    destroy : function() {
+        this.node = null;
+        this.pre_value = null;
+        this.cur_value = null;
+        for(var i=0;i<this.listeners.length;i++) {
+            this.listeners[i].destroy();
+        }
+        this.listeners.length = 0;
     }
 };
 

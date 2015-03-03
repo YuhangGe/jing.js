@@ -14,7 +14,7 @@ function JRepeat(ele, attr, drive_module, key, env, expr) {
 
     this.val = listener.cur_value;
 
-    this.dom_items = [];
+    this.items = [];
 
     $$before(this.cmt, ele);
     $$remove(ele);
@@ -29,10 +29,28 @@ __jrepeate_prototype.update = function(new_value) {
      * 同时，已经$watch的表达式没有被destroy
      * todo 采用diff的思想，只更新发生变化的元素。
      */
-    for(var i=0;i<this.dom_items.length;i++) {
-        $$remove(this.dom_items[i]);
+    for(var i=0;i<this.items.length;i++) {
+        var it = this.items[i];
+        $$remove(it.ele);
+        var env = it.env,
+            v = it.val;
+
+        var et = v[__env_emit_name];
+        if(!et) {
+            continue;
+        }
+        for(var k in et) {
+            if(et[k].env === env) {
+                //log(k);
+                delete et[k];
+            }
+        }
+        //env.$destroy(); //todo $destroy previous environment
+        it.env = null;
+        it.ele = null;
+        it.val = null;
     }
-    this.dom_items.length = 0;
+    this.items.length = 0;
     this.val = new_value;
     this._get();
     __drive_insert_b.push({
@@ -50,7 +68,6 @@ __jrepeate_prototype._get = function() {
     var frag = document.createDocumentFragment();
     for(var i=0;i<array.length;i++) {
         r_ele = this.ele.cloneNode(true);
-        log(event_jid(r_ele));
         r_env = environment_create_child(this.env, i);
         r_env.$prop = {
             '@index' : i,
@@ -67,7 +84,11 @@ __jrepeate_prototype._get = function() {
          */
         drive_render_element(r_ele, this.attr, this.module, r_env);
         frag.appendChild(r_ele);
-        this.dom_items.push(r_ele);
+        this.items.push({
+            ele : r_ele,
+            env : r_env,
+            val : array[i]
+        });
     }
     this.frag = frag;
 };

@@ -679,9 +679,6 @@ LazyListener.prototype = {
 
 function LazyExprListener(var_tree, expr, env, handler, data, lazy_time) {
     this.base(handler, data, lazy_time);
-    if(data.id && data.id==='j.ele.7') {
-        debugger;
-    }
     this.expr = expr;
     this.var_tree = var_tree;
     this.env = env;

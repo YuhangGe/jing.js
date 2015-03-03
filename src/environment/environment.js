@@ -23,6 +23,16 @@ $defineGetterSetter(__env_prototype, '$root', function() {
     return this.__.parent ? this.__.parent.$root : this;
 });
 
+$defineProperty(__env_prototype, '$destroy', function() {
+    this.__.emit_tree.destroy();
+    for(var k in this.__.children) {
+        this.__.children[k].$destroy();
+    }
+    this.__.children = null;
+    this.__.parent = null;
+    this.__.emit_tree = null;
+});
+
 $defineProperty(__env_prototype, '$child', function(name) {
     var cd = this.__.children;
     if($hasProperty(cd, name)) {

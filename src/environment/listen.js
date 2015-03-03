@@ -42,6 +42,14 @@ ImmExprListener.prototype = {
 
         this.pre_value = this.cur_value;
 
+    },
+    destroy : function() {
+        this.data = null;
+        this.handler = null;
+        this.expr = null;
+        this.var_tree = null;
+        this.pre_value = null;
+        this.cur_value = null;
     }
 };
 
@@ -69,14 +77,16 @@ LazyListener.prototype = {
     deal : function() {
         this.handler(this.changes, this.data);
         this.changes.length = 0;
+    },
+    destroy : function() {
+        this.handler = null;
+        this.data = null;
+        this.changes.length = 0;
     }
 };
 
 function LazyExprListener(var_tree, expr, env, handler, data, lazy_time) {
     this.base(handler, data, lazy_time);
-    if(data.id && data.id==='j.ele.7') {
-        debugger;
-    }
     this.expr = expr;
     this.var_tree = var_tree;
     this.env = env;
@@ -128,6 +138,15 @@ LazyExprListener.prototype = {
         }], this.data);
 
         this.pre_value = this.cur_value;
+    },
+    destroy : function() {
+        this.data = null;
+        this.handler = null;
+        this.expr = null;
+        this.env = null;
+        this.var_tree = null;
+        this.pre_value = null;
+        this.cur_value = null;
     }
 };
 $inherit(LazyExprListener, LazyListener);

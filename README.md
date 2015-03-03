@@ -8,8 +8,6 @@ Flexible javascript MVW framework
 
 当前代码处理实验阶段，项目文件结构还略显混乱。在demo/simple文件夹下面可以看到示例及代码注释文档。
 
-然后在浏览器中访问 `test/index.html`文件。
-
 模块化和命名约定
 ------
 由于jing.js是纯浏览器端库，不会被使用在nodejs平台上，

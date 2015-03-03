@@ -1,4 +1,4 @@
-function JInputModel(ele, env, expr) {
+function JInputModel(ele, env, expr, two_way) {
     this.ele = ele;
     this.env = env;
     this.expr = expr;
@@ -12,6 +12,8 @@ function JInputModel(ele, env, expr) {
     this.val_event = 'input';
 
     var type = $attr(ele, 'type');
+    //todo 支持checkbox, radio等各种类型。
+
     switch (type) {
         case 'checkbox':
             this.val_key = 'checked';
@@ -20,7 +22,10 @@ function JInputModel(ele, env, expr) {
     }
 
     this.ele[this.val_key] = this.val;
-    $on(ele, this.val_event, $bind(this, this.change));
+
+    if(two_way) {
+        $on(ele, this.val_event, $bind(this, this.change));
+    }
 
 }
 var __jimodel_prototype = JInputModel.prototype;
@@ -43,20 +48,30 @@ __jimodel_prototype.destroy = function() {
     this.expr = null;
 };
 
+function directive_data_bind(drive_module, directive_module, env, element, attr_value, two_way) {
+    if(element.nodeName !== 'INPUT') {
+        return;
+    }
+    //todo 支持checkbox, radio等各种类型。
+
+    var expr = parse_expression(attr_value);
+
+    if(expr.type !== 'variable' && expr.type !== 'property') {
+        throw 'j-model only support settable expression';
+    }
+
+    new JInputModel(element, env, expr, two_way);
+}
+
 directive_create('j-model', function() {
 
     return function(drive_module, directive_module, env, element, attr_value) {
-        if(element.nodeName !== 'INPUT') {
-            return;
-        }
-        //todo 支持checkbox, radio等各种类型。
+        directive_data_bind(drive_module, directive_module, env, element, attr_value, true);
+    };
+});
 
-        var expr = parse_expression(attr_value);
-
-        if(expr.type !== 'variable' && expr.type !== 'property') {
-            throw 'j-model only support settable expression';
-        }
-
-        new JInputModel(element, env, expr);
+directive_create('j-value', function() {
+    return function(drive_module, directive_module, env, element, attr_value) {
+        directive_data_bind(drive_module, directive_module, env, element, attr_value, false);
     };
 });

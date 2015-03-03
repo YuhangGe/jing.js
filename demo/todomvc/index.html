@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>jing.js • TodoMVC</title>
-    <link rel="stylesheet" href="css/base.css">
+    <link rel="stylesheet" href="bower_components/todomvc-common/base.css">
     <link rel="stylesheet" href="css/index.css">
 
 </head>
@@ -34,7 +34,7 @@
 					</span>
         <ul id="filters">
             <li>
-                <a j-class="status === '' ? 'selected' : ''" href="#/">All</a>
+                <a j-class="status === '' ? 'selected' : ''" href="#/all">All</a>
             </li>
             <li>
                 <a j-class="status === 'active' ? 'selected' : ''" href="#/active">Active</a>
@@ -55,7 +55,9 @@
 </footer>
 
 <script type="text/javascript" src="../../dist/jing.min.js"></script>
-<script type="text/javascript" src="js/base.js"></script>
+<script type="text/javascript" src="bower_components/todomvc-common/base.js"></script>
+<script type="text/javascript" src="js/store.js"></script>
+<script type="text/javascript" src="js/todo.js"></script>
 <script type="text/javascript" src="js/app.js"></script>
 </body>
 </html>

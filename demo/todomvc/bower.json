@@ -1,0 +1,29 @@
+{
+  "name": "jing_todo_mvc",
+  "version": "0.0.0",
+  "homepage": "https://github.com/YuhangGe/jing.js",
+  "authors": [
+    "YuhangGe <abeyuhang@gmail.com>"
+  ],
+  "description": "Flexible javascript MVW framework",
+  "main": "dist/jing.min.js",
+  "keywords": [
+    "javascript",
+    "MVW",
+    "MVC",
+    "MVVM"
+  ],
+  "license": "MIT",
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    ".idea",
+    ".npmignore",
+    "grunt",
+    ".gitignore",
+    "package.json",
+    "gruntfile.js"
+  ]
+}

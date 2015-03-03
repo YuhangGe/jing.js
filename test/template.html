@@ -15,7 +15,7 @@
             <!--color: #800080;-->
         <!--}-->
     <!--</style>-->
-    <link rel="stylesheet" href="../demo/todomvc/css/base.css">
+    <link rel="stylesheet" href="../demo/todomvc/bower_components/todomvc-common/base.css">
     <link rel="stylesheet" href="../demo/todomvc/css/index.css">
 
 </head>
@@ -106,7 +106,7 @@
 					</span>
         <ul id="filters">
             <li>
-                <a j-class="status === '' ? 'selected' : ''" href="#/">All</a>
+                <a j-class="status === 'all' ? 'selected' : ''" href="#/all">All</a>
             </li>
             <li>
                 <a j-class="status === 'active' ? 'selected' : ''" href="#/active">Active</a>
@@ -126,7 +126,12 @@
     <p>Part of <a href="http://todomvc.com">TodoMVC</a></p>
 </footer>
 
-<script type="text/javascript" src="../demo/todomvc/js/base.js"></script>
+<script type="text/javascript" src="../demo/todomvc/bower_components/director/director.min.js"></script>
+
+<script type="text/javascript" src="../demo/todomvc/bower_components/todomvc-common/base.js"></script>
+<script type="text/javascript" src="../demo/todomvc/js/store.js"></script>
+<script type="text/javascript" src="../demo/todomvc/js/todo.js"></script>
+<script type="text/javascript" src="../demo/todomvc/js/route.js"></script>
 <script type="text/javascript" src="../demo/todomvc/js/app.js"></script>
 </body>
 

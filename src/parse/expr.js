@@ -11,6 +11,7 @@ var __parse_op_priority = {
 
     'A' : [400, 0], //Array的构造函数，优先级最高
     '.' : [200, 0],
+    '[]' : [200, 0],
     'F' : [300, 0], //用字符F表示函数调用。
 
 
@@ -149,7 +150,7 @@ function parse_meet_op(op) {
                 /*
                  * 中括号相当于 .() ，也就是先运算括号内，再取Property
                  */
-                parse_check_op('.');
+                parse_check_op('[]');
                 __parse_op_stack.push('(');
             } else {
                 /*
@@ -230,7 +231,7 @@ function parse_expr() {
                 __parse_is_pre_token_var = true;
                 break;
             case 'str':
-                parse_push_node(new ConstantGrammarNode(__parse_token_value));
+                parse_push_node(new ConstantGrammarNode(__parse_token_value.substring(1, __parse_token_value.length-1)));
                 __parse_is_pre_token_var = true;
                 break;
             case 'op':
@@ -336,6 +337,17 @@ function parse_deal_op(op) {
             //tmp.concat(node_b);
             //parse_push_node(tmp);
             //元素分隔不作任何处理。
+            break;
+        case '[]' :
+            node_b = parse_pop_node();
+            node_a = parse_pop_node();
+            //node_b = node_b.type==='variable' ? new ConstantGrammarNode(node_b.var_name) : node_b;
+            if(parse_is_constant(node_a) && parse_is_constant(node_b)) {
+                tmp = new ConstantGrammarNode(node_a.value[node_b.value]);
+            } else {
+                tmp = new PropertyGrammarNode(node_a, node_b);
+            }
+            parse_push_node(tmp);
             break;
         case '.':
             node_b = parse_pop_node();

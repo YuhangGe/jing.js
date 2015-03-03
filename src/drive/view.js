@@ -5,20 +5,20 @@ function drive_get_view_expr(txt) {
     var piece_array = [];
     var piece;
 
-    while((piece = __drive_view_expr_REG.exec(txt))!==null) {
-        if(piece.index > piece_start) {
+    while ((piece = __drive_view_expr_REG.exec(txt)) !== null) {
+        if (piece.index > piece_start) {
             piece_array.push(new ConstantGrammarNode(txt.substring(piece_start, piece.index)));
         }
         piece_start = piece.index + piece[0].length;
         piece_array.push(parse_expression(piece[1], true));
     }
-    if(piece && piece_start < txt.length) {
+    if (piece && piece_start < txt.length) {
         piece_array.push(new ConstantGrammarNode(txt.substring(piece_start)));
     }
 
-    if(piece_array.length === 0) {
+    if (piece_array.length === 0) {
         return null;
-    } else if(piece_array.length === 1) {
+    } else if (piece_array.length === 1) {
         return piece_array[0];
     }
 
@@ -31,14 +31,14 @@ function drive_get_view_expr(txt) {
      *   为了简单起见，采取的解决方法是，在最左边添加一个空字符串，
      *   这样相加的时候会从左往右计算，javascript会以字符串形式链接 '' + age + year
      */
-    if(ea.type !== 'constant' || !$isString(ea.value)) {
+    if (ea.type !== 'constant' || !$isString(ea.value)) {
         piece_array.unshift(new ConstantGrammarNode(''));
         ea = piece_array[0];
     }
 
-    for(var i=1;i<piece_array.length;i++) {
+    for (var i = 1; i < piece_array.length; i++) {
         eb = piece_array[i];
-        if(ea.type === 'constant' && eb.type === 'constant') {
+        if (ea.type === 'constant' && eb.type === 'constant') {
             ea = new ConstantGrammarNode(ea.value + eb.value);
         } else {
             ea = new CalcGrammarNode("#+", ea, eb);
@@ -52,17 +52,16 @@ function drive_render_view(ele, env) {
     var txt = ele.textContent;
     var expr = drive_get_view_expr(txt);
 
-    if(expr === null) {
+    if (expr === null) {
         return;
-    } else if(expr.type === 'constant') {
+    } else if (expr.type === 'constant') {
         ele.textContent = expr.value;
         return;
     }
 
-        var listener = environment_watch_expression(env, expr, drive_view_observer, {
-            ele : ele
-        }, 10);
-
+    var listener = environment_watch_expression(env, expr, drive_view_observer, {
+        ele: ele
+    }, 10);
 
 
     ele.textContent = listener.cur_value;

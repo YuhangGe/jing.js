@@ -9,7 +9,7 @@ function EmitNode(id, parent) {
 EmitNode.prototype = {
     val : function(var_name) {
         var p = this.parent.val(this.id);
-        if(p && var_name) {
+        if(p && !$isUndefined(var_name)) {
             return p[var_name];
         } else {
             return p;

@@ -4,6 +4,17 @@
     <meta charset="UTF-8">
     <title>Test</title>
     <link rel="stylesheet" href="../bower_components/mocha/mocha.css">
+    <style>
+        .ca {
+            color: red;
+        }
+        .cb {
+            color: blue;
+        }
+        .cc {
+            color: #800080;
+        }
+    </style>
 </head>
 <body>
 <div id="mocha">
@@ -36,6 +47,7 @@
 <script type="text/javascript" src="../src/directive/directive.js"></script>
 <script type="text/javascript" src="../src/directive/j-app.js"></script>
 <script type="text/javascript" src="../src/directive/j-async-env.js"></script>
+<script type="text/javascript" src="../src/directive/j-class.js"></script>
 <script type="text/javascript" src="../src/directive/j-directive.js"></script>
 <script type="text/javascript" src="../src/directive/j-env.js"></script>
 <script type="text/javascript" src="../src/directive/j-if.js"></script>
@@ -72,10 +84,11 @@
         console.log.apply(console, arguments);
     }
     jing.module('MyApp')
+
             .env('Ctrl', function(module, env) {
-                env.message = "hello, jing.js";
-            }).init(function(module, rootEnv) {
-                rootEnv.rootMessage = 'Message From Root';
+                this.c = 'ca';
+            }).env('ShowEnv', function() {
+                this.state = 'show';
             });
 </script>
 
@@ -87,16 +100,15 @@
 
 <div id="main" j-app="MyApp">
     <div j-env="Ctrl">
-        <div>
-            <p>Message: {{message}}</p>
-            <input j-model="message"/>
+        <p j-class="c === 'cd' ? '' : c">Hello, Jing.JS</p>
+        <p><button j-click="c = c==='cb' ? 'cc' : 'cb'">Toggle Color</button></p>
+        <p><button j-click="c = 'cd' ">Delete Color</button></p>
+        <div j-env="ShowEnv">
+            <p class="cb" j-show="state==='show'">Hello, World.</p>
+            <p><button j-click="state= state==='show' ? 'hide' : 'show'">{{state==='show' ? 'Hide' : 'Show'}}</button></p>
         </div>
-        <div>
-            <input type="button" value="Click Me" j-click="message='click message'">
-        </div>
-        <p>{{rootMessage}}</p>
-        <p><input j-model="rootMessage"/></p>
     </div>
+
 </div>
 
 </body>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title>Style, Class, Show/Hide</title>
+    <style>
+        .ca {
+            color: red;
+        }
+        .cb {
+            color: blue;
+        }
+        .cc {
+            color: #800080;
+        }
+    </style>
+    <script type="text/javascript" src="../../dist/jing.js"></script>
+    <script type="text/javascript">
+        jing.module('MyApp')
+                .factory('Color', function() {
+                    function rand_color() {
+                        var r = Math.floor(Math.random() * 255);
+                        var g = Math.floor(Math.random() * 255);
+                        var b = Math.floor(Math.random() * 255);
+                        return 'rgb('+r+','+g+','+b+')';
+                    }
+                    return {
+                        rand : rand_color
+                    }
+                })
+                .env('StyleEnv', function(module, env) {
+                    this.color_a = 'red';
+                    var Color = module.require('Color');
+                    this.cc = function() {
+                        return Color.rand();
+                    };
+                    this.oc = function() {
+                        return {
+                            color: Color.rand()
+                        }
+                    };
+
+                    this.obj_s = {
+                        color: 'blue',
+                        'font-weight' : 'bold'
+                    };
+                })
+                .env('ClassEnv', function() {
+                    this.c = 'ca';
+                })
+                .env('ShowEnv', function() {
+                    this.state = 'show';
+                })
+    </script>
+</head>
+<body j-app="MyApp">
+<h3>Style</h3>
+<div j-env="StyleEnv">
+    <p j-style="color: {{color_a}}; font-weight:bold;">Inline Style</p>
+    <p j-style="obj_s">Object Style</p>
+    <p><button j-click="color_a = cc()">Change Color</button></p>
+    <p><button j-click="obj_s = oc()">Change Color</button></p>
+</div>
+<h3>Class</h3>
+<div j-env="ClassEnv">
+    <p j-class="c === 'cd' ? '' : c">Hello, Jing.JS</p>
+    <p><button j-click="c = c==='cb' ? 'cc' : 'cb'">Toggle Color</button></p>
+    <p><button j-click="c = 'cd' ">Delete Color</button></p>
+</div>
+<h3>Show/Hide</h3>
+<div j-env="ShowEnv">
+    <p class="cb">&nbsp;<span j-show="state==='show'">Hello, World.</span></p>
+    <p><button j-click="state= state==='show' ? 'hide' : 'show'">{{state==='show' ? 'Hide' : 'Show'}}</button></p>
+</div>
+</body>
+</html>

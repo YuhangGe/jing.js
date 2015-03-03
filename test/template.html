@@ -1,37 +1,39 @@
 <!DOCTYPE html>
 <html>
-<head lang="en">
+<head data-framework="jingjs">
     <meta charset="UTF-8">
     <title>Test</title>
-    <link rel="stylesheet" href="../bower_components/mocha/mocha.css">
-    <style>
-        .ca {
-            color: red;
-        }
-        .cb {
-            color: blue;
-        }
-        .cc {
-            color: #800080;
-        }
-    </style>
+    <!--<link rel="stylesheet" href="../bower_components/mocha/mocha.css">-->
+    <!--<style>-->
+        <!--.ca {-->
+            <!--color: red;-->
+        <!--}-->
+        <!--.cb {-->
+            <!--color: blue;-->
+        <!--}-->
+        <!--.cc {-->
+            <!--color: #800080;-->
+        <!--}-->
+    <!--</style>-->
+    <link rel="stylesheet" href="../demo/todomvc/css/base.css">
+
 </head>
-<body>
-<div id="mocha">
+<!--<body>-->
+<!--<div id="mocha">-->
 
-</div>
+<!--</div>-->
 
-<script type="text/javascript" src="../bower_components/jquery/dist/jquery.min.js"></script>
-<script type="text/javascript" src="../bower_components/mocha/mocha.js"></script>
-<script type="text/javascript" src="../bower_components/chai/chai.js"></script>
-<script>mocha.setup('bdd')</script>
-<script type="text/javascript">
-    for(var kn in chai) {
-        if(!window[kn]) {
-            window[kn] = chai[kn];
-        }
-    }
-</script>
+<!--<script type="text/javascript" src="../bower_components/jquery/dist/jquery.min.js"></script>-->
+<!--<script type="text/javascript" src="../bower_components/mocha/mocha.js"></script>-->
+<!--<script type="text/javascript" src="../bower_components/chai/chai.js"></script>-->
+<!--<script>mocha.setup('bdd')</script>-->
+<!--<script type="text/javascript">-->
+    <!--for(var kn in chai) {-->
+        <!--if(!window[kn]) {-->
+            <!--window[kn] = chai[kn];-->
+        <!--}-->
+    <!--}-->
+<!--</script> -->
 
 <!--JING SOURCE FILES-->
 
@@ -39,16 +41,19 @@
 <!--<script type="text/javascript" src="cases/env/watch/array.js"></script>-->
 
 <script type="text/javascript">
-    function log() {
-        console.log.apply(console, arguments);
-    }
-    jing.module('MyApp')
-
-            .env('Ctrl', function(module, env) {
-                this.c = 'ca';
-            }).env('ShowEnv', function() {
-                this.state = 'show';
-            });
+//    function log() {
+//        console.log.apply(console, arguments);
+//    }
+//    jing.module('MyApp')
+//
+//            .env('Ctrl', function(module, env) {
+//                this.c = 'ca';
+//                this.add = function() {
+//                    log('add');
+//                }
+//            }).env('ShowEnv', function() {
+//                this.state = 'show';
+//            });
 </script>
 
 <script>
@@ -57,18 +62,71 @@
 //    mocha.run();
 </script>
 
-<div id="main" j-app="MyApp">
-    <div j-env="Ctrl">
-        <p j-class="c === 'cd' ? '' : c">Hello, Jing.JS</p>
-        <p><button j-click="c = c==='cb' ? 'cc' : 'cb'">Toggle Color</button></p>
-        <p><button j-click="c = 'cd' ">Delete Color</button></p>
-        <div j-env="ShowEnv">
-            <p class="cb" j-show="state==='show'">Hello, World.</p>
-            <p><button j-click="state= state==='show' ? 'hide' : 'show'">{{state==='show' ? 'Hide' : 'Show'}}</button></p>
-        </div>
-    </div>
+<!--<div id="main" j-app="MyApp">-->
+    <!--<div j-env="Ctrl">-->
+        <!--<p j-class="c === 'cd' ? '' : c">Hello, Jing.JS</p>-->
+        <!--<p><button j-click="c = c==='cb' ? 'cc' : 'cb'">Toggle Color</button></p>-->
+        <!--<p><button j-click="c = 'cd' ">Delete Color</button></p>-->
+        <!--<div j-env="ShowEnv">-->
+            <!--<p class="cb" j-show="state==='show'">Hello, World.</p>-->
+            <!--<p><button j-click="state= state==='show' ? 'hide' : 'show'">{{state==='show' ? 'Hide' : 'Show'}}</button></p>-->
+        <!--</div>-->
+        <!--<button j-dblclick="add()">Double Click</button>-->
+        <!--<input j-enter="add()">-->
+<!---->
+    <!--</div>-->
+<!--</div>-->
 
-</div>
+<!--</body>-->
+<body j-app="TodoApp">
 
+<section id="todoapp">
+    <header id="header">
+        <h1>todos</h1>
+        <input id="new-todo" placeholder="What needs to be done?" j-model="new_todo" j-enter="addTodo()" autofocus>
+    </header>
+    <section id="main" j-show="todos.length">
+        <input id="toggle-all" type="checkbox" j-model="all_checked" j-click="markAll(all_checked)">
+        <label for="toggle-all">Mark all as complete</label>
+        <ul id="todo-list">
+            <li j-repeat="todo in todos" j-class="(todo.completed ? 'completed ' : '') + (todo === edited_todo ? 'editing' : '')">
+                <div class="view">
+                    <input class="toggle" type="checkbox" j-change="toggleComplete(todo)" j-model="todo.completed">
+                    <label j-dblclick="editTodo(todo)">{{todo.title}}</label>
+                    <button class="destroy" j-click="removeTodo(todo)"></button>
+                </div>
+                <input class="edit" j-model="todo.title" j-blur="doneEditing(todo)" todo-focus="todo === edited_todo">
+            </li>
+        </ul>
+    </section>
+    <footer id="footer" j-show="todos.length">
+					<span id="todo-count">
+                        <strong>{{remaining_count}}</strong>{{remaining_count>1?' items left':' item left'}}
+					</span>
+        <ul id="filters">
+            <li>
+                <a j-class="status === '' ? 'selected' : ''" href="#/">All</a>
+            </li>
+            <li>
+                <a j-class="status === 'active' ? 'selected' : ''" href="#/active">Active</a>
+            </li>
+            <li>
+                <a j-class="status === 'completed' ? 'selected' : ''" href="#/completed">Completed</a>
+            </li>
+        </ul>
+        <button id="clear-completed" j-click="clearCompletedTodos()" j-show="completed_count > 0">Clear completed ({{completed_count}})</button>
+    </footer>
+</section>
+<footer id="info">
+    <p>Double-click to edit a todo</p>
+    <p>Written by
+        <a href="http://xiaoge.me">Yuhang Ge</a>
+    </p>
+    <p>Part of <a href="http://todomvc.com">TodoMVC</a></p>
+</footer>
+
+<script type="text/javascript" src="../demo/todomvc/js/base.js"></script>
+<script type="text/javascript" src="../demo/todomvc/js/app.js"></script>
 </body>
+
 </html>

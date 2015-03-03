@@ -247,7 +247,7 @@ function $isNumber(num) {
     return typeof num === 'number';
 }
 function $isObject(obj) {
-    return typeof obj === 'object';
+    return obj !== null && typeof obj === 'object';
 }
 function $isNull(nl) {
     return nl === null;
@@ -405,7 +405,7 @@ function environment_def_props(name, value) {
 
 function environment_create_child(env, c_name) {
     var cd = env.__.children;
-    var cs = new Environment(c_name, this);
+    var cs = new Environment(c_name, env);
     /*
      * 这里的第4个参数一定要为true，才能覆盖。
      */
@@ -669,7 +669,6 @@ LazyListener.prototype = {
             pre_value : pre_value,
             cur_value : cur_value
         });
-        var me = this;
         this.timeout = setTimeout(this.delegate, this.lazy);
     },
     deal : function() {
@@ -680,6 +679,9 @@ LazyListener.prototype = {
 
 function LazyExprListener(var_tree, expr, env, handler, data, lazy_time) {
     this.base(handler, data, lazy_time);
+    if(data.id && data.id==='j.ele.7') {
+        debugger;
+    }
     this.expr = expr;
     this.var_tree = var_tree;
     this.env = env;
@@ -718,12 +720,9 @@ LazyExprListener.prototype = {
                 listen_refresh_expr_node(n_arr[j]);
             }
         }
-        //for(k in this.var_tree) {
-        //    listen_refresh_expr_node(this.var_tree[k]);
-        //}
+
         this.changes.length = 0;
-        //log(this.expr);
-        //return;
+
         this.cur_value = this.expr.exec(this.env);
         if(!$isJArray(this.cur_value) && this.cur_value === this.pre_value) {
             return;
@@ -773,7 +772,7 @@ function environment_declare_obj(p, var_name, value, emit_node) {
             //pv.destroy(); //todo destroy previous Array
         }
 
-        if($isObject(props[var_name]) && $isObject(val)) {
+        if($isObject(props[var_name]) && $isObject(val) && $isObject(pv)) {
             var en = this[__env_emit_name][var_name];
             environment_redeclare_var(en, val, pv);
         }
@@ -1376,16 +1375,16 @@ function directive_deal_j_async_env(ele, drive_module, env) {
 
 directive_create('j-class', function() {
     function apply_class(ele, pre, cur) {
-        ele.className = (ele.className.replace(pre, '') + ' ' + cur).trim();
+        ele.className = (ele.className.replace(pre.trim(), '') + ' ' + cur).trim();
     }
     return function(drive_module, directive_module, env, element, attr_value) {
+
         var expr = parse_expression(attr_value, true);
-        log(expr);
-        var listener = environment_watch_expression(env, expr, function(change_list, data) {
-            apply_class(data.ele, change_list[0].pre_value, change_list[0].cur_value);
-        }, {
-            ele : element
-        }, 10);
+        log('jc', event_jid(element));
+
+        var listener = environment_watch_expression(env, expr, function(change_list, ele) {
+            apply_class(ele, change_list[0].pre_value, change_list[0].cur_value);
+        }, element, 10);
 
         apply_class(element, '', listener.cur_value);
     }
@@ -1422,9 +1421,7 @@ directive_create('j-if', function() {
     function apply_insert(ele, parent, insert) {
     }
     return function(drive_module, directive_module, env, element, attr_value) {
-        var expr = parse_expression(attr_value);
-        var insert = expr.exec(env);
-
+        throw 'j-if has not been implemented';
     }
 });
 
@@ -1516,26 +1513,37 @@ function JInputModel(ele, env, expr) {
     this.ele = ele;
     this.env = env;
     this.expr = expr;
-    this.val = expr.exec(env);
-    ele.value = this.val;
 
-    $on(ele, 'input', $bind(this, this.change));
-
-    environment_watch_expression(env, expr, function(change_list, j_model) {
+    var listener = environment_watch_expression(env, expr, function(change_list, j_model) {
         j_model.update(change_list[0].cur_value);
     }, this, 10);
+
+    this.val = listener.cur_value;
+    this.val_key = 'value';
+    this.val_event = 'input';
+
+    var type = $attr(ele, 'type');
+    switch (type) {
+        case 'checkbox':
+            this.val_key = 'checked';
+            this.val_event = 'change';
+            break;
+    }
+
+    this.ele[this.val_key] = this.val;
+    $on(ele, this.val_event, $bind(this, this.change));
 
 }
 var __jimodel_prototype = JInputModel.prototype;
 
 __jimodel_prototype.change = function() {
-    this.val = this.ele.value;
+    this.val = this.ele[this.val_key];
     this.expr.set(this.env, this.val);
 };
 
 __jimodel_prototype.update = function(new_value) {
     if(this.val !== new_value) {
-        this.ele.value = new_value;
+        this.ele[this.val_key] = new_value;
         this.val = new_value;
     }
 };
@@ -1559,6 +1567,7 @@ directive_create('j-model', function() {
         if(expr.type !== 'variable' && expr.type !== 'property') {
             throw 'j-model only support settable expression';
         }
+
         new JInputModel(element, env, expr);
     };
 });
@@ -1575,25 +1584,45 @@ directive_create('j-on', function() {
         });
     }
 });
-directive_create('j-click', function() {
-    /*
-     * todo j-click应该进一步考虑触屏。
-     */
+
+directive_create('j-enter', function() {
     return function(drive_module, directive_module, env, element, attr_value) {
         var expr = parse_expression(attr_value);
-        event_on(element, 'click', function() {
-            expr.exec(env);
+        event_on(element, 'keydown', function(e) {
+            if(e.keyCode === 13) {
+                expr.exec(env);
+            }
         });
     }
 });
-directive_create(['j-mousedown', 'j-md', 'j-mouse-down'], function() {
-    return function(drive_module, directive_module, env, element, attr_value) {
-        var expr = parse_expression(attr_value);
-        event_on(element, 'mousedown', function() {
-            expr.exec(env);
-        });
-    }
+
+$each(['j-click', 'j-dblclick', 'j-mousedown'], function(d_name) {
+    var e_name = d_name.substring(2);
+    directive_create(d_name, function() {
+        return function(drive_module, directive_module, env, element, attr_value) {
+            var expr = parse_expression(attr_value);
+            if(e_name==='blur') {
+                debugger;
+            }
+            event_on(element, e_name, function(e) {
+                expr.exec(env);
+            });
+        }
+    });
 });
+
+$each(['j-blur', 'j-focus', 'j-change'], function(d_name) {
+    var e_name = d_name.substring(2);
+    directive_create(d_name, function() {
+        return function(drive_module, directive_module, env, element, attr_value) {
+            var expr = parse_expression(attr_value);
+            $on(element, e_name, function(e) {
+                expr.exec(env);
+            });
+        }
+    });
+});
+
 
 function JRepeat(ele, attr, drive_module, key, env, expr) {
     this.ele = ele;
@@ -1623,7 +1652,7 @@ var __jrepeate_prototype = JRepeat.prototype;
 __jrepeate_prototype.update = function(new_value) {
     /*
      * 目前是简单地重新全部更新元素。是一种很低效率的方式。
-     *
+     * 同时，已经$watch的表达式没有被destroy
      * todo 采用diff的思想，只更新发生变化的元素。
      */
     for(var i=0;i<this.dom_items.length;i++) {
@@ -1647,6 +1676,7 @@ __jrepeate_prototype._get = function() {
     var frag = document.createDocumentFragment();
     for(var i=0;i<array.length;i++) {
         r_ele = this.ele.cloneNode(true);
+        log(event_jid(r_ele));
         r_env = environment_create_child(this.env, i);
         r_env.$prop = {
             '@index' : i,
@@ -1659,7 +1689,7 @@ __jrepeate_prototype._get = function() {
         r_env[this.key] = array[i];
         /*
          * 目前是对每一次复制的元素进行render，包括解析directive和view。
-         * todo 可以考虑复用directive和view，这样就不需要每次循环都去drive_render_view
+         * todo 可以考虑复用directive和view，这样就不需要每次循环都去drive_render_view. destroy之前的元素的已经$watch的表达式。
          */
         drive_render_element(r_ele, this.attr, this.module, r_env);
         frag.appendChild(r_ele);
@@ -1696,18 +1726,23 @@ function directive_deal_j_repeat(ele, attr, drive_module, env) {
 
     function directive_show_hide(drive_module, directive_module, env, element, attr_value, show) {
         var expr = parse_expression(attr_value);
-        var val = expr.exec(env),
-            is_show = show ? (val ? true : false) : (val ? false : true);
 
-        apply_show_hide(element, is_show);
 
-        environment_watch_expression(env, expr, (show ? function(change_list, data) {
+
+        var listener = environment_watch_expression(env, expr, (show ? function(change_list, data) {
             apply_show_hide(data.ele, change_list[0].cur_value ? true : false);
         } : function(change_list, data) {
             apply_show_hide(data.ele, change_list[0].cur_value ? false : true);
         }), {
             ele : element
         }, 10);
+
+        var val = listener.cur_value,
+            is_show = show ? (val ? true : false) : (val ? false : true);
+
+        apply_show_hide(element, is_show);
+
+
     }
 
     directive_create('j-show', function() {
@@ -2913,6 +2948,7 @@ function drive_get_view_expr(txt) {
 
 function drive_render_view(ele, env) {
     var txt = ele.textContent;
+
     var expr = drive_get_view_expr(txt);
 
     if (expr === null) {
@@ -2925,7 +2961,6 @@ function drive_render_view(ele, env) {
     var listener = environment_watch_expression(env, expr, drive_view_observer, {
         ele: ele
     }, 10);
-
 
     ele.textContent = listener.cur_value;
 }

@@ -8,6 +8,12 @@ Flexible javascript MVW framework
 
 当前代码处理实验阶段，项目文件结构还略显混乱。在demo/simple文件夹下面可以看到示例及代码注释文档。
 
+Todos
+------
+
+* $watch机制的销毁策略。（Important\!）
+* j-repeat还有许多工作需要完善和改进。包括使用diff思想，复用组件，以及销毁不再使用的组件的$watch
+
 模块化和命名约定
 ------
 由于jing.js是纯浏览器端库，不会被使用在nodejs平台上，

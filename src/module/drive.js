@@ -1,5 +1,5 @@
-var __module_dom_ready = false;
 var __module_drive_queue = {};
+var __module_doc_ready = false;
 
 function module_apply_drive() {
     console.time('ttt');
@@ -14,34 +14,22 @@ function module_apply_drive() {
             r_list[j].call(d_item.env, d_item.module, d_item.env);
         }
 
-        __drive_insert_b.length = 0;
-
         drive_parse_element(d_item.ele, d_item.module, d_item.env);
 
-        $each(__drive_insert_b, function(it) {
-            it.pos.parentNode.insertBefore(it.ele, it.pos);
-            //log(it.ele.parentElement);
-            //log(it.ele.parentNode);
-            //it.pos.parentElement.removeChild(it.ele);
-        });
-        __drive_insert_b.length = 0;
+        drive_insert_before();
 
         d_item.init = true;
     }
     console.timeEnd('ttt');
 }
 
-$on(document, 'DOMContentLoaded', function() {
-    if(!__module_dom_ready) {
-        __module_dom_ready = true;
-        module_apply_drive();
-    }
+$ready(function() {
+   if(!__module_doc_ready) {
+       __module_doc_ready = true;
+   }
 });
 
-$defineProperty(__module_prototype, 'drive', function drive(element) {
-    if(this.parent) {
-        throw 'function "drive" can only be applied to root Module';
-    }
+function module_drive_add(module, element) {
     var id = event_jid(element), d_item = __module_drive_queue[id];
     if(d_item) {
         throw 'element can\'t be driven more than once';
@@ -50,13 +38,22 @@ $defineProperty(__module_prototype, 'drive', function drive(element) {
             init : false,
             env : new Environment(id),
             ele : element,
-            module : this
+            module : module
         };
         __module_drive_queue[id] = d_item;
     }
+}
+$defineProperty(__module_prototype, 'drive', function drive(element) {
+    if(this.parent) {
+        throw 'function "drive" can only be applied to root Module';
+    }
+    if($isString(element)) {
+        element = document.querySelector(element);
+    }
+    module_drive_add(element);
 
-    if(__module_dom_ready) {
-        module_apply_drive();
+    if(__module_doc_ready) {
+       module_apply_drive();
     }
 
     return this;

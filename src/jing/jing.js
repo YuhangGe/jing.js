@@ -23,6 +23,5 @@ jing.factory = function(name) {
         return ms[0].factory(ms[1]);
     }
 };
-jing.environment = function(name, func) {
 
-};
+jing.ready = $ready;

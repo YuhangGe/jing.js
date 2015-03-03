@@ -1,34 +1,11 @@
-/*
- * require scope
- */
-//
-//function drive_directive_name_value(ele, drive_module, env) {
-//    var dn = $attr(ele, __JDN).split(','),
-//        dv = $hasAttr(ele, __JDV) ? $attr(ele, __JDV).split(',') : [];
-//    if(dn.length === 0) {
-//        //todo check format
-//    }
-//    var i, ns, val, dire, link_scope, parent_scope;
-//    for(i=0;i<dn.length;i++) {
-//        ns = dn[i].trim();
-//        val = dv[i];
-//        dire = __directive_full_table[ns];
-//        if(!dire) {
-//            throw 'directive "' + ns + '" not found!';
-//        }
-//        link_scope = drive_run_directive(ele, drive_module, dire, env, val);
-//        if(dire.env_type === __ENV_TYPE_PARENT) {
-//            if(parent_scope) {
-//                throw 'directive with env_type:jing.env_types.PARENT can be occur once on one element!';
-//            } else {
-//                parent_scope = link_scope;
-//            }
-//        }
-//    }
-//    return parent_scope;
-//}
-
 var __drive_insert_b = [];
+
+function drive_insert_before() {
+    $each(__drive_insert_b, function(it) {
+        it.pos.parentNode.insertBefore(it.ele, it.pos);
+    });
+    __drive_insert_b.length = 0;
+}
 
 function drive_run_directive(element, drive_module, directive, env, val) {
     directive_initialize(directive);

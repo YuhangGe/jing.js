@@ -205,6 +205,9 @@ function $$before(new_ele, ele) {
 function $$remove(ele) {
     ele.parentNode.removeChild(ele);
 }
+function $$all(query) {
+    return document.querySelectorAll(query);
+}
 function $$append(parent, ele) {
     parent.appendChild(ele);
 }
@@ -250,6 +253,13 @@ function $isNull(nl) {
 }
 function $isUndefined(obj) {
     return typeof obj === 'undefined';
+}
+function $ready(fn) {
+    if (document.readyState === 'complete') {
+        fn();
+    } else {
+        document.addEventListener('DOMContentLoaded', fn);
+    }
 }
 /*
  * 在部署时，所有$assert的调用都应该删除。

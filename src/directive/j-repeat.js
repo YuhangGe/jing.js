@@ -35,7 +35,11 @@ __jrepeate_prototype.update = function(new_value) {
     this.dom_items.length = 0;
     this.val = new_value;
     this._get();
-    $$before(this.frag, this.cmt);
+    __drive_insert_b.push({
+        ele : this.frag,
+        pos : this.cmt
+    });
+    drive_insert_before();
 };
 __jrepeate_prototype._get = function() {
     var array = this.val;
@@ -73,7 +77,6 @@ __jrepeate_prototype.render = function() {
         ele : this.frag,
         pos : this.cmt
     });
-
 };
 
 function directive_deal_j_repeat(ele, attr, drive_module, env) {

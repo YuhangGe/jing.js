@@ -34,6 +34,7 @@
 <script type="text/javascript" src="../src/module/directive.js"></script>
 <script type="text/javascript" src="../src/module/drive.js"></script>
 <script type="text/javascript" src="../src/directive/directive.js"></script>
+<script type="text/javascript" src="../src/directive/j-app.js"></script>
 <script type="text/javascript" src="../src/directive/j-async-env.js"></script>
 <script type="text/javascript" src="../src/directive/j-directive.js"></script>
 <script type="text/javascript" src="../src/directive/j-env.js"></script>
@@ -111,26 +112,36 @@
             return list;
         }).env('E4', function(module) {
 
-            this.list = module.require('S1');
-            this.index = 1;
-            this.inc = function() {
-                this.index++;
-                log(this.index);
-            };
+            this.list1 = module.require('S1');
+            this.list = this.list1.slice(0, 3);
+
+            this.index = 0;
 
             this.append = function(name, idx) {
                 this.list.push({
                     name : name + idx,
                     age : 888,
-                    girls : []
+                    girls : [{
+                        name : 'Push Girl 0',
+                        age : 34
+                    },{
+                        name : 'Push Girl 0',
+                        age : 34
+                    }]
                 });
             };
 
             this.unshift = function(name) {
                 this.list.unshift({
-                    name : 'sdsd',
+                    name : 'Shift Boy',
                     age : 323,
-                    girls : []
+                    girls : [{
+                        name : 'Shift Girl 0',
+                        age : 34
+                    }, {
+                        name : 'Shift Girl 1',
+                        age : 323
+                    }]
                 });
             };
 
@@ -139,9 +150,9 @@
 
             env.msg = 'hello';
             this.uu = 'good';
+            this.log = log;
 
-
-        }).drive(document.body);
+        });
 //    })();
 </script>
 
@@ -151,7 +162,7 @@
 //    mocha.run();
 </script>
 
-<div id="main">
+<div id="main" j-app="MyApp">
     <!--<p>{{msg}}</p>-->
     <!--<p><button j-click="msg='love jing'">Set Message</button></p>-->
     <!--<p><input type="text" j-model="msg"/></p>-->
@@ -169,7 +180,7 @@
     <div j-env="E4">
         <h4>Simple</h4>
         <ul>
-            <li j-repeat="boy in list.slice(index, index+5)">
+            <li j-repeat="boy in list1.slice(index, index+5)">
                 <p>{{boy.name}}, {{boy.age}}</p>
             </li>
         </ul>
@@ -177,23 +188,21 @@
             <button j-click="index-=5">上一页</button>
             <button j-click="index+=5">下一页</button>
         </p>
-        <!--<h4>j-repeat</h4>-->
-        <!--<ul>-->
-            <!--<li>First Line, {{list.slice(0, 1)[0].name}}</li>-->
-            <!--<li>-->
-                <!--<p>First Boy: {{list[0].name}}, {{list[0].age}}</p>-->
-            <!--</li>-->
-            <!--<li j-repeat="boy in list.slice(1, list.length-2)">-->
-                <!--<p>{{boy.name}}, {{boy.age}}</p>-->
-                <!--<ul>-->
-                    <!--<li j-repeat="girl in boy.girls">{{girl.name}}, {{girl.age * 100}}</li>-->
-                <!--</ul>-->
-            <!--</li>-->
-            <!--<li>-->
-                <!--<p>Last Boy: {{list[list.length-1].name}}, {{list[list.length-1].age}}</p>-->
-            <!--</li>-->
-        <!--</ul>-->
-        <!--<span>{{list[list.length-1].name + ' ' + list[list.length-1].age}}</span>-->
+        <h4>Complex</h4>
+        <ul>
+            <li>
+                <p>First Boy: {{list[0].name}}, {{list[0].age}}</p>
+            </li>
+            <li j-repeat="boy in list.slice(1, list.length-1)">
+                <p>{{boy.name}}, {{boy.age}}</p>
+                <ul>
+                    <li j-repeat="girl in boy.girls">{{girl.name}}, {{girl.age * 100}}</li>
+                </ul>
+            </li>
+            <li>
+                <p>Last Boy: {{list[list.length-1].name}}, {{list[list.length-1].age}}</p>
+            </li>
+        </ul>
         <div>
             <button j-click="unshift('shift')">Shift</button>
             <button j-click="append('jing', list.length)">Append</button>

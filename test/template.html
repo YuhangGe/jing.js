@@ -87,12 +87,12 @@
         <input id="new-todo" placeholder="What needs to be done?" j-model="new_todo" j-enter="addTodo()" autofocus>
     </header>
     <section id="main" j-show="todos.length">
-        <input id="toggle-all" type="checkbox" j-model="all_checked" j-click="markAll(all_checked)">
+        <input id="toggle-all" type="checkbox" j-value="all_checked" j-change="markAll(all_checked)">
         <label for="toggle-all">Mark all as complete</label>
         <ul id="todo-list">
             <li j-repeat="todo in todos" j-class="(todo.completed ? 'completed ' : '') + (todo === edited_todo ? 'editing' : '')">
                 <div class="view">
-                    <input class="toggle" type="checkbox" j-change="toggleComplete(todo)" j-model="todo.completed">
+                    <input class="toggle" type="checkbox" j-change="toggleComplete(todo)" j-value="todo.completed">
                     <label j-dblclick="editTodo(todo)">{{todo.title}}</label>
                     <button class="destroy" j-click="removeTodo(todo)"></button>
                 </div>

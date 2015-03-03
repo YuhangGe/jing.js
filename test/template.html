@@ -31,180 +31,11 @@
     function log() {
         console.log.apply(console, arguments);
     }
-
     jing.module('MyApp')
             .env('Ctrl', function(module, env) {
-
-                /*
-                 * jing.js的Environment跟angularjs的Scope和Controller概念基本一致。
-                 * 通过调用Module.env(name, instance_function)可以创建并实例化一个Environment,
-                 *   从而为该Environment声明和定义成员。
-                 *
-                 * 实例化函数接受两个参数，module和env，其中，
-                 *   module就是该模块，可以用来调用module.require，参看demo/simple/modularization.html
-                 *   env是被创建的需要实例化的Environment。
-                 *
-                 * 在实例化函数中，this同样指代的是该Environment，也就是说，this === env。
-                 *
-                 */
-                log(this === env); //true
-
-                /*
-                 * Environment中，由$符号打头的成员变量和成员函数，是jing.js保留的，不可以被用户覆盖。
-                 * 这些保留成员变量/函数包括：
-                 *   $watch(...) : 监控成员变化
-                 *   $prop : 添加成员变量/函数的辅助。
-                 *   $root : 返回根Environment
-                 *   $parent : 返回父亲Environment.
-                 *   $name : 该Environment的名称。
-                 *   $children : 所有子环境。
-                 *   $child(child_name) : 创建（或返回）子环境。
-                 *
-                 *   $get(variable_name) : 取得该Environment中的成员的值。会循环遍历其父亲环境直到找到。
-                 *   $set(variable_name, value) : 设置该Environment中的成员的值。会循环遍历其父亲环境直到找到。
-                 *   $has(variable_name) : 取得该Environment中的是否有某个成员。会循环遍历其父亲环境直到找到。
-                 *   $find(variable_name) : 循环遍历父亲环境，直到找到存在该成员的那个Environment(有可能就是这个Environment)。
-                 *
-                 * 此外，Environment还有一个以两个下划线为名称的成员变量：__
-                 *   该成员变量同样是jing.js的保留变量，不能被覆盖。
-                 *
-                 * 除了以上成员，可以给Environment赋以任意名称的变量。
-                 */
-
-                this.boy = {
-                    name : 'xiaoge',
-                    age : 25
-                };
-                env.girl = {
-                    name : 'jing',
-                    age : 24
-                };
-
-                /*
-                 * Environment.$prop是一个魔法函数，用来批量添加变量。
-                 * 它支持3种不同的方式，可以根据不同的场景以及自己的喜好选择使用。
-                 * 以下的这些代码跟上面的代码一样，都是定义boy和girl两个变量的方法。
-                 */
-                env.$prop = {
-                    boy : {
-                        name : 'xiaoge',
-                        age : 25
-                    },
-                    girl : {
-                        name : 'jing',
-                        age : 24
-                    }
-                };
-                env.$prop({
-                    boy : {
-                        name : 'xiaoge',
-                        age : 25
-                    },
-                    girl : {
-                        name : 'jing',
-                        age : 24
-                    }
-                });
-
-                env.$prop('boy', {
-                    name : 'xiaoge',
-                    age : 25
-                });
-
-                /*
-                 * Environment可以支持复杂的嵌套Object和Array.
-                 */
-                this.A = {
-                    B : [{
-                        C : [{
-                            v : {
-                                D : 88
-                            }
-                        }, {
-                            v : {
-                                D : 99
-                            }
-                        }]
-                    }]
-                };
-
-                this.index = 0;
-
-                for(var i=0;i<50;i++) {
-                    this.A.B[0].C.push({
-                        v : {
-                            D : i
-                        }
-                    });
-                }
-
-                env.boy.say = env.girl.say = function(guest_name) {
-                    alert('Hi '+ guest_name + ', I\'m ' + this.name + '.');
-                };
-
-                env.list = [1,2,3];
-
-                this.$prop = {
-                    ca : function() {
-                        this.index = 0;
-                        this.A = {
-                            B: [{
-                                C: [{
-                                    v: {
-                                        D: 'change A'
-                                    }
-                                }]
-                            }]
-                        }
-                    },
-                    cb : function() {
-                        env.index = 0;
-                        this.A.B = [{
-                            C: [{
-                                v: {
-                                    D: 'change B'
-                                }
-                            }]
-                        }];
-                    },
-                    cc : function () {
-                        env.index = 0;
-                        this.A.B[0].C = [{
-                            v: {
-                                D: 'change C'
-                            }
-                        }]
-                    },
-                    pc : function () {
-                        this.A.B[0].C.push({
-                            v: {
-                                D: 'push C'
-                            }
-                        });
-                        this.index = this.A.B[0].C.length-1;
-                    },
-                    cd : function () {
-                        env.index = 0;
-                        env.A.B[0].C[0].v.D = 'change D';
-                    }
-                };
-
-                env.$watch('A.B[0].C', function(change_list, data) {
-                    //data is null
-                    log('C imm change: ' , change_list[0].cur_value);
-                }, null, false); //显示地表明使用立即模式
-
-                env.$watch('A.B[0].C[0].v.D', function(change_list) {
-                    log('D lazy change: ', change_list[0].cur_value);
-                });
-
-                env.cm = function() {
-                    this.ca();
-                    this.cb();
-                    this.cc();
-                    this.pc();
-                    this.cd();
-                }
+                env.message = "hello, jing.js";
+            }).init(function(module, rootEnv) {
+                rootEnv.rootMessage = 'Message From Root';
             });
 </script>
 
@@ -215,29 +46,16 @@
 </script>
 
 <div id="main" j-app="MyApp">
-    <!--<p>{{msg}}</p>-->
-    <!--<p><button j-click="msg='love jing'">Set Message</button></p>-->
-    <!--<p><input type="text" j-model="msg"/></p>-->
-    <!--<div j-env="E1">-->
-        <!--<p>{{boy.girl.name}}</p>-->
-        <!--<p><button j-click="fn()">Click</button></p>-->
-        <!--<p><button j-click="boy.girl.say()">Click2</button></p>-->
-    <!--</div>-->
-    <!--<div j-env="E2">-->
-        <!--<div j-env="E3">-->
-            <!--<p>{{e2_msg}}, {{msg}}, {{e3_msg}}</p>-->
-            <!--<p><button j-click="f()">E3 Func</button></p>-->
-        <!--</div>-->
-    <!--</div>-->
     <div j-env="Ctrl">
-        <p>这个Demo展示了jing.js的Environment及其$watch机制的用法。</p>
-        <p>Boy: {{boy.name}}, {{boy.age}}</p>
-        <p>Girl: {{girl.name}}, {{girl.age}}</p>
-        <p>Value: {{A.B[0].C[index].v.D}}</p>
-        <p><button j-click="index++">Index++</button><button j-click="boy.say('guest')">Say</button></p>
-        <p><button j-click="ca()">Change A</button><button j-click="cb()">Change B</button><button j-click="cc()">Change C</button><button j-click="pc()">Push C</button><button j-click="cd()">Change D</button></p>
-        <p><button j-click="cm();">Change Many times</button></p>
-
+        <div>
+            <p>Message: {{message}}</p>
+            <input j-model="message"/>
+        </div>
+        <div>
+            <input type="button" value="Click Me" j-click="message='click message'">
+        </div>
+        <p>{{rootMessage}}</p>
+        <p><input j-model="rootMessage"/></p>
     </div>
 </div>
 

@@ -326,7 +326,7 @@ $defineProperty(__env_prototype, '$get', function(var_name) {
     if($hasProperty(this, var_name)) {
         return this[var_name];
     } else if(this.__.parent) {
-        return this.__.parent.$val(var_name);
+        return this.__.parent.$get(var_name);
     } else {
         return null;
     }
@@ -361,7 +361,7 @@ $defineProperty(__env_prototype, '$set', function(var_name, value) {
     if($hasProperty(this, var_name)) {
         this[var_name] = value;
     } else if(this.__.parent) {
-        this.__.parent.set(var_name, value);
+        this.__.parent.$set(var_name, value);
     }
 });
 
@@ -894,7 +894,11 @@ function environment_watch_items(env, var_array, listener, is_lazy) {
         return;
     }
 
-    var p = env, vn, i, e_tree = env.__.emit_tree;
+    var p = env.$find(var_array[0]);
+    if(!p) {
+        throw 'variable ' + var_array[0] + ' not found!';
+    }
+    var vn, i, e_tree = env.__.emit_tree;
     var e_node, cp;
     for (i = 0; i < var_array.length; i++) {
         if (!$isObject(p)) {

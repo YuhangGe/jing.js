@@ -3,29 +3,30 @@
 <head>
     <meta charset="UTF-8">
     <title>Simple Data Binding Demo</title>
-    <script type="text/javascript" src="../../dist/jing.min.js"></script>
+    <script type="text/javascript" src="../../dist/jing.js"></script>
     <script type="text/javascript">
         function log() {
             console.log.apply(console, arguments);
         }
-
-
-
-        jing.$on(document, 'DOMContentLoaded', function () {
-            jing.module('MyApp').drive(document.body);
-        });
-
+        jing.module('MyApp')
+                .env('Ctrl', function(module, env) {
+                    env.message = "hello, jing.js";
+                }).init(function(module, rootEnv) {
+                    rootEnv.rootMessage = 'Message From Root';
+                });
     </script>
 </head>
-<div j-ctrl="TestCtrl">
+<body  j-app="MyApp">
+<div j-env="Ctrl">
     <div>
         <p>Message: {{message}}</p>
         <input j-model="message"/>
     </div>
     <div>
-        <input type="button" value="Click Me" j-click="test">
+        <input type="button" value="Click Me" j-click="message='click message'">
     </div>
     <p>{{rootMessage}}</p>
+    <p><input j-model="rootMessage"/></p>
 </div>
 </body>
 </html>

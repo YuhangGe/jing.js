@@ -54,6 +54,9 @@ jing.module('TodoApp')
                 env.edited_todo = todo;
             },
             toggleComplete : function(todo) {
+                if(todo) {
+                    todo.completed =  !todo.completed;
+                }
                 var r = 0, c = 0;
                 for(var i=0;i<env.todos.length;i++) {
                     if(env.todos[i].completed) {

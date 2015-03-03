@@ -20,7 +20,7 @@
         <ul id="todo-list">
             <li j-repeat="todo in todos" j-class="(todo.completed ? 'completed ' : '') + (todo === edited_todo ? 'editing' : '')">
                 <div class="view">
-                    <input class="toggle" type="checkbox" j-change="toggleComplete(todo)" j-model="todo.completed">
+                    <input class="toggle" type="checkbox" j-change="toggleComplete(todo)" j-value="todo.completed">
                     <label j-dblclick="editTodo(todo)">{{todo.title}}</label>
                     <button class="destroy" j-click="removeTodo(todo)"></button>
                 </div>

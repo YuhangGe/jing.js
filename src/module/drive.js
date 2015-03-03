@@ -29,8 +29,19 @@ $ready(function() {
    }
 });
 
+function module_get_root_env(element) {
+    var id = event_jid(element),
+        d_item = __module_drive_queue[id];
+    if(!d_item) {
+        return null;
+    } else {
+        return d_item.env;
+    }
+}
+
 function module_drive_add(module, element) {
-    var id = event_jid(element), d_item = __module_drive_queue[id];
+    var id = event_jid(element),
+        d_item = __module_drive_queue[id];
     if(d_item) {
         throw 'element can\'t be driven more than once';
     } else {

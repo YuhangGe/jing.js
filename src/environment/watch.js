@@ -165,7 +165,7 @@ function environment_watch_items(env, var_array, listener, is_lazy) {
     if(!act_env) {
         throw 'variable ' + var_array[0] + ' not found!';
     }
-    var p = act_env, vn, i, e_tree = env.__.emit_tree;
+    var p = act_env, vn, i, e_tree = act_env.__.emit_tree;
     var e_node, cp, pen;
     for (i = 0; i < var_array.length; i++) {
         if (!$isObject(p)) {

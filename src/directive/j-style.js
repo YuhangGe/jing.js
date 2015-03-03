@@ -57,7 +57,7 @@ directive_create('j-style', function() {
     return function(drive_module, directive_module, env, element, attr_value) {
         var expr = drive_get_view_expr(attr_value);
         if(expr === null) {
-            expr = parse_expression(attr_value);
+            expr = parse_expression(attr_value, true);
         }
 
         apply_style(element, expr.exec(env));

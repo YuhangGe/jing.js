@@ -2,26 +2,37 @@ function JInputModel(ele, env, expr) {
     this.ele = ele;
     this.env = env;
     this.expr = expr;
-    this.val = expr.exec(env);
-    ele.value = this.val;
 
-    $on(ele, 'input', $bind(this, this.change));
-
-    environment_watch_expression(env, expr, function(change_list, j_model) {
+    var listener = environment_watch_expression(env, expr, function(change_list, j_model) {
         j_model.update(change_list[0].cur_value);
     }, this, 10);
+
+    this.val = listener.cur_value;
+    this.val_key = 'value';
+    this.val_event = 'input';
+
+    var type = $attr(ele, 'type');
+    switch (type) {
+        case 'checkbox':
+            this.val_key = 'checked';
+            this.val_event = 'change';
+            break;
+    }
+
+    this.ele[this.val_key] = this.val;
+    $on(ele, this.val_event, $bind(this, this.change));
 
 }
 var __jimodel_prototype = JInputModel.prototype;
 
 __jimodel_prototype.change = function() {
-    this.val = this.ele.value;
+    this.val = this.ele[this.val_key];
     this.expr.set(this.env, this.val);
 };
 
 __jimodel_prototype.update = function(new_value) {
     if(this.val !== new_value) {
-        this.ele.value = new_value;
+        this.ele[this.val_key] = new_value;
         this.val = new_value;
     }
 };
@@ -45,6 +56,7 @@ directive_create('j-model', function() {
         if(expr.type !== 'variable' && expr.type !== 'property') {
             throw 'j-model only support settable expression';
         }
+
         new JInputModel(element, env, expr);
     };
 });

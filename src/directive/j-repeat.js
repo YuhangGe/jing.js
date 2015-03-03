@@ -26,7 +26,7 @@ var __jrepeate_prototype = JRepeat.prototype;
 __jrepeate_prototype.update = function(new_value) {
     /*
      * 目前是简单地重新全部更新元素。是一种很低效率的方式。
-     *
+     * 同时，已经$watch的表达式没有被destroy
      * todo 采用diff的思想，只更新发生变化的元素。
      */
     for(var i=0;i<this.dom_items.length;i++) {
@@ -50,6 +50,7 @@ __jrepeate_prototype._get = function() {
     var frag = document.createDocumentFragment();
     for(var i=0;i<array.length;i++) {
         r_ele = this.ele.cloneNode(true);
+        log(event_jid(r_ele));
         r_env = environment_create_child(this.env, i);
         r_env.$prop = {
             '@index' : i,
@@ -62,7 +63,7 @@ __jrepeate_prototype._get = function() {
         r_env[this.key] = array[i];
         /*
          * 目前是对每一次复制的元素进行render，包括解析directive和view。
-         * todo 可以考虑复用directive和view，这样就不需要每次循环都去drive_render_view
+         * todo 可以考虑复用directive和view，这样就不需要每次循环都去drive_render_view. destroy之前的元素的已经$watch的表达式。
          */
         drive_render_element(r_ele, this.attr, this.module, r_env);
         frag.appendChild(r_ele);

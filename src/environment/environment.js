@@ -120,7 +120,7 @@ function environment_def_props(name, value) {
 
 function environment_create_child(env, c_name) {
     var cd = env.__.children;
-    var cs = new Environment(c_name, this);
+    var cs = new Environment(c_name, env);
     /*
      * 这里的第4个参数一定要为true，才能覆盖。
      */

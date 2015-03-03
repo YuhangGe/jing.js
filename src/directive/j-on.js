@@ -10,22 +10,41 @@ directive_create('j-on', function() {
         });
     }
 });
-directive_create('j-click', function() {
-    /*
-     * todo j-click应该进一步考虑触屏。
-     */
+
+directive_create('j-enter', function() {
     return function(drive_module, directive_module, env, element, attr_value) {
         var expr = parse_expression(attr_value);
-        event_on(element, 'click', function() {
-            expr.exec(env);
+        event_on(element, 'keydown', function(e) {
+            if(e.keyCode === 13) {
+                expr.exec(env);
+            }
         });
     }
 });
-directive_create(['j-mousedown', 'j-md', 'j-mouse-down'], function() {
-    return function(drive_module, directive_module, env, element, attr_value) {
-        var expr = parse_expression(attr_value);
-        event_on(element, 'mousedown', function() {
-            expr.exec(env);
-        });
-    }
+
+$each(['j-click', 'j-dblclick', 'j-mousedown'], function(d_name) {
+    var e_name = d_name.substring(2);
+    directive_create(d_name, function() {
+        return function(drive_module, directive_module, env, element, attr_value) {
+            var expr = parse_expression(attr_value);
+            if(e_name==='blur') {
+                debugger;
+            }
+            event_on(element, e_name, function(e) {
+                expr.exec(env);
+            });
+        }
+    });
+});
+
+$each(['j-blur', 'j-focus', 'j-change'], function(d_name) {
+    var e_name = d_name.substring(2);
+    directive_create(d_name, function() {
+        return function(drive_module, directive_module, env, element, attr_value) {
+            var expr = parse_expression(attr_value);
+            $on(element, e_name, function(e) {
+                expr.exec(env);
+            });
+        }
+    });
 });

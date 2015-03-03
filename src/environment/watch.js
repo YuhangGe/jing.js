@@ -33,7 +33,7 @@ function environment_declare_obj(p, var_name, value, emit_node) {
             //pv.destroy(); //todo destroy previous Array
         }
 
-        if($isObject(props[var_name]) && $isObject(val)) {
+        if($isObject(props[var_name]) && $isObject(val) && $isObject(pv)) {
             var en = this[__env_emit_name][var_name];
             environment_redeclare_var(en, val, pv);
         }

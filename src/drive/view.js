@@ -52,6 +52,7 @@ function drive_get_view_expr(txt) {
 
 function drive_render_view(ele, env) {
     var txt = ele.textContent;
+
     var expr = drive_get_view_expr(txt);
 
     if (expr === null) {
@@ -64,7 +65,6 @@ function drive_render_view(ele, env) {
     var listener = environment_watch_expression(env, expr, drive_view_observer, {
         ele: ele
     }, 10);
-
 
     ele.textContent = listener.cur_value;
 }

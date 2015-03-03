@@ -36,13 +36,10 @@ function environment_declare_obj(p, var_name, value, emit_node) {
             var en = this[__env_emit_name][var_name];
             environment_redeclare_var(en, val, pv);
         }
-        //log(this);
-        //log(pv);
-        //log(val);
 
         props[var_name] = val;
         this[__env_emit_name][var_name].notify();
-    });
+    }, false, true);
     return v;
 }
 function environment_declare_arr(p, idx_str, emit_node) {

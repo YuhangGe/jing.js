@@ -27,3 +27,6 @@ jing.factory = function(name) {
 jing.ready = $ready;
 
 jing.env = module_get_root_env;
+
+jing.JSONStringify = $JSONStringify;
+jing.JSONParse = $JSONParse;

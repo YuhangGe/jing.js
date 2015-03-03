@@ -35,7 +35,7 @@ function jarray_up(jarray) {
                         this.__.en.notify();
                     }
                     //这里的参数true很重要，使得该属性可以被重写覆盖。
-                }, true);
+                }, true, true);
             })(i);
         }
 

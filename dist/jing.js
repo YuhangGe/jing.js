@@ -153,18 +153,18 @@ function $in(obj, func) {
     }
 }
 function $defineProperty(obj, prop, value, writable, enumerable) {
-    //Object.defineProperty(obj, prop, {
-    //    value : value,
-    //    writable : writable ? true : false,
-    //    enumerable : enumerable ? true : false
-    //});
-    //开发阶段enumerable都为true，方便调试
-    //todo remove enumerable [true]
     Object.defineProperty(obj, prop, {
         value : value,
         writable : writable ? true : false,
-        enumerable : true
+        enumerable : enumerable ? true : false
     });
+    //开发阶段enumerable都为true，方便调试
+    //todo remove enumerable [true]
+    //Object.defineProperty(obj, prop, {
+    //    value : value,
+    //    writable : writable ? true : false,
+    //    enumerable : true
+    //});
 }
 function $hasProperty(obj, prop) {
     return obj.hasOwnProperty(prop);
@@ -270,6 +270,36 @@ function $assert(condition) {
         console.trace();
         throw '$assert failure!';
     }
+}
+
+
+function $JSONStringify(obj) {
+
+    function get_origin_obj(obj) {
+        var rtn_obj = obj;
+        var i, k, tmp;
+        if($isJArray(obj) || $isArray(obj)) {
+            rtn_obj = [];
+            tmp = $isArray(obj) ? obj : obj.__.array;
+            for(i=0;i<tmp.length;i++) {
+                rtn_obj.push(get_origin_obj(tmp[i]));
+            }
+        } else if($isObject(obj)) {
+            rtn_obj = {};
+            for(k in obj) {
+                rtn_obj[k] = get_origin_obj(obj[k]);
+            }
+        }
+
+        return rtn_obj;
+    }
+
+    return JSON.stringify(get_origin_obj(obj));
+
+}
+
+function $JSONParse(str) {
+    return JSON.parse(str);
 }
 
 function $ajax(options) {
@@ -581,7 +611,7 @@ function jarray_up(jarray) {
                         this.__.en.notify();
                     }
                     //这里的参数true很重要，使得该属性可以被重写覆盖。
-                }, true);
+                }, true, true);
             })(i);
         }
 
@@ -841,7 +871,7 @@ function environment_declare_obj(p, var_name, value, emit_node) {
 
         props[var_name] = val;
         this[__env_emit_name][var_name].notify();
-    });
+    }, false, true);
     return v;
 }
 function environment_declare_arr(p, idx_str, emit_node) {
@@ -3118,6 +3148,9 @@ jing.factory = function(name) {
 jing.ready = $ready;
 
 jing.env = module_get_root_env;
+
+jing.JSONStringify = $JSONStringify;
+jing.JSONParse = $JSONParse;
 
 
 })();

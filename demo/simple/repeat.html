@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <title>Simple J-Repeat Demo</title>
-    <script type="text/javascript" src="../dist/jing.js"></script>
+    <script type="text/javascript" src="../../dist/jing.js"></script>
     <script type="text/javascript">
         jing.module('MyApp').factory('S1', function() {
             var list = [];
@@ -63,6 +63,7 @@
 </head>
 <body j-app="MyApp">
 <div j-env="Ctrl">
+    <p>这个Demo展示了jing.js的j-repeat指令的用法。</p>
     <h4>Simple</h4>
     <ul>
         <li j-repeat="boy in list1.slice(index, index+5)">
@@ -72,6 +73,7 @@
     <p>
         <button j-click="index-=5">上一页</button>
         <button j-click="index+=5">下一页</button>
+        <span>直接在j-click指令里赋值，来更加简单地实现分页效果。angularjs不支持index+=5这样的用法。</span>
     </p>
     <h4>Complex</h4>
     <ul>

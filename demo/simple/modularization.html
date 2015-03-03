@@ -2,31 +2,14 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Simple Data Binding Demo</title>
-    <script type="text/javascript" src="../dist/jing.min.js"></script>
+    <title>Modularization Demo</title>
+    <script type="text/javascript" src="../../dist/jing.min.js"></script>
     <script type="text/javascript">
-        function log() {
-            console.log.apply(console, arguments);
-        }
-
         jing.module('Service')
                 .factory('A', function (module) {
-
                     /*
-                     * 获取rootScope的标准方法是通过任意一个scope来调用scope.$root.
-                     *   通常情况下，factory中不应该直接访问rootScope.
-                     *   但是，如果一定想要得到rootScope，
-                     *   可以使用 jing.scope(module.path)
-                     *      但当该module没有drive任何html元素，这个函数返回空值。
-                     *
-                     * 从软件工程角度讲，两个模块之间应该是松耦合的，
-                     *   不同模块的factory不应该直接去访问其它模块的rootScope,
-                     *   如果一定要访问，使用下面的方法。
-                     * 注意，如果jing.scope传入的module没有drive任何html元素，则返回为空值。
+                     * 访问本模块的其它组件，使用module.require，跟nodejs方式类似。
                      */
-                    var rootScope = jing.scope(jing.module('MyApp').path); // return rootScope of app.
-                    var rootScope2 = jing.scope(jing.module('Service3.ChildS1.ChildS2').path); //return undefined/null
-
                     var SeB = module.require('B');
                     var arr = [];
                     for (var i = 0; i < 10; i++) {
@@ -44,9 +27,11 @@
 
                     /*
                      * 如果下面这行代码取消注释，则会抛出循环依赖的异常。
-                     *
                      */
                     //var SA = module.require('A');  //throw circular require exception, because factory A has required B.
+                    /*
+                     * 访问其它模块的组件，也是同样的require。
+                     */
                     var CC = module.require('Service3.ChildS1.ChildS2.CC');
                     var name = 'Alibaba';
                     return {
@@ -57,10 +42,9 @@
                 });
         /*
          * 模块的定义非常灵活。原则就是，如果有，就返回。如果没有，就创建。
-         * 支持通过点号来分隔定义子模块。不需要像angularjs得先创建再使用，是分开的。
+         * 支持通过点号来分隔定义子模块。
          *
          * 这样的好处是，大型项目开发时，不需要依赖js文件的加载顺序。
-         * 但这样一来也可能有坏处。未来版本的处理方式还待定。
          */
         jing.module('Service3.ChildS1.ChildS2')
                 .factory('CC', 8888);
@@ -77,7 +61,11 @@
 
                     return _;
                 })
-                .controller("TestCtrl", function (module, scope) {
+                /*
+                 * env函数定义了Environment，其概念类似于angularjs的Scope和Controller的结合。
+                 * 不一样的是，jing.js将会提供异步Environment。
+                 */
+                .env("TestCtrl", function (module, env) {
                     var ServiceA = module.require('Service.A');
                     var ServiceB = module.require('Service.B');
                     var MyService = module.require('MyService');
@@ -95,61 +83,76 @@
                      */
 
                     /*
-                     * 获取rootScope的标准方法是通过任意一个scope来调用scope.$root.
-                     *   通常情况下，factory中不应该直接访问rootScope.
-                     *   但是，如果一定想要得到rootScope，
-                     *   可以使用 jing.scope(module.path)
-                     *      但当该module没有drive任何html元素，这个函数返回空值。
+                     * rootEnv相当于angularjs中的$rootScope，是该Environment的根环境。
+                     *
+                     * 获取rootEnv的方法是通过任意一个env来调用env.$root
+                     * 假设当前env已经是根环境了，则返回自身（而不是null）。
+                     *
                      */
-                    //var rootScope = jing.scope(module.path)
-                    var rootScope = scope.$root;
+                    var rootEnv = env.$root;
 
                     log(ServiceA.array);
                     log(ServiceB.func(), ServiceB.func());
                     log(MyService.tick, MyService.tick, MyService.tick, MyService.tick);
                     log(CS);
-                    log(rootScope.rootMessage);
-                    log(rootScope.oooo);
+                    log(rootEnv.rootMessage);
+                    log(rootEnv.oooo);
 
-                    scope.message = 'Hello, World!';
-                    scope.boys = [1, 2, 3, 4];
-                    scope.test = function (event) {
-                        log(event);
-                        alert(scope.message);
-                        log(this.message); //this 即 scope
-                        scope.message = "Hello, Jing!";
-                        this.boys.push(6);
-                        log(scope.boys);
+                    /*
+                     * 传入该函数体的两个参数，module和env，module是当前模块，env是当前环境。
+                     * 除了通过env访问当前环境，也可以使用this。
+                     */
+                    env.message = 'Hello, World!';
+                    this.message = 'Hello, World!';
+                    env.girl = {
+                        name : 'Jing',
+                        say : function() {
+                            /*
+                             * 在Object内部，this是该Object。
+                             */
+                            log('Hi, I\'m '+ this.name + '.'); // Hi, I'm Jing.
+                        }
                     };
-                    scope.$watch('boys', function (var_name, new_value, data) {
-                        log('boys changed to ', new_value);
+
+                    env.boys = [1, 2, 3, 4];
+                    env.test = function (event) {
+                        /*
+                         * 对于Environment下的函数，比如这个test，
+                         *   其内部的this就是该Environment
+                         */
+                        this.message = "Hello, Jing!"; //same as env.message='...'
+                        this.boys.push(6); //same as env.boys.push
+                        this.girl.say();
+
+                    };
+
+
+
+                    /*
+                     * $watch的用法，请参看demo/simple/environment.html里面的注释。
+                     */
+                    env.$watch('boys', function (change_list, data) {
+                        log('boys changed to ', change_list[0].cur_value);
                         log(data);
                     }, {
                         info: '额外的数据'
                     });
                 })
-                .initialize(function (module, rootScope) {
+                .init(function (module, rootEnv) {
                     var CC = module.require('Service3.ChildS1.ChildS2.CC');
-                    rootScope.$declare({
-                        'rootMessage': 'root message: ' + CC
-                    });
+                    rootEnv.rootMessage = 'root message: ' + CC;
                 });
 
-        jing.$on(document, 'DOMContentLoaded', function () {
-            jing.module('MyApp').drive(document.body);
-        });
-
+        function log() {
+            console.log.apply(console, arguments);
+        }
     </script>
 </head>
-<div j-ctrl="TestCtrl">
-    <div>
-        <p>Message: {{message}}</p>
-        <input j-model="message"/>
-    </div>
-    <div>
-        <input type="button" value="Click Me" j-click="test">
-    </div>
-    <p>{{rootMessage}}</p>
+<body j-app="MyApp">
+<div j-env="TestCtrl">
+    <p>这个Demo展示了jing.js的模块化处理机制。</p>
+    <p>请查看Console的输出日志！</p>
+    <p><button j-click="test()">Test Click</button></p>
 </div>
 </body>
 </html>

@@ -434,7 +434,7 @@ function EmitNode(id, parent) {
 EmitNode.prototype = {
     val : function(var_name) {
         var p = this.parent.val(this.id);
-        if(p && var_name) {
+        if(p && !$isUndefined(var_name)) {
             return p[var_name];
         } else {
             return p;
@@ -1850,6 +1850,7 @@ var __parse_op_priority = {
 
     'A' : [400, 0], //Array的构造函数，优先级最高
     '.' : [200, 0],
+    '[]' : [200, 0],
     'F' : [300, 0], //用字符F表示函数调用。
 
 
@@ -1988,7 +1989,7 @@ function parse_meet_op(op) {
                 /*
                  * 中括号相当于 .() ，也就是先运算括号内，再取Property
                  */
-                parse_check_op('.');
+                parse_check_op('[]');
                 __parse_op_stack.push('(');
             } else {
                 /*
@@ -2069,7 +2070,7 @@ function parse_expr() {
                 __parse_is_pre_token_var = true;
                 break;
             case 'str':
-                parse_push_node(new ConstantGrammarNode(__parse_token_value));
+                parse_push_node(new ConstantGrammarNode(__parse_token_value.substring(1, __parse_token_value.length-1)));
                 __parse_is_pre_token_var = true;
                 break;
             case 'op':
@@ -2175,6 +2176,17 @@ function parse_deal_op(op) {
             //tmp.concat(node_b);
             //parse_push_node(tmp);
             //元素分隔不作任何处理。
+            break;
+        case '[]' :
+            node_b = parse_pop_node();
+            node_a = parse_pop_node();
+            //node_b = node_b.type==='variable' ? new ConstantGrammarNode(node_b.var_name) : node_b;
+            if(parse_is_constant(node_a) && parse_is_constant(node_b)) {
+                tmp = new ConstantGrammarNode(node_a.value[node_b.value]);
+            } else {
+                tmp = new PropertyGrammarNode(node_a, node_b);
+            }
+            parse_push_node(tmp);
             break;
         case '.':
             node_b = parse_pop_node();
@@ -2831,20 +2843,20 @@ function drive_get_view_expr(txt) {
     var piece_array = [];
     var piece;
 
-    while((piece = __drive_view_expr_REG.exec(txt))!==null) {
-        if(piece.index > piece_start) {
+    while ((piece = __drive_view_expr_REG.exec(txt)) !== null) {
+        if (piece.index > piece_start) {
             piece_array.push(new ConstantGrammarNode(txt.substring(piece_start, piece.index)));
         }
         piece_start = piece.index + piece[0].length;
         piece_array.push(parse_expression(piece[1], true));
     }
-    if(piece && piece_start < txt.length) {
+    if (piece && piece_start < txt.length) {
         piece_array.push(new ConstantGrammarNode(txt.substring(piece_start)));
     }
 
-    if(piece_array.length === 0) {
+    if (piece_array.length === 0) {
         return null;
-    } else if(piece_array.length === 1) {
+    } else if (piece_array.length === 1) {
         return piece_array[0];
     }
 
@@ -2857,14 +2869,14 @@ function drive_get_view_expr(txt) {
      *   为了简单起见，采取的解决方法是，在最左边添加一个空字符串，
      *   这样相加的时候会从左往右计算，javascript会以字符串形式链接 '' + age + year
      */
-    if(ea.type !== 'constant' || !$isString(ea.value)) {
+    if (ea.type !== 'constant' || !$isString(ea.value)) {
         piece_array.unshift(new ConstantGrammarNode(''));
         ea = piece_array[0];
     }
 
-    for(var i=1;i<piece_array.length;i++) {
+    for (var i = 1; i < piece_array.length; i++) {
         eb = piece_array[i];
-        if(ea.type === 'constant' && eb.type === 'constant') {
+        if (ea.type === 'constant' && eb.type === 'constant') {
             ea = new ConstantGrammarNode(ea.value + eb.value);
         } else {
             ea = new CalcGrammarNode("#+", ea, eb);
@@ -2878,17 +2890,16 @@ function drive_render_view(ele, env) {
     var txt = ele.textContent;
     var expr = drive_get_view_expr(txt);
 
-    if(expr === null) {
+    if (expr === null) {
         return;
-    } else if(expr.type === 'constant') {
+    } else if (expr.type === 'constant') {
         ele.textContent = expr.value;
         return;
     }
 
-        var listener = environment_watch_expression(env, expr, drive_view_observer, {
-            ele : ele
-        }, 10);
-
+    var listener = environment_watch_expression(env, expr, drive_view_observer, {
+        ele: ele
+    }, 10);
 
 
     ele.textContent = listener.cur_value;

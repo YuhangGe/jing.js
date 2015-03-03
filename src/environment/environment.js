@@ -41,7 +41,7 @@ $defineProperty(__env_prototype, '$get', function(var_name) {
     if($hasProperty(this, var_name)) {
         return this[var_name];
     } else if(this.__.parent) {
-        return this.__.parent.$val(var_name);
+        return this.__.parent.$get(var_name);
     } else {
         return null;
     }
@@ -76,7 +76,7 @@ $defineProperty(__env_prototype, '$set', function(var_name, value) {
     if($hasProperty(this, var_name)) {
         this[var_name] = value;
     } else if(this.__.parent) {
-        this.__.parent.set(var_name, value);
+        this.__.parent.$set(var_name, value);
     }
 });
 

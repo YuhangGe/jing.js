@@ -1374,6 +1374,23 @@ function directive_deal_j_async_env(ele, drive_module, env) {
 
 }
 
+directive_create('j-class', function() {
+    function apply_class(ele, pre, cur) {
+        ele.className = (ele.className.replace(pre, '') + ' ' + cur).trim();
+    }
+    return function(drive_module, directive_module, env, element, attr_value) {
+        var expr = parse_expression(attr_value, true);
+        log(expr);
+        var listener = environment_watch_expression(env, expr, function(change_list, data) {
+            apply_class(data.ele, change_list[0].pre_value, change_list[0].cur_value);
+        }, {
+            ele : element
+        }, 10);
+
+        apply_class(element, '', listener.cur_value);
+    }
+});
+
 /**
  * Created by abraham on 15/1/22.
  */
@@ -1765,16 +1782,18 @@ directive_create('j-style', function() {
     return function(drive_module, directive_module, env, element, attr_value) {
         var expr = drive_get_view_expr(attr_value);
         if(expr === null) {
-            expr = parse_expression(attr_value);
+            expr = parse_expression(attr_value, true);
         }
 
-        apply_style(element, expr.exec(env));
 
-        environment_watch_expression(env, expr, function(change_list, data) {
+        var listener = environment_watch_expression(env, expr, function(change_list, data) {
             apply_style(data.ele, change_list[0].cur_value);
         }, {
             ele : element
         }, 10);
+
+        apply_style(element, listener.cur_value);
+
     }
 });
 
@@ -2388,9 +2407,9 @@ function ConditionGrammarNode(op, left_node, right_node) {
     }
     this.base('condition', nodes);
 }
-parse_inherit_node(ConditionGrammarNode, function(scope) {
+parse_inherit_node(ConditionGrammarNode, function(env) {
     var ns = this.nodes;
-    return ns[0] ? ns[1] : ns[2];
+    return ns[0].exec(env) ? ns[1].exec(env) : ns[2].exec(env);
 });
 
 function ConstantGrammarNode(value) {
@@ -2558,7 +2577,7 @@ var __parse_token_regex = new RegExp(
         //括号和点号
         + "|\\(|\\)|\\[|\\]|\\{|\\}|\\.|\\?|\\:|;|,"
         //字符串
-        + "|(?:\"[^\"]+\")|(?:'[^']+')"
+        + "|(?:\"[^\"]*\")|(?:'[^']*')"
         //数字
         + "|(?:\\d+(?:\\.\\d+)?)"
         //变量
@@ -2854,14 +2873,16 @@ function drive_get_view_expr(txt) {
         piece_start = piece.index + piece[0].length;
         piece_array.push(parse_expression(piece[1], true));
     }
-    if (piece && piece_start < txt.length) {
-        piece_array.push(new ConstantGrammarNode(txt.substring(piece_start)));
-    }
 
     if (piece_array.length === 0) {
         return null;
-    } else if (piece_array.length === 1) {
-        return piece_array[0];
+    } else {
+        if(piece_start < txt.length) {
+            piece_array.push(new ConstantGrammarNode(txt.substring(piece_start)));
+        }
+        if (piece_array.length === 1) {
+            return piece_array[0];
+        }
     }
 
     var ea = piece_array[0], eb;

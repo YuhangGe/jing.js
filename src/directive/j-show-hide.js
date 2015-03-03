@@ -6,18 +6,23 @@
 
     function directive_show_hide(drive_module, directive_module, env, element, attr_value, show) {
         var expr = parse_expression(attr_value);
-        var val = expr.exec(env),
-            is_show = show ? (val ? true : false) : (val ? false : true);
 
-        apply_show_hide(element, is_show);
 
-        environment_watch_expression(env, expr, (show ? function(change_list, data) {
+
+        var listener = environment_watch_expression(env, expr, (show ? function(change_list, data) {
             apply_show_hide(data.ele, change_list[0].cur_value ? true : false);
         } : function(change_list, data) {
             apply_show_hide(data.ele, change_list[0].cur_value ? false : true);
         }), {
             ele : element
         }, 10);
+
+        var val = listener.cur_value,
+            is_show = show ? (val ? true : false) : (val ? false : true);
+
+        apply_show_hide(element, is_show);
+
+
     }
 
     directive_create('j-show', function() {

@@ -60,12 +60,14 @@ directive_create('j-style', function() {
             expr = parse_expression(attr_value, true);
         }
 
-        apply_style(element, expr.exec(env));
 
-        environment_watch_expression(env, expr, function(change_list, data) {
+        var listener = environment_watch_expression(env, expr, function(change_list, data) {
             apply_style(data.ele, change_list[0].cur_value);
         }, {
             ele : element
         }, 10);
+
+        apply_style(element, listener.cur_value);
+
     }
 });

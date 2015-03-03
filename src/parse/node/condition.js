@@ -7,7 +7,7 @@ function ConditionGrammarNode(op, left_node, right_node) {
     }
     this.base('condition', nodes);
 }
-parse_inherit_node(ConditionGrammarNode, function(scope) {
+parse_inherit_node(ConditionGrammarNode, function(env) {
     var ns = this.nodes;
-    return ns[0] ? ns[1] : ns[2];
+    return ns[0].exec(env) ? ns[1].exec(env) : ns[2].exec(env);
 });

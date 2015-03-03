@@ -13,6 +13,7 @@ Todos
 
 * $watch机制的销毁策略。（Important\!）
 * j-repeat还有许多工作需要完善和改进。包括使用diff思想，复用组件，以及销毁不再使用的组件的$watch
+* $watch和j-repeat可能存在潜在的内存泄露。
 
 模块化和命名约定
 ------

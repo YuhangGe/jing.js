@@ -317,26 +317,12 @@ label[for='toggle-all'] {
 }
 
 #clear-completed,
-html #clear-completed:active {
-    float: right;
-    position: relative;
+html #clear-completed {
     line-height: 20px;
     text-decoration: none;
     cursor: pointer;
-    visibility: hidden;
-    position: relative;
-}
-
-#clear-completed::after {
-    visibility: visible;
-    content: 'Clear completed';
     position: absolute;
-    right: 0;
-    white-space: nowrap;
-}
-
-#clear-completed:hover::after {
-    text-decoration: underline;
+    right: 5px;
 }
 
 #info {

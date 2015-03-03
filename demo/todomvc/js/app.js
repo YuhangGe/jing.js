@@ -1,7 +1,5 @@
 jing.module('TodoApp')
-    //.directive('todo-focus', function(module, ele, attrs) {
-    //
-    //})
+
     .factory('Todo', function () {
         function Todo(title) {
             this.title = title;
@@ -41,11 +39,14 @@ jing.module('TodoApp')
                         i--;
                     }
                 }
+                this.toggleComplete();
+
             },
             addTodo: function () {
                 var tn = this.new_todo.trim();
                 if (tn !== '') {
                     this.todos.push(new Todo(tn));
+                    this.toggleComplete();
                 }
                 this.new_todo = '';
             },
@@ -75,6 +76,7 @@ jing.module('TodoApp')
                 var idx = env.todos.indexOf(todo);
                 if(idx>=0) {
                     env.todos.splice(idx, 1);
+                    env.toggleComplete();
                 }
             }
         };

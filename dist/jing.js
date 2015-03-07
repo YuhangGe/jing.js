@@ -865,9 +865,6 @@ function environment_declare_obj(p, var_name, value, emit_node) {
             var en = this[__env_emit_name][var_name];
             environment_redeclare_var(en, val, pv);
         }
-        //log(this);
-        //log(pv);
-        //log(val);
 
         props[var_name] = val;
         this[__env_emit_name][var_name].notify();
@@ -3151,6 +3148,8 @@ jing.env = module_get_root_env;
 
 jing.JSONStringify = $JSONStringify;
 jing.JSONParse = $JSONParse;
+jing.each = $each;
+jing.map = $map;
 
 
 })();

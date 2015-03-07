@@ -129,41 +129,20 @@ function $hasAttr(ele, attr_name) {
     }
 }
 
-function $each(arr, func) {
-    for(var i=0;i<arr.length;i++) {
-        if(func(arr[i], arr[i], i)===false) {
-            return;
-        }
-    }
-}
-function $map(array, func) {
-    var len = array.length,
-        new_array = new Array(len);
-    for(var i=0;i<len;i++) {
-        new_array[i] = func(array[i], i);
-    }
-    return new_array;
-}
-function $in(obj, func) {
-    for(var kn in obj) {
-        if(func(obj[kn], kn) === false) {
-            return;
-        }
-    }
-}
+
 function $defineProperty(obj, prop, value, writable, enumerable) {
-    Object.defineProperty(obj, prop, {
-        value : value,
-        writable : writable ? true : false,
-        enumerable : enumerable ? true : false
-    });
-    //开发阶段enumerable都为true，方便调试
-    //todo remove enumerable [true]
     //Object.defineProperty(obj, prop, {
     //    value : value,
     //    writable : writable ? true : false,
-    //    enumerable : true
+    //    enumerable : enumerable ? true : false
     //});
+    //开发阶段enumerable都为true，方便调试
+    //todo remove enumerable [true]
+    Object.defineProperty(obj, prop, {
+        value : value,
+        writable : writable ? true : false,
+        enumerable : true
+    });
 }
 function $hasProperty(obj, prop) {
     return obj.hasOwnProperty(prop);
@@ -232,7 +211,7 @@ function $setArray(dst_arr, src_arr) {
         dst_arr[i] = src_arr[i];
     }
 }
-function $id(id) {
+function $$id(id) {
     return document.getElementById(id);
 }
 

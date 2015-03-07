@@ -15,6 +15,35 @@ Todos
 * j-repeat还有许多工作需要完善和改进。包括使用diff思想，复用组件，以及销毁不再使用的组件的$watch
 * $watch和j-repeat可能存在潜在的内存泄露。
 
+关于$watch机制
+------
+$watch机制目前使用的是基于$defineProperty($defineGetterSetter)来做的。
+目前的策略是，会向下传递变更；但只有被$watch过的节点，才会向上传递。具体来说，
+比如现在有:
+````
+env.A = {
+    B : {
+        C : 'c',
+        D : 'd'
+    },
+    E : 'e'
+}
+````
+对`A`进行$watch, `env.$watch('A', fn_a)`，然后执行`env.A.B.C='c2'`，
+这种情况下对`A`的$watch的回调`fn_a`不会被调用。接下来，对`A.B.C`进行$watch：`env.$watch('A.B.C', fn_c)`，
+然后再执行`env.A.B.C='c3'`，则`fn_c`和`fn_a`都会被调用。执行`env.A = '...'`，`fn_a`和`fn_c`也
+都会被调用。
+
+目前的策略的问题是，在不少的情况下，即使`A.B.C`没有被$watch过，当其值发生变化时，也应该向上传递变更，
+使得`fn_a`被调用。AngularJS采用的是贪婪对比检测，能够支持向上传递。jing.js要支持向上传递，可以在`A`被$watch时，
+递归地同时$watch其所有子节点(deep watch)。
+
+deep watch的潜在问题是，如果被$watch的节点的子节点层次和数量都非常大，
+那是否有可能带来性能上的影响？比如夸张点的例子是，`A`这个Object有10层，每层有10个元素，
+整颗树也有10的10次方个节点了，而可能UI界面真正用到的，只是其中的某个节点，采用deep watch策略并不恰当。
+
+todo. 接下来jing.js也会提供可选的deep watch方式，$watch函数可传入指定为deep watch的参数。
+
 模块化和命名约定
 ------
 由于jing.js是纯浏览器端库，不会被使用在nodejs平台上，

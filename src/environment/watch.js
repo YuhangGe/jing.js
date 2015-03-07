@@ -24,12 +24,12 @@ function environment_declare_obj(p, var_name, value, emit_node) {
         if(pv === val) {
             return;
         }
-
-        if(pv instanceof JArray) {
-            if($isArray(val)) {
-                val = new JArray(val, pv.__.en);
-            }
-            //pv.destroy(); //todo destroy previous Array
+        var pj = $isJArray(pv),
+            cj = $isArray(val);
+        if(pj && cj) {
+            val = new JArray(val, pv.__.en);
+        } else if(pj !== cj) {
+            throw new Error('暂时不允许在Array和非Array类型之间进行切换赋值。');
         }
 
         if($isObject(props[var_name]) && $isObject(val) && $isObject(pv)) {
@@ -44,9 +44,10 @@ function environment_declare_obj(p, var_name, value, emit_node) {
 }
 function environment_declare_arr(p, idx_str, emit_node) {
     //p is JArray
-    var idx = parseInt(idx_str), v = p.__.array[idx];
-    p[__env_emit_name][idx] = emit_node;
+    var idx = parseInt(idx_str),
+        v = p.__.array[idx];
 
+    p[__env_emit_name][idx_str] = emit_node;
     if($isArray(v)) {
         v = p.__.array[idx] = new JArray(v, emit_node);
     }
@@ -63,7 +64,7 @@ function environment_declare_arr(p, idx_str, emit_node) {
             environment_redeclare_var(en, val);
         }
         this.__.array[idx] = val;
-        this.__.en.notify();
+        this.__.en.item_notify(idx);
     });
 
     return v;
@@ -137,19 +138,21 @@ function environment_watch_each_var(p, var_name, emit_node) {
         delete p[var_name];
         environment_declare_obj(p, var_name, val, emit_node);
         et[var_name] = emit_node;
-    } else if(!$hasProperty(et, var_name)) {
-        et[var_name] = emit_node;
     }
+    //else if(!$hasProperty(et, var_name)) {
+    //    et[var_name] = emit_node;
+    //}
 
-    return ps[var_name];
+    return p[var_name];
 }
+
 
 function environment_watch_items(env, var_array, listener, is_lazy) {
 
-    function get_node(parent, name, env) {
+    function get_node(parent, name) {
         var n = parent.children[name];
         if(!n) {
-            n = parent.children[name] = new EmitNode(name, env, parent);
+            n = parent.children[name] = new EmitNode(name, parent);
         }
         return n;
     }
@@ -170,66 +173,79 @@ function environment_watch_items(env, var_array, listener, is_lazy) {
         }
         vn = var_array[i];
         pen = p[__env_emit_name];
-
-        if(pen && $hasProperty(pen, vn) && pen[vn].env !== act_env) {
-            throw new Error('Object只能属于一个Environment，如果要修改其所属于的Environment，先调用env.$remove(obj)');
-        }
-
-        e_node = get_node(e_tree, vn, act_env);
+        e_node = get_node(e_tree, vn);
         cp = environment_watch_each_var(p, vn, e_node);
-
         p = cp;
         e_tree = e_node;
     }
 
-    var emitter = is_lazy ? e_node.L_emitter : e_node.I_emitter;
-    if(emitter === null) {
-        if(is_lazy) {
-            emitter = new LazyEmitter(e_node);
-            e_node.L_emitter = emitter;
-        } else {
-            emitter = new ImmEmitter(e_node);
-            e_node.I_emitter = emitter;
-        }
-    }
-    emitter.listeners.push(listener);
+    (is_lazy ? e_node.L_emitter : e_node.I_emitter).addListener(listener);
+}
+
+/*
+ * 将a.b[4][3][7].c.d[9]转成a.b.4.3.7.c.d.9的形式。
+ */
+function environment_var2items(var_name) {
+    return var_name.replace(/\[\s*(\d+)\s*\]/g, ".$1.").replace('..', '.', 'g').split('.');
 }
 
 
-function environment_watch_var_str(env, var_name, listener, is_lazy) {
-    /*
-     * 将a.b[4][3][7].c.d[9]转成a.b.4.3.7.c.d.9的形式。
-     */
-    var v_arr = $map(var_name.replace(/\[\s*(\d+)\s*\]/g, ".$1.").replace(/\.{2}/g, '.').split('.'), function(item) {
-        return item.trim();
-    });
-
-    environment_watch_items(env, v_arr, listener, is_lazy);
-
-}
-
-
-$defineProperty(__env_prototype, '$watch', function (var_name, callback, data, lazy_time) {
-    if (typeof callback !== 'function') {
-        log('$watch need function');
+$defineProperty(__env_prototype, '$unwatch', function(listener_id) {
+    var lt = this.__.listeners,
+        listener = lt[listener_id];
+    if(!listener) {
         return;
     }
-
-    var i, listener, imm = lazy_time === false;
-
-    listener = imm ? new ImmListener(callback, data) : new LazyListener(callback, data, $isNumber(lazy_time) ? lazy_time : 0);
-
-    if ($isString(var_name)) {
-        environment_watch_var_str(this, var_name, listener, !imm);
-    } else if ($isArray(var_name)) {
-        for (i = 0; i < var_name.length; i++) {
-            environment_watch_var_str(this, var_name[i], listener, !imm);
-        }
-    } else {
-        log('$watch wrong format');
-    }
+    delete lt[listener_id];
+    environment_unwatch_listener(listener);
 });
 
+$defineProperty(__env_prototype, '$watch', function (var_name, callback, data, lazy_time) {
+    function items2expr(items) {
+        var expr = build_node_loop(items, items.length-1);
+        var_tree[items.join('.')] = expr;
+        return expr;
+    }
+
+    function build_node_loop(items, idx) {
+        return idx === 0 ?
+            new VariableGrammarNode(items[0]) :
+            new PropertyGrammarNode(build_node_loop(items, idx - 1), new ConstantGrammarNode(items[idx]));
+    }
+
+    if (typeof callback !== 'function') {
+        throw new Error('$watch need function');
+    }
+
+    if (!$isString(var_name) ||! /^[\w\d]+(?:(?:\.[\w\d]+)|(?:\[\s*\d+\s*\]))*$/.test(var_name)) {
+        throw new Error('$watch wrong format');
+    }
+
+    var is_lazy = lazy_time !== false;
+    var v_items = environment_var2items(var_name),
+        expr = build_node_loop(v_items, v_items.length-1),
+        var_tree = {};
+
+    var_tree[v_items.join('.')] = [expr];
+
+    var listener = is_lazy ? new LazyExprListener(var_tree, expr, this, callback, data, $isNumber(lazy_time) ? lazy_time : 0) : new ImmExprListener(var_tree, expr, env, callback, data);
+
+    environment_watch_items(this, v_items, listener, is_lazy);
+
+    this.__.listeners[listener.id] = listener;
+
+    return listener.id;
+});
+
+function environment_unwatch_listener(listener) {
+    $each(listener.emitters, function(emitter) {
+        var idx = emitter.listeners.indexOf(listener);
+        if(idx>=0) {
+            emitter.listeners.splice(idx, 1);
+        }
+    });
+    listener.destroy();
+}
 
 function environment_watch_expr_loop(expr_node, watch_array, var_tree) {
     function expr_prop(expr, v_arr) {
@@ -279,6 +295,8 @@ function environment_watch_expression(env, expr, callback, data, lazy_time) {
     for (var i = 0; i < watch_array.length; i++) {
         environment_watch_items(env, watch_array[i], listener, is_lazy);
     }
+
+    env.__.listeners[listener.id] = listener;
 
     listener.cur_value = listener.pre_value = expr.exec(env);
 

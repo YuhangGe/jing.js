@@ -32,3 +32,6 @@ jing.JSONStringify = $JSONStringify;
 jing.JSONParse = $JSONParse;
 jing.each = $each;
 jing.map = $map;
+jing.filter = $filter;
+jing.defineProperty = $defineProperty;
+jing.defineGetterSetter = $defineGetterSetter;

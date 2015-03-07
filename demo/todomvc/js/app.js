@@ -3,71 +3,59 @@ jing.module('TodoApp')
         var Todo = module.require('Model.Todo');
         var Storage = module.require('Database.Todos');
         var Router = module.require('Router');
+        var filters = {
+            all : {},
+            active : {
+                completed : false
+            },
+            completed : {
+                completed : true
+            }
+        };
 
         env.$prop = {
             new_todo: '',
             all_checked: false,
-            todos: [],
+            todos: Storage.fetch(),
             edited_todo: null,
             remaining_count: 0,
             completed_count: 0,
             status: 'all',
-
-            filters : ['all', 'active', 'completed']
-        };
-
-
-        env.setCurFilter = function(filter) {
-
-            switch (filter) {
-                case 'active':
-                    env.status = 'active';
-                    break;
-                case 'completed':
-                    env.status = 'completed';
-                    break;
-                default:
-                    env.status = 'all';
-                    break;
+            cur_filter : filters.all,
+            A : {
+                B : {
+                    C : 45,
+                    D : 90
+                },
+                E : "dsd"
             }
         };
 
-        env.todos = Storage.fetch();
-        if(env.todos.length === 0) {
-            env.todos.push(new Todo('Say hello to Xiao Ge'))
-        }
-        calc_todos();
+        env.$watch('all_checked', function(change_list) {
+            var checked = change_list[0].cur_value;
+            $each(env.todos, function(todo) {
+                todo.completed = checked;
+            });
+        });
 
-        Router.run(env);
+        env.$watch('todos', function(change_list) {
+            //log('todos change');
+            //log(change_list);
+            //log('todos change');
+            //var todos = change_list[0].cur_value,
+            //    cn = jing.filter(todos, {completed : true}).length,
+            //    rn = todos.length - cn;
+            //env.all_checked = rn === 0;
+            //env.remaining_count = rn;
+            //env.completed_count = cn;
+            //Storage.save(env.todos);
+        });
 
-        function save_todos() {
-            Storage.save(env.todos);
-        }
-
-
-        function calc_todos() {
-            var r = 0, c = 0;
-            for(var i=0;i<env.todos.length;i++) {
-                if(env.todos[i].completed) {
-                    c++;
-                } else {
-                    r++;
-                }
-            }
-            env.all_checked = r === 0;
-            env.remaining_count = r;
-            env.completed_count = c;
-        }
 
         env.$prop = {
-            markAll: function (all_checked) {
-                for(var i=0;i<env.todos.length;i++) {
-                    env.todos[i].completed = !all_checked;
-                }
-                env.all_checked = !all_checked;
-                env.remaining_count = all_checked ? env.todos.length : 0;
-                env.completed_count = !all_checked ? env.todos.length : 0;
-                save_todos();
+            setStatus : function(status) {
+                env.status = status;
+                env.cur_filter = filters[status];
             },
             clearCompletedTodos: function () {
                 for(var i=0;i<env.todos.length;i++) {
@@ -76,40 +64,34 @@ jing.module('TodoApp')
                         i--;
                     }
                 }
-                this.toggleComplete();
             },
             addTodo: function () {
-                var tn = this.new_todo.trim();
+                var tn = env.new_todo.trim();
                 if (tn !== '') {
-                    this.todos.push(new Todo(tn));
-                    this.toggleComplete();
+                    env.todos.push(new Todo(tn));
                 }
-                this.new_todo = '';
+                env.new_todo = '';
             },
             editTodo: function (todo) {
                 env.edited_todo = todo;
             },
             toggleComplete : function(todo) {
-                if(todo) {
-                    todo.completed =  !todo.completed;
-                }
-                calc_todos();
-                save_todos();
+                todo.completed =  !todo.completed;
             },
             doneEditing: function (todo) {
                 if (todo.title.trim() === '') {
                     env.removeTodo(todo);
                 }
                 env.edited_todo = null;
-                save_todos();
             },
             removeTodo: function (todo) {
                 var idx = env.todos.indexOf(todo);
                 if(idx>=0) {
                     env.todos.splice(idx, 1);
-                    env.toggleComplete();
                 }
             }
         };
+
+        Router.run(env, filters);
 
     });

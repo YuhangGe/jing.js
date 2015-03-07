@@ -5,7 +5,6 @@
  *   包括，
  *   1.当数组巨大时，该JArray实例也会有巨大数量的属性；
  *   2.想要访问的元素位置超出数组元素的个数时，也会无效；
- *   3.每一个元素修改时，都要遍历所有的emit_node。
  *   4.为了简化，数组数量减少时，JArray的属性数量不变。
  *   以及如下问题：
  *     'slice'函数返回了新的 JArray对象，
@@ -15,15 +14,14 @@
  *
  */
 function jarray_up(jarray) {
-    var i, e_tree, len = jarray.__.array.length;
+    var i, e_tree, en,
+        up = jarray.__.up,
+        len = jarray.__.array.length;
     if(len === 0) {
         return;
     }
-    e_tree = jarray.__.en.children;
-    for(i=0;i<len;i++) {
-        if(!$hasProperty(e_tree, i)) {
-            e_tree[i] = new EmitNode(i, jarray.__.en, jarray.__.en.env);
-        }
+
+    for(i=up;i<len;i++) {
         if(!$hasProperty(jarray, i)) {
             (function(idx) {
                 $defineGetterSetter(jarray, idx, function() {
@@ -32,30 +30,34 @@ function jarray_up(jarray) {
                     var ov = this.__.array[idx];
                     if(ov !== val) {
                         this.__.array[idx] = val;
-                        this.__.en.notify();
+                        this.__.en.item_notify(idx);
                     }
-                    //这里的参数true很重要，使得该属性可以被重写覆盖。
-                }, true, true);
+                }, true, true);//这里的参数true很重要，使得该属性可以被重写覆盖。
+
             })(i);
         }
-
     }
+    jarray.__.up = len;
 }
 
 function JArray(array, emit_node) {
     $defineProperty(this, '__', {
         array : array,
-        en : emit_node
+        en : emit_node,
+        up : 0
     });
     $defineProperty(this, __env_emit_name, {});
+
     jarray_up(this);
 }
 var __jarray_prototype = JArray.prototype;
 
-$each(['push', 'pop', 'shift', 'unshift', 'splice', 'sort', 'reverse'], function(med) {
+$each(['push', 'pop', 'shift', 'unshift', 'splice'], function(med) {
     $defineProperty(__jarray_prototype, med, function() {
-        var rtn = Array.prototype[med].apply(this.__.array, arguments);
-        jarray_up(this);
+        var fn = Array.prototype[med],
+            rtn = fn.apply(this.__.array, arguments);
+
+        jarray_up(this, true);
         this.__.en.notify();
         return rtn;
     });
@@ -89,8 +91,24 @@ $defineGetterSetter(__jarray_prototype, 'length', function() {
     return this.__.array.length;
 }, function(len) {
     this.__.array.length = len;
-    jarray_up(this);
+    jarray_up(this, true);
     this.__.en.notify();
+});
+$defineProperty(__jarray_prototype, 'filter', function(fn) {
+    var src = this.__.array;
+    if(!fn || src.length === 0) {
+        return this;
+    }
+    var dst = $filter(src, fn);
+    if(dst.length===src.length) {
+        return this;
+    }
+    return new JArray(dst, this.__.en);
+});
+
+$defineProperty(__jarray_prototype, 'sort', function(fn) {
+    var dst = this.__.array.sort(fn);
+    return new JArray(dst, this.__.en);
 });
 
 $defineProperty(__jarray_prototype, 'destroy', function() {

@@ -1,10 +1,15 @@
 function Environment(name, parent) {
     $defineProperty(this, '__', {
-        prop : $bind(this, environment_def_props),
-        emit_tree : new RootEmitNode(this),
+        prop : $bind(this, environment_reg_props),
+        bind : $bind(this, environment_reg_binds),
+        emit_tree : new EmitNode('env.root'),
         name : name,
         children : {},
-        parent : parent ? parent : null
+        parent : parent ? parent : null,
+        listeners : {},
+        //以下字段是给j-repeat的子Env用的。
+        array : null,
+        index : 0
     });
 }
 
@@ -24,13 +29,19 @@ $defineGetterSetter(__env_prototype, '$root', function() {
 });
 
 $defineProperty(__env_prototype, '$destroy', function() {
-    this.__.emit_tree.destroy();
-    for(var k in this.__.children) {
+    var k;
+    for(k in this.__.children) {
         this.__.children[k].$destroy();
     }
     this.__.children = null;
     this.__.parent = null;
     this.__.emit_tree = null;
+    var ls = this.__.listeners;
+    for(k in ls) {
+        environment_unwatch_listener(ls[k]);
+        ls[k] = null;
+    }
+    this.__.listeners = null;
 });
 
 $defineProperty(__env_prototype, '$child', function(name) {
@@ -115,16 +126,81 @@ $defineProperty(__env_prototype, '$set', function(var_name, value) {
 $defineGetterSetter(__env_prototype, '$prop', function() {
     return this.__.prop;
 }, function() {
-    environment_def_props.apply(this, arguments);
+    environment_reg_props.apply(this, arguments);
 });
 
-function environment_def_props(name, value) {
+$defineProperty(__env_prototype, '$bind', function() {
+    return this.__.bind;
+}, function() {
+    environment_reg_binds.apply(this, arguments);
+});
+
+function environment_reg_props(name, value) {
     if($isObject(name)) {
         for(var kn in name) {
             this[kn] = name[kn];
         }
     } else {
         this[name] = value;
+    }
+}
+
+function environment_reg_binds(name, var_str) {
+
+    function reg_bind(name, var_name) {
+        if($hasProperty(this, name)) {
+            throw new Error('variable' + name + ' has been registered');
+        }
+        var var_array = environment_split_var(var_name);
+        var env = this.$find(var_array[0]);
+        if(!env || env === this) {
+            throw new Error('variable ' + var_array[0] + ' not found in $bind');
+        }
+        /*
+         * 构建emit_tree
+         */
+        var listener = new ImmListener();
+        environment_watch_items(env, var_array[0], listener, false);
+        environment_unwatch_listener(listener);
+        /*
+         *
+         */
+        var e_node = env.__.emit_tree;
+        for(var i=0;i<var_array.length;i++) {
+            e_node = e_node.children[var_array[i]];
+        }
+
+        $defineGetterSetter(this, name, function() {
+            var p = env[var_array[0]];
+            for(var i=1;i<var_array.length;i++) {
+                p = p[var_array[i]];
+            }
+            return p;
+        }, function(val) {
+            var p = env, v = var_array[0];
+            for(var i=0;i<var_array.length-1;i++) {
+                p = p[var_array[i]];
+                v = var_array[i+1];
+            }
+            p[v] = val;
+        });
+
+        var new_e_node = new EmitNode(name, this.__.emit_tree);
+        new_e_node.L_emitter = e_node.L_emitter;
+        new_e_node.I_emitter = e_node.I_emitter;
+
+        this.__.emit_tree.children[name] = new_e_node;
+        this[__env_emit_name][name] = new_e_node;
+
+
+    }
+
+    if($isObject(name)) {
+        for(var kn in name) {
+            reg_bind.call(this, kn, name[kn]);
+        }
+    } else {
+        reg_bind.call(this, name, var_str);
     }
 }
 

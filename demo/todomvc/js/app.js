@@ -74,7 +74,7 @@ jing.module('TodoApp')
 
         env.$watch('all_checked', function(change_list) {
             var checked = change_list[0].cur_value;
-            $each(env.todos, function(todo) {
+            jing.each(env.todos, function(todo) {
                 todo.completed = checked;
             });
         });

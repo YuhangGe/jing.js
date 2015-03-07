@@ -90,13 +90,13 @@ function parse_expression(expr_str, node_need_cache) {
     __parse_node_need_cache = node_need_cache ? true : false;
     parse_token_init(expr_str);
 
-    try {
+    //try {
         parse_expr();
         parse_reduce_op();
-    } catch(ex) {
-        console.log(ex.message);
-        console.log(ex.stack);
-    }
+    //} catch(ex) {
+    //    console.log(ex.message);
+    //    console.log(ex.stack);
+    //}
 
 
 

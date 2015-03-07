@@ -54,7 +54,7 @@ function directive_data_bind(drive_module, directive_module, env, element, attr_
     }
     //todo 支持checkbox, radio等各种类型。
 
-    var expr = parse_expression(attr_value);
+    var expr = parse_expression(attr_value, false);
 
     if(expr.type !== 'variable' && expr.type !== 'property') {
         throw 'j-model only support settable expression';

@@ -68,8 +68,14 @@
             angular.bootstrap($('#a1'), ['MyApp']);
             console.timeEnd('ttt');
 //            angular.bootstrap($('#a2'), ['MyApp']);
-
+            $on(document.getElementById('cccc'), 'change', function() {
+                log('change')
+            })
         });
+
+        function ct() {
+            log('check change')
+        }
     </script>
 </head>
 <body>
@@ -87,6 +93,8 @@
         <p><button ng-click="append()">Append</button></p>
     </div>
 </div>
+
+<input type="checkbox" id="cccc">
 
 </body>
 </html>

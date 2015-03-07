@@ -4,7 +4,7 @@ jing.module('TodoApp')
         var Storage = module.require('Database.Todos');
         var Router = module.require('Router');
         var filters = {
-            all : {},
+            all : null,
             active : {
                 completed : false
             },
@@ -25,6 +25,11 @@ jing.module('TodoApp')
         };
 
         env.$prop = {
+            toggleCheckAll : function(checked) {
+                jing.each(env.todos, function(todo) {
+                    todo.completed = checked;
+                });
+            },
             _calcCompleted : function() {
                 var todos = this.todos,
                     cn = jing.filter(todos, {completed : true}).length,
@@ -72,19 +77,12 @@ jing.module('TodoApp')
             }
         };
 
-        env.$watch('all_checked', function(change_list) {
-            var checked = change_list[0].cur_value;
-            jing.each(env.todos, function(todo) {
-                todo.completed = checked;
-            });
-        });
-
         env.$watch('todos', function(change_list) {
             var c = change_list[0];
             if(c.type !== 'child') {
                 env._calcCompleted();
             }
-            Storage.save(env.todos);
+            //Storage.save(env.todos);
         });
         env._calcCompleted();
         Router.run(env, filters);

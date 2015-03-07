@@ -1883,7 +1883,7 @@ function directive_data_bind(drive_module, directive_module, env, element, attr_
     }
     //todo 支持checkbox, radio等各种类型。
 
-    var expr = parse_expression(attr_value);
+    var expr = parse_expression(attr_value, false);
 
     if(expr.type !== 'variable' && expr.type !== 'property') {
         throw 'j-model only support settable expression';
@@ -1944,7 +1944,7 @@ $each(['j-click', 'j-dblclick', 'j-mousedown'], function(d_name) {
     });
 });
 
-$each(['j-blur', 'j-focus', 'j-change'], function(d_name) {
+$each(['j-blur', 'j-focus'], function(d_name) {
     var e_name = d_name.substring(2);
     directive_create(d_name, function() {
         return function(drive_module, directive_module, env, element, attr_value) {
@@ -1956,6 +1956,19 @@ $each(['j-blur', 'j-focus', 'j-change'], function(d_name) {
     });
 });
 
+directive_create('j-change', function() {
+    return function(drive_module, directive_module, env, element, attr_value) {
+        var expr = parse_expression(attr_value);
+        $on(element, 'change', function(e) {
+            /*
+             * 因为j-model里面也是用的change事件，为了能够让j-model先起作用，延后执行。
+             */
+            setTimeout(function() {
+                expr.exec(env);
+            });
+        });
+    }
+});
 
 function j_repeat_env(env, key, jarray, index) {
 
@@ -2381,13 +2394,13 @@ function parse_expression(expr_str, node_need_cache) {
     __parse_node_need_cache = node_need_cache ? true : false;
     parse_token_init(expr_str);
 
-    try {
+    //try {
         parse_expr();
         parse_reduce_op();
-    } catch(ex) {
-        console.log(ex.message);
-        console.log(ex.stack);
-    }
+    //} catch(ex) {
+    //    console.log(ex.message);
+    //    console.log(ex.stack);
+    //}
 
 
 

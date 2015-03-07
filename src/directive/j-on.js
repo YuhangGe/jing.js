@@ -37,7 +37,7 @@ $each(['j-click', 'j-dblclick', 'j-mousedown'], function(d_name) {
     });
 });
 
-$each(['j-blur', 'j-focus', 'j-change'], function(d_name) {
+$each(['j-blur', 'j-focus'], function(d_name) {
     var e_name = d_name.substring(2);
     directive_create(d_name, function() {
         return function(drive_module, directive_module, env, element, attr_value) {
@@ -47,4 +47,18 @@ $each(['j-blur', 'j-focus', 'j-change'], function(d_name) {
             });
         }
     });
+});
+
+directive_create('j-change', function() {
+    return function(drive_module, directive_module, env, element, attr_value) {
+        var expr = parse_expression(attr_value);
+        $on(element, 'change', function(e) {
+            /*
+             * 因为j-model里面也是用的change事件，为了能够让j-model先起作用，延后执行。
+             */
+            setTimeout(function() {
+                expr.exec(env);
+            });
+        });
+    }
 });

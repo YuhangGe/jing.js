@@ -2,7 +2,7 @@ function Environment(name, parent) {
     $defineProperty(this, '__', {
         prop : $bind(this, environment_reg_props),
         bind : $bind(this, environment_reg_binds),
-        emit_tree : new EmitNode('env.root'),
+        emit_tree : new RootEmitNode('env.root'),
         name : name,
         children : {},
         parent : parent ? parent : null,

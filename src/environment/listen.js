@@ -60,7 +60,7 @@ ImmExprListener.prototype = {
         this.env = env;
         this.pre_value = null;
         this.cur_value = null;
-        this.compare = true;
+        //this.compare = true;
     },
     notify : function(emit_type, var_name) {
         var n = this.var_tree[var_name];
@@ -77,7 +77,7 @@ ImmExprListener.prototype = {
     _deal : function() {
 
         this.cur_value = this.expr.exec(this.env);
-        if(this.compare && this.cur_value === this.pre_value) {
+        if(!$isJArray(this.cur_value) && this.cur_value === this.pre_value) {
             return;
         }
         this.handler([{

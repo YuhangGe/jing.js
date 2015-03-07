@@ -201,17 +201,8 @@ $defineProperty(__env_prototype, '$unwatch', function(listener_id) {
 });
 
 $defineProperty(__env_prototype, '$watch', function (var_name, callback, data, lazy_time) {
-    function items2expr(items) {
-        var expr = build_node_loop(items, items.length-1);
-        var_tree[items.join('.')] = expr;
-        return expr;
-    }
 
-    function build_node_loop(items, idx) {
-        return idx === 0 ?
-            new VariableGrammarNode(items[0]) :
-            new PropertyGrammarNode(build_node_loop(items, idx - 1), new ConstantGrammarNode(items[idx]));
-    }
+
 
     if (typeof callback !== 'function') {
         throw new Error('$watch need function');
@@ -222,17 +213,25 @@ $defineProperty(__env_prototype, '$watch', function (var_name, callback, data, l
     }
 
     var is_lazy = lazy_time !== false;
-    var v_items = environment_var2items(var_name),
-        expr = build_node_loop(v_items, v_items.length-1),
-        var_tree = {};
+    var v_tree = {},
+        v_items = environment_var2items(var_name),
+        expr = build_node_loop(v_items.length-1);
 
-    var_tree[v_items.join('.')] = [expr];
-
-    var listener = is_lazy ? new LazyExprListener(var_tree, expr, this, callback, data, $isNumber(lazy_time) ? lazy_time : 0) : new ImmExprListener(var_tree, expr, env, callback, data);
+    function build_node_loop(idx) {
+        if(idx === 0) {
+            var vn = new VariableGrammarNode(v_items[0]);
+            v_tree[v_items.join('.')] = [vn];
+            return vn;
+        } else {
+            return new PropertyGrammarNode(build_node_loop(idx - 1), new ConstantGrammarNode(v_items[idx]));
+        }
+    }
+    var listener = is_lazy ? new LazyExprListener(v_tree, expr, this, callback, data, $isNumber(lazy_time) ? lazy_time : 0) : new ImmExprListener(v_tree, expr, this, callback, data);
 
     environment_watch_items(this, v_items, listener, is_lazy);
 
     this.__.listeners[listener.id] = listener;
+    listener.cur_value = listener.pre_value = expr.exec(this);
 
     return listener.id;
 });
@@ -287,6 +286,10 @@ function environment_watch_expression(env, expr, callback, data, lazy_time) {
 
     if(watch_array.length === 0) {
         return;
+    }
+
+    if(expr.type === 'property') {
+        //todo 如果是简单表达式，则使用PropListener，精确传递变化类型。
     }
 
     var is_lazy = lazy_time !== false;

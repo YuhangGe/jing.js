@@ -265,7 +265,9 @@ function $JSONStringify(obj) {
         } else if($isObject(obj)) {
             rtn_obj = {};
             for(k in obj) {
-                rtn_obj[k] = get_origin_obj(obj[k]);
+                if(k !== __env_emit_name && k !== __env_prop_name) {
+                    rtn_obj[k] = get_origin_obj(obj[k]);
+                }
             }
         }
 

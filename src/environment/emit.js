@@ -3,7 +3,7 @@ function EmitNode(id, parent) {
     this.L_emitter = null;
     this.children = {};
     this.parent = parent;
-    this.path = (parent ? parent.path + '.' : '') + id;
+    this.path = (parent.path ? parent.path + '.' : '') + id;
     this.I_emitter = new ImmEmitter(this.path);
     this.L_emitter = new ImmEmitter(this.path);
 }
@@ -67,6 +67,29 @@ EmitNode.prototype = {
         this.I_emitter = null;
         this.L_emitter = null;
         this.parent = null;
+    }
+};
+
+function RootEmitNode(id) {
+    this.id = id;
+    this.children = {};
+    this.path = '';
+}
+RootEmitNode.prototype = {
+    _nu : function() {
+
+    },
+    _ne : function() {
+
+    },
+    _nd : function() {
+
+    },
+    destroy : function() {
+        for(var k in this.children) {
+            this.children[k].destroy();
+            delete this.children[k];
+        }
     }
 };
 

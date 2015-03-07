@@ -31,11 +31,11 @@ function JRepeat(ele, attr, drive_module, key, env, expr) {
     this.module = drive_module;
     this.frag = null; // document.createDocumentFragment();
     var listener = environment_watch_expression(env, expr, function(change_list, repeater) {
-        //var c = change_list[0];
-        //log(c);
-        //if(c.type !== 'child') {
-        //    repeater.update(change_list[0].cur_value);
-        //}
+        var c = change_list[0];
+        if(c.type !== 'child') {
+            log('j-repeat update. todo: use diff strategy');
+            repeater.update(change_list[0].cur_value);
+        }
     }, this, 10);
     listener.compare = false;
 

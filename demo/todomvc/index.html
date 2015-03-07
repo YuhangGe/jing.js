@@ -12,15 +12,15 @@
 <section id="todoapp">
     <header id="header">
         <h1>todos</h1>
-        <input id="new-todo" placeholder="What needs to be done?" j-model="new_todo" j-enter="addTodo()" autofocus>
+        <input id="new-todo" autocomplete="off" placeholder="What needs to be done?" j-model="new_todo" j-enter="addTodo()" autofocus>
     </header>
     <section id="main" j-show="todos.length">
-        <input id="toggle-all" type="checkbox" j-model="all_checked" j-click="markAll(all_checked)">
+        <input id="toggle-all" type="checkbox" j-model="all_checked">
         <label for="toggle-all">Mark all as complete</label>
         <ul id="todo-list">
-            <li j-repeat="todo in todos" j-class="(todo.completed ? 'completed ' : '') + (todo === edited_todo ? 'editing' : '')">
+            <li j-repeat="todo in todos.filter(cur_filter)" j-class="(todo.completed ? 'completed ' : '') + (todo === edited_todo ? 'editing' : '')">
                 <div class="view">
-                    <input class="toggle" type="checkbox" j-change="toggleComplete(todo)" j-value="todo.completed">
+                    <input class="toggle" type="checkbox" j-model="todo.completed">
                     <label j-dblclick="editTodo(todo)">{{todo.title}}</label>
                     <button class="destroy" j-click="removeTodo(todo)"></button>
                 </div>
@@ -34,7 +34,7 @@
 					</span>
         <ul id="filters">
             <li>
-                <a j-class="status === '' ? 'selected' : ''" href="#/all">All</a>
+                <a j-class="status === 'all' ? 'selected' : ''" href="#/all">All</a>
             </li>
             <li>
                 <a j-class="status === 'active' ? 'selected' : ''" href="#/active">Active</a>
@@ -54,9 +54,11 @@
     <p>Part of <a href="http://todomvc.com">TodoMVC</a></p>
 </footer>
 
-<script type="text/javascript" src="../../dist/jing.min.js"></script>
 <script type="text/javascript" src="bower_components/todomvc-common/base.js"></script>
 <script type="text/javascript" src="bower_components/director/director.min.js"></script>
+
+<script type="text/javascript" src="../../dist/jing.min.js"></script>
+
 <script type="text/javascript" src="js/store.js"></script>
 <script type="text/javascript" src="js/route.js"></script>
 <script type="text/javascript" src="js/todo.js"></script>

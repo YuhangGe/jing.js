@@ -21,38 +21,18 @@ jing.module('TodoApp')
             remaining_count: 0,
             completed_count: 0,
             status: 'all',
-            cur_filter : filters.all,
-            A : {
-                B : {
-                    C : 45,
-                    D : 90
-                },
-                E : "dsd"
-            }
+            cur_filter : filters.all
         };
 
-        env.$watch('all_checked', function(change_list) {
-            var checked = change_list[0].cur_value;
-            $each(env.todos, function(todo) {
-                todo.completed = checked;
-            });
-        });
-
-        env.$watch('todos', function(change_list) {
-            //log('todos change');
-            //log(change_list);
-            //log('todos change');
-            //var todos = change_list[0].cur_value,
-            //    cn = jing.filter(todos, {completed : true}).length,
-            //    rn = todos.length - cn;
-            //env.all_checked = rn === 0;
-            //env.remaining_count = rn;
-            //env.completed_count = cn;
-            //Storage.save(env.todos);
-        });
-
-
         env.$prop = {
+            _calcCompleted : function() {
+                var todos = this.todos,
+                    cn = jing.filter(todos, {completed : true}).length,
+                    rn = todos.length - cn;
+                this.all_checked = rn === 0;
+                this.remaining_count = rn;
+                this.completed_count = cn;
+            },
             setStatus : function(status) {
                 env.status = status;
                 env.cur_filter = filters[status];
@@ -92,6 +72,21 @@ jing.module('TodoApp')
             }
         };
 
+        env.$watch('all_checked', function(change_list) {
+            var checked = change_list[0].cur_value;
+            $each(env.todos, function(todo) {
+                todo.completed = checked;
+            });
+        });
+
+        env.$watch('todos', function(change_list) {
+            var c = change_list[0];
+            if(c.type !== 'child') {
+                env._calcCompleted();
+            }
+            Storage.save(env.todos);
+        });
+        env._calcCompleted();
         Router.run(env, filters);
 
     });

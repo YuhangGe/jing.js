@@ -33,6 +33,8 @@
                         <strong>{{remaining_count}}</strong>{{remaining_count>1?' items left':' item left'}}
 					</span>
         <ul id="filters">
+            <!-- todo : 接下来完善jing.js的Parse Object功能 -->
+            <!-- 使得可以使用j-class='{selected : status==="all"}'这样的简便方式 -->
             <li>
                 <a j-class="status === 'all' ? 'selected' : ''" href="#/all">All</a>
             </li>

@@ -1,4 +1,5 @@
 function GrammarNode(type, child_nodes) {
+    this.__jing0210node__ = true; 
     this.type = type;
     this.nodes = child_nodes ? child_nodes : [];
     this.parent = null;

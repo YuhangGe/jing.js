@@ -208,7 +208,9 @@ $defineProperty(__env_prototype, '$watch', function (var_name, callback, data, l
         throw new Error('$watch need function');
     }
 
-    if (!$isString(var_name) ||! /^[\w\d]+(?:(?:\.[\w\d]+)|(?:\[\s*\d+\s*\]))*$/.test(var_name)) {
+    if($isObject(var_name) && $hasProperty(var_name, '__jing0210node__')) {
+        return environment_watch_expression.call(this, this, var_name, callback, data, lazy_time);
+    } else if(!$isString(var_name) || ! /^[\w\d]+(?:(?:\.[\w\d]+)|(?:\[\s*\d+\s*\]))*$/.test(var_name)) {
         throw new Error('$watch wrong format');
     }
 

@@ -23,7 +23,9 @@ $defineGetterSetter(__env_prototype, '$children', function() {
 $defineGetterSetter(__env_prototype, '$parent', function() {
     return this.__.parent;
 });
-
+$defineProperty(__env_prototype, '$parse', function(expression_string) {
+    return parse_expression(expression_string);
+});
 $defineGetterSetter(__env_prototype, '$root', function() {
     return this.__.parent ? this.__.parent.$root : this;
 });

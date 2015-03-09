@@ -38,6 +38,7 @@
 
 <script type="text/javascript" src="../src/util/util.js"></script>
 <script type="text/javascript" src="../src/util/array.js"></script>
+<script type="text/javascript" src="../src/util/dom.js"></script>
 <script type="text/javascript" src="../src/environment/environment.js"></script>
 <script type="text/javascript" src="../src/environment/emit.js"></script>
 <script type="text/javascript" src="../src/environment/jarray.js"></script>
@@ -52,6 +53,7 @@
 <script type="text/javascript" src="../src/directive/j-app.js"></script>
 <script type="text/javascript" src="../src/directive/j-async-env.js"></script>
 <script type="text/javascript" src="../src/directive/j-class.js"></script>
+<script type="text/javascript" src="../src/directive/j-cloak.js"></script>
 <script type="text/javascript" src="../src/directive/j-directive.js"></script>
 <script type="text/javascript" src="../src/directive/j-env.js"></script>
 <script type="text/javascript" src="../src/directive/j-if.js"></script>
@@ -79,6 +81,7 @@
 <script type="text/javascript" src="../src/drive/drive.js"></script>
 <script type="text/javascript" src="../src/drive/view.js"></script>
 <script type="text/javascript" src="../src/jing/jing.js"></script>
+<script type="text/javascript" src="../src/jing/init.js"></script>
 
 <!--<script type="text/javascript" src="cases/env/watch/expr.js"></script>-->
 <!--<script type="text/javascript" src="cases/env/watch/array.js"></script>-->
@@ -123,26 +126,26 @@
 <!--</body>-->
 <body j-app="TodoApp">
 
-<section id="todoapp">
+<section id="todoapp" >
     <header id="header">
         <h1>todos</h1>
         <input id="new-todo" autocomplete="off" placeholder="What needs to be done?" j-model="new_todo" j-enter="addTodo()" autofocus>
     </header>
-    <section id="main" j-show="todos.length">
+    <section id="main" j-show="todos.length" >
         <input id="toggle-all" type="checkbox" j-model="all_checked" j-change="toggleCheckAll(all_checked)" >
         <label for="toggle-all">Mark all as complete</label>
-        <ul id="todo-list">
+        <ul id="todo-list" j-cloak>
             <li j-repeat="todo in todos.filter(cur_filter)" j-class="(todo.completed ? 'completed ' : '') + (todo === edited_todo ? 'editing' : '')">
                 <div class="view">
                     <input class="toggle" type="checkbox" j-model="todo.completed">
-                    <label j-dblclick="editTodo(todo)">{{todo.title}}</label>
+                    <label j-dblclick="editTodo(todo)">{{$index+1}}： {{todo.title}}</label>
                     <button class="destroy" j-click="removeTodo(todo)"></button>
                 </div>
                 <input class="edit" j-model="todo.title" j-blur="doneEditing(todo)" todo-focus="todo === edited_todo">
             </li>
         </ul>
     </section>
-    <footer id="footer" j-show="todos.length">
+    <footer id="footer" j-show="todos.length" j-cloak>
 					<span id="todo-count">
                         <strong>{{remaining_count}}</strong>{{remaining_count>1?' items left':' item left'}}
 					</span>
@@ -172,6 +175,7 @@
 
 <script type="text/javascript" src="../demo/todomvc/bower_components/todomvc-common/base.js"></script>
 <script type="text/javascript" src="../demo/todomvc/js/store.js"></script>
+<script type="text/javascript" src="../demo/todomvc/js/todo-focus.js"></script>
 <script type="text/javascript" src="../demo/todomvc/js/todo.js"></script>
 <script type="text/javascript" src="../demo/todomvc/js/route.js"></script>
 <script type="text/javascript" src="../demo/todomvc/js/app.js"></script>

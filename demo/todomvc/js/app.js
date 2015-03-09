@@ -82,7 +82,7 @@ jing.module('TodoApp')
             if(c.type !== 'child') {
                 env._calcCompleted();
             }
-            //Storage.save(env.todos);
+            Storage.save(env.todos);
         });
         env._calcCompleted();
         Router.run(env, filters);

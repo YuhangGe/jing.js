@@ -14,7 +14,7 @@
         <h1>todos</h1>
         <input id="new-todo" autocomplete="off" placeholder="What needs to be done?" j-model="new_todo" j-enter="addTodo()" autofocus>
     </header>
-    <section id="main" j-show="todos.length">
+    <section id="main" j-show="todos.length" j-cloak>
         <input id="toggle-all" type="checkbox" j-model="all_checked" j-change="toggleCheckAll(all_checked)">
         <label for="toggle-all">Mark all as complete</label>
         <ul id="todo-list">
@@ -28,7 +28,7 @@
             </li>
         </ul>
     </section>
-    <footer id="footer" j-show="todos.length">
+    <footer id="footer" j-show="todos.length" j-cloak>
 					<span id="todo-count">
                         <strong>{{remaining_count}}</strong>{{remaining_count>1?' items left':' item left'}}
 					</span>
@@ -59,6 +59,8 @@
 
 <script type="text/javascript" src="../../dist/jing.min.js"></script>
 
+<!-- 项目文件，以下文件可以按任意方式排列加载顺序 -->
+<script type="text/javascript" src="js/todo-focus.js"></script>
 <script type="text/javascript" src="js/store.js"></script>
 <script type="text/javascript" src="js/route.js"></script>
 <script type="text/javascript" src="js/todo.js"></script>

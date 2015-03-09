@@ -130,30 +130,6 @@ $defineProperty(__module_prototype, 'factory', function factory(name, func) {
     }
 
 });
-$defineProperty(__module_prototype, 'directive', function directive(name, scope_type, func) {
-    var dire;
-    if(!func) {
-        dire = this.__.directives[name];
-        if(!dire) {
-            return null;
-        } else {
-            directive_initialize(dire, this);
-            return dire.inst;
-        }
-    } else {
-        if(typeof func !== 'function') {
-            log('directive need function');
-            return;
-        }
-        if(this.__.directives.hasOwnProperty(name)) {
-            log('directive exists! override.');
-        }
-        dire = new Directive(this, name,  scope_type, func);
-        this.__.directives[name] = dire;
-        directive_register(dire);
-        return this;
-    }
-});
 
 $defineProperty(__module_prototype, 'env', function(name, func) {
     var $controllers = this.__.controllers;

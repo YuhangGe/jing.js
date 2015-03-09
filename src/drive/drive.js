@@ -1,10 +1,15 @@
 var __drive_insert_b = [];
 
 function drive_insert_before() {
-    $each(__drive_insert_b, function(it) {
+    var items = __drive_insert_b, it;
+    for(var i=0;i<items.length;i++) {
+        it = items[i];
         it.pos.parentNode.insertBefore(it.ele, it.pos);
-    });
-    __drive_insert_b.length = 0;
+        it.pos = null; //防止潜在的内存泄露，采取尽可能显示地回收策略（虽然说在js里很多地方是不必要的）。
+        it.ele = null;
+        delete items[i];
+    }
+    items.length = 0;
 }
 
 function drive_run_directive(element, drive_module, directive, env, val) {
@@ -95,6 +100,9 @@ function drive_parse_element(ele, drive_module, env) {
         case 1:
             // Element
             drive_render_element(ele, ele.attributes, drive_module, env);
+            if($hasAttr(ele, 'j-cloak')) {
+                $removeAttr(ele, 'j-cloak');
+            }
             break;
         case 3:
             // #text
@@ -104,4 +112,5 @@ function drive_parse_element(ele, drive_module, env) {
             //ignore other.
             break;
     }
+
 }

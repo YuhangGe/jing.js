@@ -10,9 +10,9 @@ jing.module('TodoApp').directive('todo-focus', function() {
         }
     }
     return function(drive_module, directive_module, env, element, attr_value) {
-        var expr = parse_expression(attr_value, true);
+        var expr = env.$parse(attr_value, true);
 
-        var listener = environment_watch_expression(env, expr, function(change_list, ele) {
+        var listener = env.$watch(expr, function(change_list, ele) {
             apply_focus(ele, change_list[0].cur_value);
         }, element, 10);
 

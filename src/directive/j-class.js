@@ -7,7 +7,6 @@ directive_create('j-class', function() {
         var expr = parse_expression(attr_value, true);
 
         var listener = environment_watch_expression(env, expr, function(change_list, ele) {
-            log('class')
             apply_class(ele, change_list[0].pre_value, change_list[0].cur_value);
         }, element, 10);
 

@@ -49,3 +49,34 @@ function $filter(arr, fn) {
     }
     return new_arr;
 }
+
+
+function $isArray(obj) {
+    return Array.isArray(obj); // obj instanceof Array;
+}
+function $isJArray(obj) {
+    return obj instanceof JArray;
+}
+
+
+function $merge(src, options) {
+    if(!options) {
+        return src;
+    }
+    for(var kn in options) {
+        src[kn] = options[kn];
+    }
+    return src;
+}
+function $copyArray(arr) {
+    var rtn = [];
+    for(var i=0;i<arr.length;i++) {
+        rtn.push(arr[i]);
+    }
+    return rtn;
+}
+function $setArray(dst_arr, src_arr) {
+    for(var i=0;i<src_arr.length;i++) {
+        dst_arr[i] = src_arr[i];
+    }
+}

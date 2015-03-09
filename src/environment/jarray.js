@@ -115,3 +115,10 @@ $defineProperty(__jarray_prototype, 'destroy', function() {
     this.__.array.length = 0;
     this.__.en = null;
 });
+
+$defineProperty(__jarray_prototype, 'forEach', function(fn) {
+    var i, arr = this.__.array, len = arr.length;
+    for(i=0;i<len;i++) {
+        fn(arr[i], i);
+    }
+});

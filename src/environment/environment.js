@@ -8,7 +8,7 @@ function Environment(name, parent) {
         parent : parent ? parent : null,
         listeners : {},
         //以下字段是给j-repeat的子Env用的。
-        array : null,
+        jarray : null,
         index : 0
     });
 }
@@ -223,3 +223,14 @@ function environment_create_child(env, c_name) {
 //    }
 //    return cs;
 //}
+
+function environment_remove_listeners(env) {
+    var ls = env.__.listeners, k;
+    for(k in ls) {
+        environment_unwatch_listener(ls[k]);
+        delete ls[k];
+    }
+    for(k in env.__.children) {
+        environment_remove_listeners(env.__.children[k]);
+    }
+}

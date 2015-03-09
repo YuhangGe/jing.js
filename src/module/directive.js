@@ -6,3 +6,11 @@ function Directive(module, name, func) {
     this.link_func = null;
 }
 var __directive_prototype = Directive.prototype;
+
+$defineProperty(__module_prototype, 'directive', function directive(name, func) {
+        if(!$isFunction(func)) {
+            throw new Error('directive need function');
+        }
+        directive_create(name, func);
+        return this;
+});

@@ -100,35 +100,6 @@ function $bind(instance, func) {
         func.apply(instance, arguments);
     };
 }
-function $css(ele, name, value) {
-    //todo name如果是'background-color'这样的带短横线的，要转成'backgroundColor'
-    if(typeof name === 'object') {
-        for(var kn in name) {
-            ele.style[kn] = name[kn];
-        }
-    } else {
-        ele.style[name] = value;
-    }
-}
-function $attr(ele, attr_name, attr_value) {
-    if(typeof attr_value !== 'undefined') {
-        ele.setAttribute(attr_name, attr_value);
-    } else {
-        return ele.getAttribute(attr_name);
-    }
-}
-function $hasAttr(ele, attr_name) {
-    if(attr_name instanceof Array) {
-        for(var i=0;i<attr_name.length;i++) {
-            if(!ele.hasAttribute(attr_name[i])) {
-                return false;
-            }
-        }
-    } else {
-        return ele.hasAttribute(attr_name);
-    }
-}
-
 
 function $defineProperty(obj, prop, value, writable, enumerable) {
     //Object.defineProperty(obj, prop, {
@@ -162,9 +133,7 @@ function $defineGetterSetter(obj, prop, getter, setter, configurable, enumerable
     Object.defineProperty(obj, prop, desc);
 }
 
-function $on(ele, event_name, event_handler) {
-    ele.addEventListener(event_name, event_handler);
-}
+
 function $timeout(func, time) {
     setTimeout(func, time);
 }
@@ -172,48 +141,6 @@ function log() {
     console.log.apply(console, arguments);
 }
 
-function $isArray(obj) {
-    return Array.isArray(obj); // obj instanceof Array;
-}
-function $isJArray(obj) {
-    return obj instanceof JArray;
-}
-function $$before(new_ele, ele) {
-    ele.parentNode.insertBefore(new_ele, ele);
-}
-function $$remove(ele) {
-    ele.parentNode.removeChild(ele);
-}
-function $$all(query) {
-    return document.querySelectorAll(query);
-}
-function $$append(parent, ele) {
-    parent.appendChild(ele);
-}
-function $merge(src, options) {
-    if(!options) {
-        return src;
-    }
-    for(var kn in options) {
-        src[kn] = options[kn];
-    }
-    return src;
-}
-function $copyArray(arr) {
-    var rtn = [];
-    for(var i=0;i<arr.length;i++) {
-        rtn.push(arr[i]);
-    }
-    return rtn;
-}
-function $setArray(dst_arr, src_arr) {
-    for(var i=0;i<src_arr.length;i++) {
-        dst_arr[i] = src_arr[i];
-    }
-}
-function $$id(id) {
-    return document.getElementById(id);
-}
 
 function $isString(str) {
     return typeof str === 'string';

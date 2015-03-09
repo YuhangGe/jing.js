@@ -101,35 +101,6 @@ function $bind(instance, func) {
         func.apply(instance, arguments);
     };
 }
-function $css(ele, name, value) {
-    //todo name如果是'background-color'这样的带短横线的，要转成'backgroundColor'
-    if(typeof name === 'object') {
-        for(var kn in name) {
-            ele.style[kn] = name[kn];
-        }
-    } else {
-        ele.style[name] = value;
-    }
-}
-function $attr(ele, attr_name, attr_value) {
-    if(typeof attr_value !== 'undefined') {
-        ele.setAttribute(attr_name, attr_value);
-    } else {
-        return ele.getAttribute(attr_name);
-    }
-}
-function $hasAttr(ele, attr_name) {
-    if(attr_name instanceof Array) {
-        for(var i=0;i<attr_name.length;i++) {
-            if(!ele.hasAttribute(attr_name[i])) {
-                return false;
-            }
-        }
-    } else {
-        return ele.hasAttribute(attr_name);
-    }
-}
-
 
 function $defineProperty(obj, prop, value, writable, enumerable) {
     //Object.defineProperty(obj, prop, {
@@ -163,9 +134,7 @@ function $defineGetterSetter(obj, prop, getter, setter, configurable, enumerable
     Object.defineProperty(obj, prop, desc);
 }
 
-function $on(ele, event_name, event_handler) {
-    ele.addEventListener(event_name, event_handler);
-}
+
 function $timeout(func, time) {
     setTimeout(func, time);
 }
@@ -173,48 +142,6 @@ function log() {
     console.log.apply(console, arguments);
 }
 
-function $isArray(obj) {
-    return Array.isArray(obj); // obj instanceof Array;
-}
-function $isJArray(obj) {
-    return obj instanceof JArray;
-}
-function $$before(new_ele, ele) {
-    ele.parentNode.insertBefore(new_ele, ele);
-}
-function $$remove(ele) {
-    ele.parentNode.removeChild(ele);
-}
-function $$all(query) {
-    return document.querySelectorAll(query);
-}
-function $$append(parent, ele) {
-    parent.appendChild(ele);
-}
-function $merge(src, options) {
-    if(!options) {
-        return src;
-    }
-    for(var kn in options) {
-        src[kn] = options[kn];
-    }
-    return src;
-}
-function $copyArray(arr) {
-    var rtn = [];
-    for(var i=0;i<arr.length;i++) {
-        rtn.push(arr[i]);
-    }
-    return rtn;
-}
-function $setArray(dst_arr, src_arr) {
-    for(var i=0;i<src_arr.length;i++) {
-        dst_arr[i] = src_arr[i];
-    }
-}
-function $$id(id) {
-    return document.getElementById(id);
-}
 
 function $isString(str) {
     return typeof str === 'string';
@@ -346,6 +273,117 @@ function $filter(arr, fn) {
     return new_arr;
 }
 
+
+function $isArray(obj) {
+    return Array.isArray(obj); // obj instanceof Array;
+}
+function $isJArray(obj) {
+    return obj instanceof JArray;
+}
+
+
+function $merge(src, options) {
+    if(!options) {
+        return src;
+    }
+    for(var kn in options) {
+        src[kn] = options[kn];
+    }
+    return src;
+}
+function $copyArray(arr) {
+    var rtn = [];
+    for(var i=0;i<arr.length;i++) {
+        rtn.push(arr[i]);
+    }
+    return rtn;
+}
+function $setArray(dst_arr, src_arr) {
+    for(var i=0;i<src_arr.length;i++) {
+        dst_arr[i] = src_arr[i];
+    }
+}
+
+function $$swap(ele1, ele2) {
+    var p1 = ele1.parentNode, left, s_ele;
+    if(p1 !== ele2.parentNode) {
+        return;
+    }
+    s_ele = ele2.previousElementSibling;
+    if(!s_ele) {
+        s_ele = ele2.nextElementSibling;
+        left = false;
+    } else {
+        left = true;
+    }
+    p1.insertBefore(ele2, ele1);
+    if(s_ele === ele1) {
+        return;
+    }
+    if(left) {
+        p1.insertBefore(ele1, s_ele);
+    } else {
+        p1.appendChild(ele1);
+    }
+
+}
+
+function $on(ele, event_name, event_handler) {
+    ele.addEventListener(event_name, event_handler);
+}
+
+function $$before(new_ele, ele) {
+    ele.parentNode.insertBefore(new_ele, ele);
+}
+function $$remove(ele) {
+    ele.parentNode.removeChild(ele);
+}
+function $$all(query) {
+    return document.querySelectorAll(query);
+}
+
+function $$append(parent, ele) {
+    parent.appendChild(ele);
+}
+
+
+function $$id(id) {
+    return document.getElementById(id);
+}
+
+function $css(ele, name, value) {
+    //todo name如果是'background-color'这样的带短横线的，要转成'backgroundColor'
+    if(typeof name === 'object') {
+        for(var kn in name) {
+            ele.style[kn] = name[kn];
+        }
+    } else {
+        ele.style[name] = value;
+    }
+}
+function $attr(ele, attr_name, attr_value) {
+    if(typeof attr_value !== 'undefined') {
+        ele.setAttribute(attr_name, attr_value);
+    } else {
+        return ele.getAttribute(attr_name);
+    }
+}
+function $hasAttr(ele, attr_name) {
+    if(attr_name instanceof Array) {
+        for(var i=0;i<attr_name.length;i++) {
+            if(!ele.hasAttribute(attr_name[i])) {
+                return false;
+            }
+        }
+    } else {
+        return ele.hasAttribute(attr_name);
+    }
+}
+
+function $removeAttr(ele, attr_name) {
+    ele.removeAttribute(attr_name);
+}
+
 function Environment(name, parent) {
     $defineProperty(this, '__', {
         prop : $bind(this, environment_reg_props),
@@ -356,7 +394,7 @@ function Environment(name, parent) {
         parent : parent ? parent : null,
         listeners : {},
         //以下字段是给j-repeat的子Env用的。
-        array : null,
+        jarray : null,
         index : 0
     });
 }
@@ -371,7 +409,9 @@ $defineGetterSetter(__env_prototype, '$children', function() {
 $defineGetterSetter(__env_prototype, '$parent', function() {
     return this.__.parent;
 });
-
+$defineProperty(__env_prototype, '$parse', function(expression_string) {
+    return parse_expression(expression_string);
+});
 $defineGetterSetter(__env_prototype, '$root', function() {
     return this.__.parent ? this.__.parent.$root : this;
 });
@@ -571,6 +611,17 @@ function environment_create_child(env, c_name) {
 //    }
 //    return cs;
 //}
+
+function environment_remove_listeners(env) {
+    var ls = env.__.listeners, k;
+    for(k in ls) {
+        environment_unwatch_listener(ls[k]);
+        delete ls[k];
+    }
+    for(k in env.__.children) {
+        environment_remove_listeners(env.__.children[k]);
+    }
+}
 
 function EmitNode(id, parent) {
     this.id = id;
@@ -846,6 +897,13 @@ $defineProperty(__jarray_prototype, 'sort', function(fn) {
 $defineProperty(__jarray_prototype, 'destroy', function() {
     this.__.array.length = 0;
     this.__.en = null;
+});
+
+$defineProperty(__jarray_prototype, 'forEach', function(fn) {
+    var i, arr = this.__.array, len = arr.length;
+    for(i=0;i<len;i++) {
+        fn(arr[i], i);
+    }
 });
 
 var __environment_listen_counter = 0;
@@ -1222,7 +1280,9 @@ $defineProperty(__env_prototype, '$watch', function (var_name, callback, data, l
         throw new Error('$watch need function');
     }
 
-    if (!$isString(var_name) ||! /^[\w\d]+(?:(?:\.[\w\d]+)|(?:\[\s*\d+\s*\]))*$/.test(var_name)) {
+    if($isObject(var_name) && $hasProperty(var_name, '__jing0210node__')) {
+        return environment_watch_expression.call(this, this, var_name, callback, data, lazy_time);
+    } else if(!$isString(var_name) || ! /^[\w\d]+(?:(?:\.[\w\d]+)|(?:\[\s*\d+\s*\]))*$/.test(var_name)) {
         throw new Error('$watch wrong format');
     }
 
@@ -1452,30 +1512,6 @@ $defineProperty(__module_prototype, 'factory', function factory(name, func) {
     }
 
 });
-$defineProperty(__module_prototype, 'directive', function directive(name, scope_type, func) {
-    var dire;
-    if(!func) {
-        dire = this.__.directives[name];
-        if(!dire) {
-            return null;
-        } else {
-            directive_initialize(dire, this);
-            return dire.inst;
-        }
-    } else {
-        if(typeof func !== 'function') {
-            log('directive need function');
-            return;
-        }
-        if(this.__.directives.hasOwnProperty(name)) {
-            log('directive exists! override.');
-        }
-        dire = new Directive(this, name,  scope_type, func);
-        this.__.directives[name] = dire;
-        directive_register(dire);
-        return this;
-    }
-});
 
 $defineProperty(__module_prototype, 'env', function(name, func) {
     var $controllers = this.__.controllers;
@@ -1525,6 +1561,14 @@ function Directive(module, name, func) {
     this.link_func = null;
 }
 var __directive_prototype = Directive.prototype;
+
+$defineProperty(__module_prototype, 'directive', function directive(name, func) {
+        if(!$isFunction(func)) {
+            throw new Error('directive need function');
+        }
+        directive_create(name, func);
+        return this;
+});
 
 
 var __module_drive_queue = {};
@@ -1700,13 +1744,16 @@ directive_create('j-class', function() {
         var expr = parse_expression(attr_value, true);
 
         var listener = environment_watch_expression(env, expr, function(change_list, ele) {
-            log('class')
             apply_class(ele, change_list[0].pre_value, change_list[0].cur_value);
         }, element, 10);
 
         apply_class(element, '', listener.cur_value);
     }
 });
+
+/*
+ * j-cloak并不是一个独立的directive，其功能在drive/dirve.js中的drive_parse_element函数中实现
+ */
 
 /**
  * Created by abraham on 15/1/22.
@@ -1976,7 +2023,7 @@ function j_repeat_env(env, key, jarray, index) {
     env.__.index = index;
 
     var jen = jarray.__.en.children[index];
-    if(!jen) {
+    if (!jen) {
         jen = jarray.__.en.children[index] = new EmitNode(index, jarray.__.en);
     }
     env.__.emit_tree.children[key] = jen;
@@ -1986,11 +2033,17 @@ function j_repeat_env(env, key, jarray, index) {
     env[__env_prop_name][key] = null;
     env[__env_emit_name][key] = jen;
 
-    $defineGetterSetter(env, key, function() {
+    $defineGetterSetter(env, key, function () {
         return this.__.jarray[this.__.index];
-    }, function(val) {
+    }, function (val) {
         this.__.jarray[this.__.index] = val;
     }, false, true);
+}
+
+function JRepeatReuseItem(ele, env) {
+    this.ele = ele;
+    this.used = false;
+    this.env = env;
 }
 
 function JRepeat(ele, attr, drive_module, key, env, expr) {
@@ -2001,11 +2054,10 @@ function JRepeat(ele, attr, drive_module, key, env, expr) {
     this.attr = attr;
     this.key = key;
     this.module = drive_module;
-    this.frag = null; // document.createDocumentFragment();
-    var listener = environment_watch_expression(env, expr, function(change_list, repeater) {
+    this.frag = document.createDocumentFragment();
+    var listener = environment_watch_expression(env, expr, function (change_list, repeater) {
         var c = change_list[0];
-        if(c.type !== 'child') {
-            log('j-repeat update. todo: use diff strategy');
+        if (c.type !== 'child') {
             repeater.update(change_list[0].cur_value);
         }
     }, this, 10);
@@ -2014,6 +2066,8 @@ function JRepeat(ele, attr, drive_module, key, env, expr) {
     this.val = listener.cur_value;
 
     this.items = [];
+    this.index_map = new Map();
+
 
     $$before(this.cmt, ele);
     $$remove(ele);
@@ -2022,107 +2076,209 @@ function JRepeat(ele, attr, drive_module, key, env, expr) {
     this.render();
 }
 var __jrepeate_prototype = JRepeat.prototype;
-__jrepeate_prototype.update = function(new_value) {
-    /*
-     * 目前是简单地重新全部更新元素。是一种很低效率的方式。
-     * 同时，已经$watch的表达式没有被destroy
-     * todo 采用diff的思想，只更新发生变化的元素。
-     */
-    for(var i=0;i<this.items.length;i++) {
-        var it = this.items[i];
-        $$remove(it.ele);
-        it.env.$destroy();
-        it.env = null;
-        it.ele = null;
-        it.val = null;
-    }
-    this.items.length = 0;
-    this.val = new_value;
-    this._get();
-    __drive_insert_b.push({
-        ele : this.frag,
-        pos : this.cmt
-    });
-    drive_insert_before();
-};
-__jrepeate_prototype._get = function() {
+__jrepeate_prototype.update = function (new_value) {
 
-    function replace_env_listener_var_key(env, org_key, org_reg, dst_key) {
-        /*
-         * todo 检查<li j-repeat><p j-env><li j-repeat><p j-env></p></li></p></li>这种复杂的嵌套情况，
-         *
-         */
-        var ls = env.__.listeners, k, var_tree, t;
-        for(k in ls) {
-            var_tree = ls[k].var_tree;
-            for(t in var_tree) {
-                if(t === org_key) {
-                    var_tree[dst_key] = var_tree[t];
-                } else if(org_reg.test(t)) {
-                    var_tree[t.replace(org_key, dst_key)] = var_tree[t];
-                }
-            }
-        }
-        for(var c in env.__.children) {
-            replace_env_listener_var_key(env.__.children[c], org_key, dst_key);
-        }
-    }
-
-    var array = this.val;
-    if(!(array instanceof JArray)) {
+    if (!$isJArray(new_value)) {
         throw new Error('only support Array in j-repeat.');
     }
+
+    var old_items = this.items,
+        map = this.index_map,
+        new_map = new Map();
+
+    var i;
+    var idx, item;
+
+    function get_index(item) {
+        var index_array = map.get(item);
+        if (!index_array || index_array.length === 0) {
+            return -1;
+        }
+        return index_array.pop();
+    }
+
+
+    var _array = new_value.__.array;
+    var items_tip = new Int32Array(_array.length);
+
+
+    for (i = 0; i < _array.length; i++) {
+        idx = get_index(_array[i]);
+        if (idx >= 0) {
+            //可复用元素
+            items_tip[i] = idx + 1;
+            old_items[idx].used = true;
+        }
+    }
+
+
+    for (i = 0; i < old_items.length; i++) {
+        item = old_items[i];
+        if (!item.used) {
+            $$remove(item.ele);
+            item.env.$destroy();
+            item.ele = null;
+            item.env = null;
+            /*
+             * 回收可复用元素。
+             */
+            delete old_items[i];
+        }
+    }
+
+
+    function get_old_idx(pre) {
+        for (var i = pre + 1; i < old_items.length; i++) {
+            if (old_items[i]) {
+                return i;
+            }
+        }
+        return -1;
+    }
+
+
+
+    function swap(idx, old_idx) {
+        var i1 = old_items[idx],
+            i2 = old_items[old_idx];
+        $$swap(i1.ele, i2.ele);
+        old_items[idx] = i2;
+        old_items[old_idx] = i1;
+    }
+
+    var env, ele;
+    var old_idx = get_old_idx(-1);
+    var pos_ele = old_idx < 0 ? this.cmt : old_items[old_idx].ele;
+    var new_items = new Array(_array.length);
+    var frag = null;
+
+    for (i = 0; i < _array.length; i++) {
+        idx = items_tip[i] - 1;
+        if (idx < 0) {
+            env = environment_create_child(this.env, i);
+            ele = this.ele.cloneNode(true);
+            item = new JRepeatReuseItem(ele, env);
+            j_repeat_set_prop(env, i, _array.length);
+            j_repeat_env(env, this.key, new_value, i);
+
+            drive_render_element(ele, this.attr, this.module, env);
+            drive_insert_before();
+
+            j_repeat_replace_env_listener_var_key(env, this.key, new RegExp('^' + this.key + '\\.'), new_value.__.en.children[i].path);
+
+            /*
+             * 将多个连续的插入，使用Fragment合并后再insert，可以提升性能。
+             */
+            frag = frag ? frag : document.createDocumentFragment();
+            frag.appendChild(ele);
+        } else {
+            if(frag) {
+                $$before(frag, pos_ele);
+                frag = null;
+            }
+            if (idx > old_idx) {
+                swap(idx, old_idx);
+            }
+            old_idx = get_old_idx(old_idx);
+            pos_ele = old_idx < 0 ? this.cmt : old_items[old_idx].ele;
+            item = old_items[idx];
+            item.env.__.index = i;
+            item.env.__.jarray = new_value;
+            j_repeat_set_prop(item.env, i, _array.length);
+        }
+        item.used = false;
+        new_items[i] = item;
+        j_repeat_set_index(new_map, _array[i], i);
+    }
+    if(frag) {
+        $$before(frag, pos_ele);
+        frag = null;
+    }
+    map.clear();
+    old_items.length = 0;
+    this.items = new_items;
+    this.index_map = new_map;
+
+};
+
+function j_repeat_set_prop(env, i, len) {
+    env.$prop = {
+        '$index': i,
+        '$first': i === 0,
+        '$odd': i % 2 !== 0,
+        '$even': i % 2 === 0,
+        '$last': i === len - 1,
+        '$middle': i !== 0 && i !== len - 1
+    };
+}
+__jrepeate_prototype.render = function () {
+    if (!$isJArray(this.val)) {
+        throw new Error('only support Array in j-repeat.');
+    }
+    var array = this.val.__.array;
     var r_ele, r_env;
     var frag = document.createDocumentFragment();
-    for(var i=0;i<array.length;i++) {
+    for (var i = 0; i < array.length; i++) {
         r_ele = this.ele.cloneNode(true);
         r_env = environment_create_child(this.env, i);
-        r_env.$prop = {
-            '@index' : i,
-            '@item' : array[i],
-            '@first' : i===0,
-            '@last' : i===array.length-1,
-            '@middle' : i!==0 && i!==array.length-1,
-            '@key' : i
-        };
-        j_repeat_env(r_env, this.key, array, i);
-        /*
-         * 目前是对每一次复制的元素进行render，包括解析directive和view。
-         * todo 可以考虑复用directive和view，这样就不需要每次循环都去drive_render_view. destroy之前的元素的已经$watch的表达式。
-         */
+        j_repeat_set_prop(r_env, i, array.length);
+        j_repeat_env(r_env, this.key, this.val, i);
+
         drive_render_element(r_ele, this.attr, this.module, r_env);
 
-        replace_env_listener_var_key(r_env, this.key, new RegExp('^'+this.key+'\\.'), array.__.en.children[i].path);
-        //log(r_env);
+        j_repeat_replace_env_listener_var_key(r_env, this.key, new RegExp('^' + this.key + '\\.'), this.val.__.en.children[i].path);
 
         frag.appendChild(r_ele);
-        this.items.push({
-            ele : r_ele,
-            env : r_env,
-            val : array[i]
-        });
+        this.items.push(new JRepeatReuseItem(r_ele, r_env));
+        j_repeat_set_index(this.index_map, array[i], i);
     }
-    this.frag = frag;
-};
 
-__jrepeate_prototype.render = function() {
-    this._get();
     __drive_insert_b.push({
-        ele : this.frag,
-        pos : this.cmt
+        ele: frag,
+        pos: this.cmt
     });
 };
+
+function j_repeat_set_index(map, item, idx) {
+    var index_array = map.get(item);
+    if (!index_array) {
+        index_array = [];
+        map.set(item, index_array);
+    }
+    index_array.push(idx);
+}
 
 function directive_deal_j_repeat(ele, attr, drive_module, env) {
     var item = attr.removeNamedItem('j-repeat'),
         expr_str = item.value;
 
     var expr = parse_expression(expr_str, true);
-    if(expr.type !== 'in') {
+    if (expr.type !== 'in') {
         throw 'j-repeat format wrong!';
     }
 
     new JRepeat(ele, attr, drive_module, expr.nodes[0], env, expr.nodes[1]);
+}
+
+function j_repeat_replace_env_listener_var_key(env, org_key, org_reg, dst_key) {
+    /*
+     * todo 检查<li j-repeat><p j-env><li j-repeat><p j-env></p></li></p></li>这种复杂的嵌套情况，
+     *
+     */
+    var ls = env.__.listeners, k, var_tree, t;
+    for (k in ls) {
+        var_tree = ls[k].var_tree;
+        for (t in var_tree) {
+            if (t === org_key) {
+                var_tree[dst_key] = var_tree[t];
+            } else if (org_reg.test(t)) {
+                var_tree[t.replace(org_key, dst_key)] = var_tree[t];
+            }
+        }
+    }
+    for (var c in env.__.children) {
+        j_repeat_replace_env_listener_var_key(env.__.children[c], org_key, dst_key);
+    }
 }
 
 (function() {
@@ -2240,6 +2396,7 @@ directive_create('j-style', function() {
 });
 
 function GrammarNode(type, child_nodes) {
+    this.__jing0210node__ = true; 
     this.type = type;
     this.nodes = child_nodes ? child_nodes : [];
     this.parent = null;
@@ -3195,10 +3352,15 @@ $defineProperty(__data_source_prototype, 'bind', function(scope, var_name) {
 var __drive_insert_b = [];
 
 function drive_insert_before() {
-    $each(__drive_insert_b, function(it) {
+    var items = __drive_insert_b, it;
+    for(var i=0;i<items.length;i++) {
+        it = items[i];
         it.pos.parentNode.insertBefore(it.ele, it.pos);
-    });
-    __drive_insert_b.length = 0;
+        it.pos = null; //防止潜在的内存泄露，采取尽可能显示地回收策略（虽然说在js里很多地方是不必要的）。
+        it.ele = null;
+        delete items[i];
+    }
+    items.length = 0;
 }
 
 function drive_run_directive(element, drive_module, directive, env, val) {
@@ -3289,6 +3451,9 @@ function drive_parse_element(ele, drive_module, env) {
         case 1:
             // Element
             drive_render_element(ele, ele.attributes, drive_module, env);
+            if($hasAttr(ele, 'j-cloak')) {
+                $removeAttr(ele, 'j-cloak');
+            }
             break;
         case 3:
             // #text
@@ -3298,6 +3463,7 @@ function drive_parse_element(ele, drive_module, env) {
             //ignore other.
             break;
     }
+
 }
 
 
@@ -3413,6 +3579,15 @@ jing.map = $map;
 jing.filter = $filter;
 jing.defineProperty = $defineProperty;
 jing.defineGetterSetter = $defineGetterSetter;
+
+(function() {
+    var __jing_style = document.createElement('style');
+    document.head.appendChild(__jing_style);
+    var __jing_sheet = __jing_style.sheet;
+    __jing_sheet.insertRule("[j-cloak] { display : none !important;}",0);
+})();
+
+
 
 
 })();

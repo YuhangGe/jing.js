@@ -14,6 +14,7 @@ Todos
 * $watch机制的销毁策略。（Important\!）
 * j-repeat还有许多工作需要完善和改进。包括使用diff思想，复用组件，以及销毁不再使用的组件的$watch
 * $watch和j-repeat可能存在潜在的内存泄露。
+* 研究Map和Object在作为hashmap时的性能对比，选择更高效的方式。目前使用的是Object
 
 关于$watch机制
 ------

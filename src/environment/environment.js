@@ -1,11 +1,13 @@
 function Environment(name, parent) {
     $defineProperty(this, '__', {
         prop : $bind(this, environment_reg_props),
-        bind : $bind(this, environment_reg_binds),
-        emit_tree : new RootEmitNode('env.root'),
+        //bind : $bind(this, environment_reg_binds),
         name : name,
         children : {},
         parent : parent ? parent : null,
+
+        emit_tree : RootEmitNode(),
+        emit_map : {},
         listeners : {},
         //以下字段是给j-repeat的子Env用的。
         jarray : null,
@@ -13,6 +15,8 @@ function Environment(name, parent) {
     });
     $defineProperty(this, __env_emit_name, {});
     $defineProperty(this, __env_prop_name, {});
+    $defineProperty(this, __env_env_name, this);
+
 }
 
 var __env_prototype = Environment.prototype;
@@ -159,65 +163,65 @@ function environment_reg_props(name, value) {
         this[name] = value;
     }
 }
-
-function environment_reg_binds(name, var_str) {
-
-    function reg_bind(name, var_name) {
-        if($hasProperty(this, name)) {
-            throw new Error('variable' + name + ' has been registered');
-        }
-        var var_array = environment_split_var(var_name);
-        var env = this.$find(var_array[0]);
-        if(!env || env === this) {
-            throw new Error('variable ' + var_array[0] + ' not found in $bind');
-        }
-        /*
-         * 构建emit_tree
-         */
-        var listener = new ImmListener();
-        environment_watch_items(env, var_array[0], listener, false);
-        environment_unwatch_listener(listener);
-        /*
-         *
-         */
-        var e_node = env.__.emit_tree;
-        for(var i=0;i<var_array.length;i++) {
-            e_node = e_node.children[var_array[i]];
-        }
-
-        $defineGetterSetter(this, name, function() {
-            var p = env[var_array[0]];
-            for(var i=1;i<var_array.length;i++) {
-                p = p[var_array[i]];
-            }
-            return p;
-        }, function(val) {
-            var p = env, v = var_array[0];
-            for(var i=0;i<var_array.length-1;i++) {
-                p = p[var_array[i]];
-                v = var_array[i+1];
-            }
-            p[v] = val;
-        });
-
-        var new_e_node = new EmitNode(name, this.__.emit_tree);
-        new_e_node.L_emitter = e_node.L_emitter;
-        new_e_node.I_emitter = e_node.I_emitter;
-
-        this.__.emit_tree.children[name] = new_e_node;
-        this[__env_emit_name][name] = new_e_node;
-
-
-    }
-
-    if($isObject(name)) {
-        for(var kn in name) {
-            reg_bind.call(this, kn, name[kn]);
-        }
-    } else {
-        reg_bind.call(this, name, var_str);
-    }
-}
+//
+//function environment_reg_binds(name, var_str) {
+//
+//    function reg_bind(name, var_name) {
+//        if($hasProperty(this, name)) {
+//            throw new Error('variable' + name + ' has been registered');
+//        }
+//        var var_array = environment_split_var(var_name);
+//        var env = this.$find(var_array[0]);
+//        if(!env || env === this) {
+//            throw new Error('variable ' + var_array[0] + ' not found in $bind');
+//        }
+//        /*
+//         * 构建emit_tree
+//         */
+//        var listener = new ImmListener();
+//        environment_watch_items(env, var_array[0], listener, false);
+//        environment_unwatch_listener(listener);
+//        /*
+//         *
+//         */
+//        var e_node = env.__.emit_tree;
+//        for(var i=0;i<var_array.length;i++) {
+//            e_node = e_node.children[var_array[i]];
+//        }
+//
+//        $defineGetterSetter(this, name, function() {
+//            var p = env[var_array[0]];
+//            for(var i=1;i<var_array.length;i++) {
+//                p = p[var_array[i]];
+//            }
+//            return p;
+//        }, function(val) {
+//            var p = env, v = var_array[0];
+//            for(var i=0;i<var_array.length-1;i++) {
+//                p = p[var_array[i]];
+//                v = var_array[i+1];
+//            }
+//            p[v] = val;
+//        });
+//
+//        var new_e_node = new EmitNode(name, this.__.emit_tree);
+//        new_e_node.L_emitter = e_node.L_emitter;
+//        new_e_node.I_emitter = e_node.I_emitter;
+//
+//        this.__.emit_tree.children[name] = new_e_node;
+//        this[__env_emit_name][name] = new_e_node;
+//
+//
+//    }
+//
+//    if($isObject(name)) {
+//        for(var kn in name) {
+//            reg_bind.call(this, kn, name[kn]);
+//        }
+//    } else {
+//        reg_bind.call(this, name, var_str);
+//    }
+//}
 
 function environment_create_child(env, c_name) {
     var cd = env.__.children;
@@ -247,5 +251,21 @@ function environment_remove_listeners(env) {
     }
     for(k in env.__.children) {
         environment_remove_listeners(env.__.children[k]);
+    }
+}
+
+function environment_notify_change(env, emit_keys) {
+    var i;
+    for(i=0;i<emit_keys.length;i++) {
+        notify_each(env, emit_keys[i]);
+    }
+
+    function notify_each(env, key) {
+        var em = env.__.emit_map,
+            e_node = em[key];
+        if(!e_node) {
+            throw new Error('emit node not found!');
+        }
+        e_node.notify();
     }
 }

@@ -51,13 +51,30 @@
                 });
             };
 
-            $scope.fn = function() {
+            $scope.tt = function() {
+                var t = $scope.a[0];
+                $scope.a[0] = $scope.a[1];
+                $scope.a[1].k = 888;
+//                setTimeout(function() {
+//                    t.k = 898
+//                });
+//                t.k = 898;
 
-                console.log(this);
-                $scope.boy.girl.name = 'wang';
+            };
 
-                this.boy.girl.say();
-            }
+            $scope.a = [{
+                k :1
+            }, {
+                k : 2
+            }];
+
+            $scope.$watch('a[0].k', function(nv, ov) {
+                log('a[0].k', nv, ov);
+            })
+            $scope.$watch('a[1].k', function(nv, ov) {
+                log('a[1].k', nv, ov);
+            })
+
         }]).run(['$rootScope', function($rs) {
             log('run');
             $rs.msg = 'hello';
@@ -66,11 +83,7 @@
         $(function() {
             console.time('ttt');
             angular.bootstrap($('#a1'), ['MyApp']);
-            console.timeEnd('ttt');
-//            angular.bootstrap($('#a2'), ['MyApp']);
-            $on(document.getElementById('cccc'), 'change', function() {
-                log('change')
-            })
+
         });
 
         function ct() {
@@ -82,15 +95,7 @@
 <div id="a1">
     <p>{{msg}}</p>
     <div ng-controller="Ctrl">
-        <p>{{boy.girl.name}}</p>
-        <p><button ng-click="fn()">Click</button></p>
-        <p><button ng-click="boy.girl.say()">Click2</button></p>
-
-        <ul>
-            <li ng-repeat="boy in list.slice(index, index+5)">{{boy.name}}, {{boy.age}}</li>
-        </ul>
-        <p><button ng-click="pp()">上一页</button><button ng-click="np()">下一页</button></p>
-        <p><button ng-click="append()">Append</button></p>
+        <p><button ng-click="tt()">Click</button></p>
     </div>
 </div>
 

@@ -15,7 +15,6 @@ EmitNode.prototype = {
         this.L_emitter.notify(emit_type);
     },
     notify : function() {
-        log(this);
         this._ne("self");
         this._nc();
         if(this.parent) {
@@ -70,25 +69,14 @@ EmitNode.prototype = {
     }
 };
 
-function RootEmitNode(id) {
-    this.id = id;
+function RootEmitNode() {
     this.children = {};
-    this.path = '';
 }
 RootEmitNode.prototype = {
-    _nu : function() {
-
-    },
-    _ne : function() {
-
-    },
-    _nd : function() {
-
-    },
     destroy : function() {
         for(var k in this.children) {
             this.children[k].destroy();
-            delete this.children[k];
+            this.children[k] = null;
         }
     }
 };
@@ -114,9 +102,6 @@ ImmEmitter.prototype = {
         }
     },
     addListener : function(listener) {
-        if(listener.is_lazy !== this.is_lazy) {
-            debugger;
-        }
         if(this.listeners.indexOf(listener)<0) {
             this.listeners.push(listener);
             listener.emitters.push(this);

@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Vue.js Test</title>
+    <script type="text/javascript" src="../bower_components/jquery/dist/jquery.min.js"></script>
+    <script type="text/javascript" src="../bower_components/vue/dist/vue.js"></script>
+
+    <script>
+        function log() {
+            console.log.apply(console, arguments);
+        }
+
+        $(function() {
+            new Vue({
+                el : '#app',
+                data : {
+                    o : {
+                        p : {
+                            q : {
+                                r : 23
+                            }
+                        }
+                    },
+                    u : {
+                        v : {
+                            w : 2
+                        }
+
+                    },
+                    a : [{
+                        k : 1
+                    }, {
+                        k : 2
+                    }]
+                },
+                ready : function() {
+                    this.$watch('a[0].k', function(val, ov) {
+                        log('a0', val, ov);
+                    });
+                    this.$watch('a[1].k', function(val, ov) {
+                        log('a1', val, ov);
+                    });
+                    this.$watch('u.v.w', function(v, o) {
+                        log('u.v.w', v, o);
+                    });
+                },
+                methods : {
+                    test : function() {
+                        this.a[0] = this.a[1];
+                        this.a[1].k = 888;
+                        this.o.p = this.u;
+                        this.u = {
+                            v : {
+                                w : 'dsd'
+                            }
+                        };
+                        var me = this;
+                        setTimeout(function() {
+                            me.o.p.v.w = 9999;
+                        }, 1000);
+                    }
+                }
+            });
+        });
+
+    </script>
+</head>
+<body>
+<div id="app">
+<p><button v-on="click: test()">Test</button></p>
+</div>
+</body>
+</html>

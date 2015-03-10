@@ -82,9 +82,67 @@ jing.module('TodoApp')
             if(c.type !== 'child') {
                 env._calcCompleted();
             }
-            Storage.save(env.todos);
+            //Storage.save(env.todos);
         });
         env._calcCompleted();
         Router.run(env, filters);
 
     });
+
+setTimeout(function() {
+    var env = new Environment();
+    env.$prop = {
+        a : {
+            b : {
+                m : {
+                    n : 4
+                }
+            }
+        },
+        c : {
+            m : {
+                n : 9
+            }
+        },
+        d : [{
+            k : 1
+        }, {
+            k  : 2
+        }]
+    };
+
+    env.$watch('a.b.m.n', function(change_list) {
+        log('n changed from "a.b.m.n"', change_list[0].cur_value);
+    });
+
+    env.$watch('c.m.n', function(change_list) {
+        log('n changed from c.m.n', change_list[0].cur_value);
+    });
+
+    env.$watch('d[0].k', function(change_list) {
+        log('k changed from d[0].k', change_list[0].cur_value);
+    });
+
+    env.$watch('d[1].k', function(change_list) {
+        log('k changed from d[1].k', change_list[0].cur_value);
+    });
+
+    //env.a.b.m.n = 90;
+    //env.c.m.n = 5;
+    //env.d[0] = {
+    //    k : 99
+    //};
+
+    setTimeout(function() {
+        //env.a.b.m = env.c.m;
+        //env.c.m.n = 87;
+        //env.c.m.n = 87;
+        env.d[0] = env.d[1];
+
+        setTimeout(function() {
+            env.d[1].k = 100;
+        }, 100);
+
+    }, 100);
+
+}, 0);

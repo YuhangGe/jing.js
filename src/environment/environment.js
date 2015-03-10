@@ -11,6 +11,8 @@ function Environment(name, parent) {
         jarray : null,
         index : 0
     });
+    $defineProperty(this, __env_emit_name, {});
+    $defineProperty(this, __env_prop_name, {});
 }
 
 var __env_prototype = Environment.prototype;
@@ -30,13 +32,22 @@ $defineGetterSetter(__env_prototype, '$root', function() {
     return this.__.parent ? this.__.parent.$root : this;
 });
 
+
 $defineProperty(__env_prototype, '$destroy', function() {
-    var k;
-    for(k in this.__.children) {
-        this.__.children[k].$destroy();
+    function destroy_obj(obj) {
+        for(var k in obj) {
+            obj[k] = null;
+        }
+    }
+    var k, cd = this.__.children;
+    for(k in cd) {
+        cd[k].$destroy();
+        cd[k] = null;
     }
     this.__.children = null;
     this.__.parent = null;
+    //这里不要调用this.__.emit_tree.destroy()
+    //因为它的子emit_node可能在其它environment被使用。
     this.__.emit_tree = null;
     var ls = this.__.listeners;
     for(k in ls) {
@@ -44,6 +55,8 @@ $defineProperty(__env_prototype, '$destroy', function() {
         ls[k] = null;
     }
     this.__.listeners = null;
+    destroy_obj(this[__env_emit_name]);
+    destroy_obj(this[__env_prop_name]);
 });
 
 $defineProperty(__env_prototype, '$child', function(name) {

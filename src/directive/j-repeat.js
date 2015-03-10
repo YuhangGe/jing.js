@@ -4,13 +4,15 @@ function j_repeat_env(env, key, jarray, index) {
     env.__.index = index;
 
     var jen = jarray.__.en.children[index];
-    if (!jen) {
+    if(!jen) {
+        //log('destroy child node:', index);
+        //log(jen);
+        //jen.destroy();
         jen = jarray.__.en.children[index] = new EmitNode(index, jarray.__.en);
     }
+    //log(jen);
     env.__.emit_tree.children[key] = jen;
 
-    $defineProperty(env, __env_emit_name, {});
-    $defineProperty(env, __env_prop_name, {});
     env[__env_prop_name][key] = null;
     env[__env_emit_name][key] = jen;
 
@@ -44,17 +46,16 @@ function JRepeat(ele, attr, drive_module, key, env, expr) {
     }, this, 10);
     listener.compare = false;
 
-    this.val = listener.cur_value;
-
     this.items = [];
     this.index_map = new Map();
 
+    this.et = {};
+    $defineProperty(this, __env_emit_name, this.et);
 
     $$before(this.cmt, ele);
     $$remove(ele);
 
-
-    this.render();
+    this.render(listener.cur_value);
 }
 var __jrepeate_prototype = JRepeat.prototype;
 __jrepeate_prototype.update = function (new_value) {
@@ -62,12 +63,31 @@ __jrepeate_prototype.update = function (new_value) {
     if (!$isJArray(new_value)) {
         throw new Error('only support Array in j-repeat.');
     }
+    var _array = new_value.__.array;
+    var i;
+    var old_items = this.items;
+    if(new_value.length === 0 && old_items.length === 0) {
+        return;
+    }
 
-    var old_items = this.items,
-        map = this.index_map,
+    var old_array, _same;
+    if(old_items.length > 0 &&_array.length === old_items.length) {
+        old_array = old_items[0].env.__.jarray.__.array;
+        _same = true;
+        for (i = 0; i < _array.length; i++) {
+            if(_array[i] !== old_array[i]) {
+                _same = false;
+                break;
+            }
+        }
+        if(_same) {
+            return;
+        }
+    }
+
+    var map = this.index_map,
         new_map = new Map();
 
-    var i;
     var idx, item;
 
     function get_index(item) {
@@ -79,7 +99,6 @@ __jrepeate_prototype.update = function (new_value) {
     }
 
 
-    var _array = new_value.__.array;
     var items_tip = new Int32Array(_array.length);
 
 
@@ -100,9 +119,7 @@ __jrepeate_prototype.update = function (new_value) {
             item.env.$destroy();
             item.ele = null;
             item.env = null;
-            /*
-             * 回收可复用元素。
-             */
+
             delete old_items[i];
         }
     }
@@ -146,7 +163,7 @@ __jrepeate_prototype.update = function (new_value) {
             drive_insert_before();
 
             j_repeat_replace_env_listener_var_key(env, this.key, new RegExp('^' + this.key + '\\.'), new_value.__.en.children[i].path);
-
+            log(env);
             /*
              * 将多个连续的插入，使用Fragment合并后再insert，可以提升性能。
              */
@@ -192,22 +209,22 @@ function j_repeat_set_prop(env, i, len) {
         '$middle': i !== 0 && i !== len - 1
     };
 }
-__jrepeate_prototype.render = function () {
-    if (!$isJArray(this.val)) {
+__jrepeate_prototype.render = function (val) {
+    if (!$isJArray(val)) {
         throw new Error('only support Array in j-repeat.');
     }
-    var array = this.val.__.array;
+    var array = val.__.array;
     var r_ele, r_env;
     var frag = document.createDocumentFragment();
     for (var i = 0; i < array.length; i++) {
         r_ele = this.ele.cloneNode(true);
         r_env = environment_create_child(this.env, i);
         j_repeat_set_prop(r_env, i, array.length);
-        j_repeat_env(r_env, this.key, this.val, i);
+        j_repeat_env(r_env, this.key, val, i);
 
         drive_render_element(r_ele, this.attr, this.module, r_env);
 
-        j_repeat_replace_env_listener_var_key(r_env, this.key, new RegExp('^' + this.key + '\\.'), this.val.__.en.children[i].path);
+        j_repeat_replace_env_listener_var_key(r_env, this.key, new RegExp('^' + this.key + '\\.'), val.__.en.children[i].path);
 
         frag.appendChild(r_ele);
         this.items.push(new JRepeatReuseItem(r_ele, r_env));

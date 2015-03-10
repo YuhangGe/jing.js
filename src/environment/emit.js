@@ -1,11 +1,10 @@
 function EmitNode(id, parent) {
     this.id = id;
-    this.L_emitter = null;
     this.children = {};
     this.parent = parent;
     this.path = (parent.path ? parent.path + '.' : '') + id;
     this.I_emitter = new ImmEmitter(this.path);
-    this.L_emitter = new ImmEmitter(this.path);
+    this.L_emitter = new LazyEmitter(this.path);
 }
 EmitNode.prototype = {
     /*
@@ -16,6 +15,7 @@ EmitNode.prototype = {
         this.L_emitter.notify(emit_type);
     },
     notify : function() {
+        log(this);
         this._ne("self");
         this._nc();
         if(this.parent) {
@@ -114,6 +114,9 @@ ImmEmitter.prototype = {
         }
     },
     addListener : function(listener) {
+        if(listener.is_lazy !== this.is_lazy) {
+            debugger;
+        }
         if(this.listeners.indexOf(listener)<0) {
             this.listeners.push(listener);
             listener.emitters.push(this);

@@ -28,6 +28,15 @@ module.exports = function(grunt) {
                 }]
             }
         },
+        compress: {
+            build: {
+                options: {
+                    mode: 'gzip'
+                },
+                src: [app_config.build.root + '/' + app_config.build.file_name + '.min.js'],
+                dest: app_config.build.root + '/' + app_config.build.file_name + '.min.js.gzip'
+            }
+        },
         shell: {
             test : {
 
@@ -72,11 +81,12 @@ module.exports = function(grunt) {
     grunt.loadNpmTasks('grunt-contrib-uglify');
     grunt.loadNpmTasks('grunt-shell');
     grunt.loadNpmTasks('grunt-contrib-watch');
+    grunt.loadNpmTasks('grunt-contrib-compress');
 
     //load local tasks
     grunt.loadTasks('grunt/tasks');
 
-    grunt.registerTask('build', ['generate:build', 'uglify:build']);
+    grunt.registerTask('build', ['generate:build', 'uglify:build', 'compress:build']);
 
     grunt.registerTask('test', ['generate:test', 'karma:unit']);
 

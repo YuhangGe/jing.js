@@ -16,6 +16,10 @@ var __env_emit_name = '__$jing.0210.emit$__';
 function environment_declare_obj(p, var_name, value, emit_node) {
     var v = $isArray(value) ? new JArray(value, emit_node) : value;
     p[__env_prop_name][var_name] = v;
+
+    if($hasProperty(p, var_name)) {
+        return;
+    }
     $defineGetterSetter(p, var_name, function () {
         return this[__env_prop_name][var_name];
     }, function (val) {
@@ -39,7 +43,7 @@ function environment_declare_obj(p, var_name, value, emit_node) {
 
         props[var_name] = val;
         this[__env_emit_name][var_name].notify();
-    }, false, true);
+    }, true);
     return v;
 }
 function environment_declare_arr(p, idx_str, emit_node) {
@@ -55,28 +59,28 @@ function environment_declare_arr(p, idx_str, emit_node) {
     $defineGetterSetter(p, idx_str, function() {
         return this.__.array[idx];
     }, function(val) {
-        var ov = this.__.array[idx];
-        if(ov === val) {
+        var pv = this.__.array[idx];
+        if(pv === val) {
             return;
         }
-        if($isObject(ov) && $isObject(val)) {
+        if($isObject(pv) && $isObject(val)) {
             var en = this[__env_emit_name][idx];
-            environment_redeclare_var(en, val);
+            environment_redeclare_var(en, val, pv);
         }
         this.__.array[idx] = val;
         this.__.en.item_notify(idx);
-    });
+    }, true);
 
     return v;
 }
 
 function environment_redeclare_var(emit_node, obj, p_obj) {
-    var var_name, cs = emit_node.children, val, ps, v;
-    var obj_em = obj[__env_emit_name],
-        p_obj_em = p_obj[__env_emit_name];
+    var var_name, cs = emit_node.children, val, ps, v, et, p_et;
+    p_et = p_obj[__env_emit_name];
     for(var_name in cs) {
         if(obj instanceof JArray && /^\d+$/.test(var_name)) {
-            if(!$hasProperty(obj_em, var_name) && $hasProperty(p_obj_em, var_name)) {
+            et = obj[__env_emit_name];
+            if(!$hasProperty(et, var_name) && $hasProperty(p_et, var_name)) {
                 v = environment_declare_arr(obj, var_name, emit_node);
                 environment_redeclare_var(cs[var_name], v, p_obj[var_name]);
             }
@@ -86,7 +90,10 @@ function environment_redeclare_var(emit_node, obj, p_obj) {
             }
 
             if(!$hasProperty(obj, __env_emit_name)) {
-                $defineProperty(obj, __env_emit_name, {});
+                et = {};
+                $defineProperty(obj, __env_emit_name, et);
+            } else {
+                et = obj[__env_emit_name];
             }
             if (!$hasProperty(obj, __env_prop_name)) {
                 ps = {};
@@ -94,9 +101,14 @@ function environment_redeclare_var(emit_node, obj, p_obj) {
             } else {
                 ps = obj[__env_prop_name];
             }
+
+            //if($hasProperty(ps, var_name)) {
+            //    val = ps[var_name];
+            //}
             val = obj[var_name];
             delete obj[var_name];
             v = environment_declare_obj(obj, var_name, val, cs[var_name]);
+            et[var_name] = p_et[var_name];
             environment_redeclare_var(cs[var_name], v, p_obj[var_name]);
         }
     }
@@ -139,7 +151,7 @@ function environment_watch_each_var(p, var_name, emit_node) {
         environment_declare_obj(p, var_name, val, emit_node);
         et[var_name] = emit_node;
     }
-    //else if(!$hasProperty(et, var_name)) {
+    // else if(!$hasProperty(et, var_name)) {
     //    et[var_name] = emit_node;
     //}
 

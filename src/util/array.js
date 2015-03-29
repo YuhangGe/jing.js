@@ -18,7 +18,7 @@ function $in(obj, func) {
 
 function $each(arr, func) {
     for(var i=0;i<arr.length;i++) {
-        if(func(arr[i], arr[i], i)===false) {
+        if(func(arr[i], i)===false) {
             return;
         }
     }
@@ -50,15 +50,6 @@ function $filter(arr, fn) {
     return new_arr;
 }
 
-
-function $isArray(obj) {
-    return Array.isArray(obj); // obj instanceof Array;
-}
-function $isJArray(obj) {
-    return obj instanceof JArray;
-}
-
-
 function $merge(src, options) {
     if(!options) {
         return src;
@@ -69,11 +60,7 @@ function $merge(src, options) {
     return src;
 }
 function $copyArray(arr) {
-    var rtn = [];
-    for(var i=0;i<arr.length;i++) {
-        rtn.push(arr[i]);
-    }
-    return rtn;
+    return arr.slice();
 }
 function $setArray(dst_arr, src_arr) {
     for(var i=0;i<src_arr.length;i++) {

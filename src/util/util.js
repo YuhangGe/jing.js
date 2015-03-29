@@ -142,24 +142,6 @@ function log() {
 }
 
 
-function $isString(str) {
-    return typeof str === 'string';
-}
-function $isFunction(func) {
-    return typeof func === 'function';
-}
-function $isNumber(num) {
-    return typeof num === 'number';
-}
-function $isObject(obj) {
-    return obj !== null && typeof obj === 'object';
-}
-function $isNull(nl) {
-    return nl === null;
-}
-function $isUndefined(obj) {
-    return typeof obj === 'undefined';
-}
 function $ready(fn) {
     if (document.readyState === 'complete') {
         fn();
@@ -173,6 +155,7 @@ function $ready(fn) {
 function $assert(condition) {
     if(!condition) {
         console.trace();
+        debugger;
         throw '$assert failure!';
     }
 }

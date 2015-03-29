@@ -1,145 +1,170 @@
-function EmitNode(id, parent) {
-    this.id = id;
-    this.children = {};
-    this.parent = parent;
-    this.path = (parent.path ? parent.path + '.' : '') + id;
-    this.I_emitter = new ImmEmitter(this.path);
-    this.L_emitter = new LazyEmitter(this.path);
+/*
+ * name : 当前节点对应的变量名。比如 boy.name 对应两个EmitNode的var_id分别是boy和name
+ */
+function EmitNode(var_name, parent, env) {
+  this.id = $uid();
+  this.name = var_name;
+  this.children = {};
+  this.parent = parent;
+  this.path = ((!parent || parent.path === '') ? '' : parent.path + '.') + var_name;
+  this.route = parent ? $copyArray(parent.route) : [];
+  this.route.push(var_name);
+
+  this.listeners = [];
+  this.tm = null;
+  this.deal = $bind(this, this._deal);
+  this.env = env;
+  /*
+   * current_value
+   * previous_value
+   */
+  this.cv = null;
+  this.pv = null;
 }
 EmitNode.prototype = {
-    /*
-     * _notify_emitter
-     */
-    _ne : function(emit_type) {
-        this.I_emitter.notify(emit_type);
-        this.L_emitter.notify(emit_type);
-    },
-    notify : function() {
-        this._ne("self");
-        this._nc();
-        if(this.parent) {
-            this.parent._nu();
-        }
-    },
-    item_notify : function(index) {
-        var cn = this.children[index];
-        if(cn) {
-            cn._ne('self');
-            cn._nc();
-        }
-        this._nu();
-    },
-    /*
-     * _notify_down
-     * @private
-     */
-    _nd : function() {
-        this._ne("parent");
-        this._nc();
-    },
-    /*
-     * _notify_children
-     * @private
-     */
-    _nc : function() {
-        for(var k in this.children) {
-            this.children[k]._nd();
-        }
-    },
-    /**
-     * _notify_up
-     * @private
-     */
-    _nu : function() {
-        this._ne("child");
-        if(this.parent) {
-            this.parent._nu();
-        }
-    },
-    destroy : function() {
-        this.I_emitter.destroy();
-        this.L_emitter.destroy();
-        for(var k in this.children) {
-            this.children[k].destroy();
-            delete this.children[k];
-        }
-        this.I_emitter = null;
-        this.L_emitter = null;
-        this.parent = null;
+  addListener: function (listener) {
+    if (this.listeners.indexOf(listener) < 0) {
+      this.listeners.push(listener);
+      listener.emitters[this.id] = this;
     }
+  },
+  _val: function () {
+    var r = this.route,
+      v = this.env.$get(r[0]);
+    for (var i = 1, len = r.length; i < len; i++) {
+      if ($isObject(v)) {
+        v = v[r[i]];
+      } else {
+        return undefined;
+      }
+    }
+    return v;
+  },
+  _deal: function () {
+    this.cv = this._val();
+    if (this.cv === this.pv) {
+      return;
+    }
+    for (var i = 0; i < this.listeners.length; i++) {
+      this.listeners[i].notify(this.path, this.cv, this.pv);
+    }
+    this.pv = this.cv;
+  },
+  notify: function () {
+    this._ctm();
+    this.tm = setTimeout(this.deal, 0);
+  },
+  _ctm: function () {
+    if (this.tm !== null) {
+      clearTimeout(this.tm);
+      this.tm = null;
+    }
+  },
+  destroy: function () {
+    this._ctm();
+    for (var k in this.children) {
+      this.children[k].destroy();
+      this.children[k] = null;
+    }
+    for (var i = 0; i < this.listeners.length; i++) {
+      var es = this.listeners[i].emitters;
+      if ($hasProperty(es, this.id)) {
+        delete es[this.id];
+      }
+    }
+    this.listeners.length = 0;
+    this.parent = null;
+    this.pv = null;
+    this.cv = null;
+    this.env = null;
+  }
 };
 
-function RootEmitNode() {
-    this.children = {};
+function RootEmitNode(env) {
+  this.env = env;
+  this.children = {};
+  this.path = '';
+  this.route = [];
 }
 RootEmitNode.prototype = {
-    destroy : function() {
-        for(var k in this.children) {
-            this.children[k].destroy();
-            this.children[k] = null;
-        }
+  destroy: function () {
+    this.env = null;
+    for (var k in this.children) {
+      this.children[k].destroy();
+      this.children[k] = null;
     }
+  }
 };
+//
+//function EmitMap() {
+//  this.nodes = {};
+//  this.indexes = {};
+//}
+//EmitMap.prototype = {
+//  add : function(emit_node, emit_index) {
+//    var id = emit_node.id;
+//    if (!$hasProperty(this.nodes, id)) {
+//      this.nodes[id] = emit_node;
+//      this.indexes[id] = emit_index;
+//    }
+//    else {
+//      /*
+//       * 单个emit_node对于某个节点而言，是唯一的。
+//       * 如果出现不唯一，说明逻辑上有问题。这里捕获这种异常，供调试。
+//       */
+//      $assert($hasProperty(this.indexes, id) && this.indexes[id] === emit_index);
+//    }
+//  },
+//  notify : function() {
+//    for(var emit_node_id in this.nodes) {
+//      this.nodes[emit_node_id].notify();
+//    }
+//  }
+//};
 
-function ImmEmitter(path) {
-    this.listeners = [];
-    this.path = path;
+function Emitter(deep) {
+  this.deep = deep ? true : false;
+  this.nodes = {};
+  this.indexes = {};
 }
-ImmEmitter.prototype = {
-    reset : function() {
-        /*
-         * 这里我们并不需要destroy每一个listener，因为我们认为destroy某个listener
-         * 是该listener所在environment的API职责，因为listener并不知道自己是属于哪个Env的。
-         *
-         * 在jing.js内部，目前只在jarray.js文件中，当数组元素减少时调用了这个函数。
-         *   数组元素减少时，相应的子Env在j-repeat.js中会被$destroy，这时候这些listener就被destroy了。
-         */
-        this.listeners.length = 0;
-    },
-    notify : function(emit_type) {
-        for(var i=0;i<this.listeners.length;i++) {
-            this.listeners[i].notify(emit_type, this.path);
-        }
-    },
-    addListener : function(listener) {
-        if(this.listeners.indexOf(listener)<0) {
-            this.listeners.push(listener);
-            listener.emitters.push(this);
-        }
-    },
-    destroy : function() {
-        for(var i=0;i<this.listeners.length;i++) {
-            this.listeners[i].destroy();
-        }
-        this.listeners.length = 0;
+Emitter.prototype = {
+  add: function (emit_node, index) {
+    //var emit_map = this.map[env_id];
+    //if(!emit_map) {
+    //  emit_map = this.map[env_id] = new EmitMap();
+    //}
+    //emit_map.add(emit_node, index);
+    var id = emit_node.id;
+    if (!$hasProperty(this.nodes, id)) {
+      this.nodes[id] = emit_node;
+      this.indexes[id] = index;
     }
-};
+    else {
+      /*
+       * 单个emit_node对于某个节点而言，是唯一的。
+       * 如果出现不唯一，说明逻辑上有问题。这里捕获这种异常，供调试。
+       */
+      $assert($hasProperty(this.indexes, id) && this.indexes[id] === index);
+    }
+  },
+  remove: function (e_id) {
+    if($hasProperty(this.nodes, e_id)) {
+      $assert($hasProperty(this.indexes, e_id));
+      delete this.nodes[e_id];
+      delete this.indexes[e_id];
+    }
+  },
+  merge: function (another_emitter) {
+    for (var eid in another_emitter.nodes) {
 
-function LazyEmitter(path) {
-    this.base(path);
-    this.handler = $bind(this, this.deal);
-    this.tm = null;
-    this.et = '';
-}
-LazyEmitter.prototype = {
-    notify : function(emit_type) {
-        if(this.tm !== null) {
-            clearTimeout(this.tm);
-            this.tm = null;
-        }
-        this.et = emit_type; //只记录最后一次的变化类型。
-        this.tm = setTimeout(this.handler, 0);
-    },
-    deal : function() {
-        this.tm = null;
-        this.callBase('notify', this.et);
-    },
-    destroy : function() {
-        if(this.tm !== null) {
-            clearTimeout(this.tm);
-            this.tm = null;
-        }
-        this.callBase('destroy');
     }
+  },
+  notify: function () {
+    //for (var env_id in this.map) {
+    //  this.map[env_id].notify();
+    //}
+    for(var emit_node_id in this.nodes) {
+      this.nodes[emit_node_id].notify();
+    }
+  }
 };
-$inherit(LazyEmitter, ImmEmitter);

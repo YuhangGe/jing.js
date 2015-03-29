@@ -1,7 +1,5 @@
-var __parse_node_mark = '__$jing0210node$__';
 
 function GrammarNode(type, child_nodes) {
-    this.__$jing0210node$__ = true;
     this.type = type;
     this.nodes = child_nodes ? child_nodes : [];
     this.parent = null;

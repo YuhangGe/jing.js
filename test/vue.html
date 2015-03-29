@@ -10,11 +10,19 @@
         function log() {
             console.log.apply(console, arguments);
         }
+        Vue.config.debug = true;
 
         $(function() {
+            var dd = {
+                c : {
+                    d : 9
+                }
+            };
+
             new Vue({
                 el : '#app',
                 data : {
+                    mm : dd,
                     o : {
                         p : {
                             q : {
@@ -28,37 +36,73 @@
                         }
 
                     },
-                    a : [{
-                        k : 1
-                    }, {
-                        k : 2
-                    }]
+                    c : {
+                        b : {
+                            d : 3
+                        }
+                    },
+                    a : {
+                        b : {
+                            d : 2
+                        },
+                        c : {
+                            f : 43
+                        }
+                    }
                 },
                 ready : function() {
-                    this.$watch('a[0].k', function(val, ov) {
-                        log('a0', val, ov);
-                    });
-                    this.$watch('a[1].k', function(val, ov) {
-                        log('a1', val, ov);
-                    });
-                    this.$watch('u.v.w', function(v, o) {
-                        log('u.v.w', v, o);
-                    });
+                    var me = this;
+                    this.$watch('mm.c.d', function(val, ov) {
+                        log('a', val, ov);
+                        log(me.mm);
+                    }, true);
+
+                    __$ = (me.mm);
+
+//                    this.$watch('c.b.d', function(val, ov) {
+//                        log('c', val, ov);
+//                    });
+//                    this.$watch('a[1].k', function(val, ov) {
+//                        log('a1', val, ov);
+//                    });
+//                    this.$watch('u.v.w', function(v, o) {
+//                        log('u.v.w', v, o);
+//                    });
                 },
                 methods : {
                     test : function() {
-                        this.a[0] = this.a[1];
-                        this.a[1].k = 888;
-                        this.o.p = this.u;
-                        this.u = {
-                            v : {
-                                w : 'dsd'
+//                        this.a.$set(0, this.a[1]);
+//                        this.a = this.c;
+//
+//                        this.a.b.d = 89;
+
+                        this.mm = {
+                            c : {
+                                d : 888,
+                                q : {
+                                    op : {
+                                        ew : 32
+                                    }
+                                }
                             }
                         };
+
+                        __$ = this.mm.c;
+
                         var me = this;
                         setTimeout(function() {
-                            me.o.p.v.w = 9999;
                         }, 1000);
+
+//                        this.a.$set(1, {
+//                            k : 1
+//                        });
+//                        this.a[1].k = 888;
+//                        this.o.p = this.u;
+//                        this.u = {
+//                            v : {
+//                                w : 'dsd'
+//                            }
+//                        };
                     }
                 }
             });

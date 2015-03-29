@@ -1,111 +1,128 @@
-var __environment_listen_counter = 0;
-
 function Listener(handler, data) {
-    this.id = (__environment_listen_counter++).toString(36);
+    this.id = $uid();
     this.handler = handler;
     this.data = data;
-    this.emitters = [];
+    this.emitters = {};
 }
 Listener.prototype = {
     destroy : function() {
         this.handler = null;
         this.data = null;
-        this.emitters.length = 0;
+        for(var k in this.emitters) {
+            this.emitters[k] = null;
+        }
         this.emitters = null;
     },
-    notify : function() {
-        //throw 'abstract method Listener.notify';
-    },
-    _deal : function() {
-        //throw 'abstract method Listener.deal';
+    notify : function(var_path, cur_value, pre_value) {
+        this.handler(cur_value, pre_value);
     }
 };
 
+
 function LazyListener(handler, data, lazy_time) {
     this.base(handler, data);
-    this.lazy = $isNumber(lazy_time) ? ((lazy_time = Math.floor(lazy_time)) >=0 ? lazy_time : 0) : 0;
+    this.lazy = $isUndefined(lazy_time) ? 0 : lazy_time;
+
+    this.pv = null;
+    this.cv = null;
+
     this.tm = null;
     this.dg = $bind(this, this._deal);
     this.changes = [];
 }
 LazyListener.prototype = {
-    notify : function(emit_type, var_path) {
+    _ctm : function() {
         if(this.tm !== null) {
             clearTimeout(this.tm);
             this.tm = null;
         }
-        this.changes.push(var_path);
+    },
+    notify : function(var_path, cur_value, pre_value) {
+        this._ctm();
         this.tm = setTimeout(this.dg, this.lazy);
+        this._notify(var_path, cur_value, pre_value);
     },
     destroy : function() {
         this.callBase('destroy');
-        this.changes = null;
-        if(this.tm !== null) {
-            clearTimeout(this.tm);
-            this.tm = null;
-        }
+        this._ctm();
         this.dg = null;
+        this.pv = null;
+        this.cv = null;
+    },
+    _deal : function() {
+        //abstract method
     }
 };
 $inherit(LazyListener, Listener);
 
-function ImmExprListener(var_tree, expr, env, handler, data) {
+/*
+ * StrListener用于连接只带属性访问的字符串的监听。比如 <p>{{boy.name}},{{boy.age}}</p>
+ * 但对于更复杂的情况比如带函数调用的情况，需要使用ExprListener，比如<p>boys.slice(3,4)[0].name</p>
+ */
+function StrListener(var_cache, str_items, handler, data, lazy_time) {
     this.base(handler, data);
-    this._init(var_tree, expr, env);
+    this.lazy = $isUndefined(lazy_time) ? 0 : lazy_time;
+    this.cache = var_cache;
+    this.items = str_items;
+    this.vc = false;
 }
-ImmExprListener.prototype = {
-    _init : function(var_tree, expr, env) {
-        this.expr = expr;
-        this.var_tree = var_tree;
-        this.env = env;
-        this.pre_value = null;
-        this.cur_value = null;
-        //this.compare = true;
-    },
-    notify : function(emit_type, var_name) {
-        var n = this.var_tree[var_name];
-        if(!n) {
+StrListener.prototype = {
+    notify : function(var_path, cur_value, pre_value) {
+        if(!$hasProperty(this.cache, var_path) || this.cache[var_path] === cur_value) {
             return;
         }
-        listen_refresh_expr_node(n);
-
-        this._deal();
+        this.callBase('notify', var_path, cur_value, pre_value);
     },
-    /*
-     * notify_change
-     */
+    _notify : function(var_path, cur_value, pre_value) {
+        this.cache[var_path] = cur_value;
+        this.vc = true;
+    },
+    _val : function() {
+        var text = '', me = this;
+        this.items.forEach(function(it) {
+            text += it.type === 'var' ? me.cache[it.value] : it.value;
+        });
+        return text;
+    },
     _deal : function() {
-
-        this.cur_value = this.expr.exec(this.env);
-        if(!$isJArray(this.cur_value) && this.cur_value === this.pre_value) {
+        if(!this.vc) {
             return;
         }
-        this.handler([{
-            type : 'expr',
-            pre_value : this.pre_value,
-            cur_value : this.cur_value
-        }], this.data);
-        this.pre_value = this.cur_value;
-
+        this.vc = false;
+        this.cv = this._val();
+        if(this.cv === this.pv) {
+            return;
+        }
+        this.handler(this.cv, this.pv, this.data);
+        this.pv = this.cv;
     },
     destroy : function() {
         this.callBase('destroy');
-        destroy_expr_listener(this);
+        this.items.length = 0;
+        for(var k in this.cache) {
+            this.cache[k] = null;
+        }
+        this.cache = null;
     }
 };
+$inherit(StrListener, Listener);
 
-$inherit(ImmExprListener, Listener);
-
-function LazyExprListener(var_tree, expr, env, handler, data, lazy_time) {
+function ExprListener(var_tree, expr, env, handler, data, lazy_time) {
     this.base(handler, data, lazy_time);
-    ImmExprListener.prototype._init.call(this, var_tree, expr, env);
+    this.expr = expr;
+    this.var_tree = var_tree;
+    this.env = env;
+    this.changes = [];
 }
 
-LazyExprListener.prototype = {
+ExprListener.prototype = {
+    _notify : function() {
+        this.changes.push(new EmitChange(var_path, cur_value, pre_value));
+    },
     _deal : function() {
         var i, c, n_arr, j;
         for(i=0;i<this.changes.length;i++) {
-            c = this.changes[i];
+            c = this.changes[i].pa;
             n_arr = this.var_tree[c];
             if(!n_arr) {
                 continue;
@@ -117,31 +134,28 @@ LazyExprListener.prototype = {
         }
 
         this.changes.length = 0;
-        /*
-         * 这样写只是为了省一点代码。
-         * LazyExprListener不仅继承了LazyListener的性质，也继承了ImmExprListener的一些性质。
-         */
-        ImmExprListener.prototype._deal.call(this);
+        this.cv = this.expr.exec(this.env);
+        if(!$isJArray(this.cv) && this.cv === this.pv) {
+            return;
+        }
+        this.handler(this.cv, this.pv, this.data);
+
+        this.pv = this.cv;
 
     },
     destroy : function() {
         this.callBase('destroy');
-        destroy_expr_listener(this);
+        this.changes.length = 0;
+        this.expr.destroy();
+        this.expr = null;
+        this.env = null;
+        for(var k in this.var_tree) {
+            delete this.var_tree[k];
+        }
+        this.var_tree = null;
     }
 };
-$inherit(LazyExprListener, LazyListener);
-
-function destroy_expr_listener(listener) {
-    listener.expr.destroy();
-    listener.expr = null;
-    listener.env = null;
-    for(var k in listener.var_tree) {
-        delete listener.var_tree[k];
-    }
-    listener.var_tree = null;
-    listener.pre_value = null;
-    listener.cur_value = null;
-}
+$inherit(ExprListener, LazyListener);
 
 function listen_refresh_expr_node(node) {
     /*

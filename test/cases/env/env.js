@@ -55,10 +55,10 @@ describe('test', function () {
     var env = new Environment('t1');
     var env2 = new Environment('t2');
 
-    var arr = [1,2,{
+    var arr = new JArray([1,2,{
       k : 4,
-      t : [5,6,7]
-    }];
+      t : new JArray([5,6,7])
+    }]);
 
     env.o = {
       m : arr
@@ -81,7 +81,22 @@ describe('test', function () {
       log('a[2].t[2]', arguments);
     });
 
-    log(env);
-    env.o.m[2] = {};
+    log(env2.a === env.o.m);
+
+    env.o.m[5] = {
+      k : 3232
+    };
+
+    setTimeout(function () {
+      log('----')
+
+      env2.a[5] = {
+        k : 323,
+        t : [6,7,8]
+      }
+
+    }, 800);
+
+
   })
 });

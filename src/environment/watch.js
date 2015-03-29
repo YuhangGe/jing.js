@@ -134,9 +134,6 @@ function environment_watch_items(env, var_array, is_deep) {
       break;
     }
     v = var_array[i];
-    if (!$hasProperty(p, v)) {
-      break;
-    }
     is_array = $isJArray(p);
     val = is_array ? p.__.arr[v] : p[v];
     if ($isArray(val)) {
@@ -145,7 +142,6 @@ function environment_watch_items(env, var_array, is_deep) {
         p.__.arr[v] = val;
       }
     }
-
     props = p[__ENV_EMIT__];
     if (!props) {
       props = {};
@@ -174,9 +170,8 @@ function environment_watch_items(env, var_array, is_deep) {
  * 将a.b[4][3][7].c.d[9]转成a.b.4.3.7.c.d.9的形式。
  */
 function environment_var2format(var_name) {
-  return var_name.replace(/\[\s*(\d+)\s*\]/g, ".$1.").replace('..', '.', 'g');
+  return var_name.replace('][', '.', 'g').replace('].', '.', 'g').replace('[', '.', 'g').replace(']', '');
 }
-
 
 $defineProperty(__env_prototype, '$unwatch', function (listener_id) {
   //var lt = this.__.listeners,
@@ -203,7 +198,7 @@ $defineProperty(__env_prototype, '$watch', function (var_name, callback, data, i
   }
 
   var v_str = environment_var2format(var_name);
-  var v_items = v_str.split('.').map(function (item) {
+  var v_items = $map(v_str.split('.'), function (item) {
     return /^\d+$/.test(item) ? parseInt(item) : item;
   });
 

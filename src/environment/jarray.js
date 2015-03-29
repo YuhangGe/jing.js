@@ -23,6 +23,11 @@ function jarray_define_prop(jarray, idx) {
 }
 
 function JArray(array) {
+  if ($isJArray(array)) {
+    array = array.__.arr;
+  } else if (!$isArray(array)) {
+    array = [];
+  }
   $defineProperty(this, '__', {
     arr: array
   });

@@ -22,9 +22,6 @@ function Environment(name, parent) {
   $defineProperty(this, __ENV_INNER__, {
     prop: $bind(this, environment_reg_props),
 
-    nodes: new RootEmitNode(this),
-    listeners: [],
-
     id: $uid(),
     name: name,
     children: {},

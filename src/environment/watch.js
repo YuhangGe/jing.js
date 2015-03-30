@@ -2,6 +2,7 @@
  * 尽可能使用一个不会被使用的名称来作为内部成员。
  */
 var __ENV_EMIT__ = '__$jing0210emit$__';
+var __ENV_DEEP__ = 0xfffffff0;
 
 function environment_define_obj_prop(obj, prop, val) {
   /**
@@ -14,70 +15,152 @@ function environment_define_obj_prop(obj, prop, val) {
     if (val === new_val) {
       return;
     }
+
+
+    $assert($hasProperty(this, __ENV_EMIT__));
+    var emit_map = this[__ENV_EMIT__][prop];
+    $assert(emit_map);
+
     if ($isArray(new_val)) {
       new_val = new JArray(new_val);
     }
+    if ($isJArray(new_val)) {
+      jarray_emit_map(new_val, emit_map, true);
+    }
+    if ($isJArray(val)) {
+      jarray_emit_map(val, emit_map, false);
+    }
 
-    $assert($hasProperty(this, __ENV_EMIT__));
-    var emitter = this[__ENV_EMIT__][prop];
-    $assert(emitter);
-    emitter.notify();
-
-    environment_update_prop(emitter, val, new_val, prop, false);
+    var eid, item;
+    for (eid in emit_map) {
+      item = emit_map[eid];
+      item.emitter.notify();
+      environment_update_prop(item.index, item.emitter, val, new_val);
+    }
 
     val = new_val;
   }, true, true);
 }
 
-function environment_update_prop(host_emitter, old_val, new_val, var_name, is_array) {
+function environment_walk_add_or_delete_emitter(emitter, idx, route, host, is_add) {
 
-  function walk_remove(eid, idx, route, host) {
-    for (; idx < route.length; idx++) {
-      var r = route[idx];
-      var ets = host[__ENV_EMIT__];
-      var n;
-      if (ets && (n = ets[r])) {
-        delete n.nodes[eid];
-        delete n.indexes[eid];
+  for (; idx < route.length; idx++) {
+    var r = route[idx];
+    var ets, emit_map;
+    var val;
+    if (is_add) {
+      //add emitter
+      ets = __get_ets(host);
+      emit_map = __get_emap(ets, r);
+      $assert(!$hasProperty(emit_map, emitter.id));
+      emit_map[emitter.id] = {
+        index: idx,
+        emitter: emitter
+      };
+      val = host[r];
+      if ($isArray(val)) {
+        val = new JArray(val);
       }
-      if (!$hasProperty(host, r) || !$isObject(host = host[r])) {
-        return;
+      if ($isJArray(val)) {
+        jarray_emit_map(val, emit_map, true);
+      }
+      environment_define_obj_prop(host, r, val);
+    } else if ((ets = host[__ENV_EMIT__])
+      && (emit_map = ets[r])
+      && ($hasProperty(emit_map, emitter.id))) {
+      //remove emitter
+      delete emit_map[emitter.id];
+    }
+    if (!$hasProperty(host, r) || !$isObject(host = host[r])) {
+      return undefined;
+    }
+  }
+
+  return host;
+
+}
+function __get_emap(ets, r) {
+  var emit_map = ets[r];
+  if (!emit_map) {
+    emit_map = ets[r] = {};
+  }
+  return emit_map;
+}
+
+function __get_ets(obj) {
+  var ets = obj[__ENV_EMIT__];
+  if (!ets) {
+    ets = {};
+    $defineProperty(obj, __ENV_EMIT__, ets);
+  }
+  return ets;
+}
+
+
+
+
+function environment_update_prop(emit_index, host_emitter, old_val, new_val) {
+
+
+  var emit_route = host_emitter.route;
+  var obj = new_val;
+
+  if (emit_index < emit_route.length - 1) {
+    if ($isObject(old_val)) {
+      environment_walk_add_or_delete_emitter(host_emitter, emit_index + 1, emit_route, old_val, false);
+    }
+    if ($isObject(new_val)) {
+      obj = environment_walk_add_or_delete_emitter(host_emitter, emit_index + 1, emit_route, new_val, true);
+    }
+  }
+
+  if (host_emitter.deep && $isObject(old_val)) {
+    loop_del(old_val, host_emitter.id);
+  }
+
+  if (host_emitter.deep && $isObject(obj)) {
+    loop_add(obj, host_emitter);
+  }
+
+  function loop_del(obj, emit_id) {
+    var props = obj[__ENV_EMIT__];
+    if (props) {
+      delete props[emit_id];
+    }
+    for (var k in obj) {
+      if (k === __ENV_EMIT__) {
+        continue;
+      }
+      var val = obj[k];
+      if ($isObject(val)) {
+        loop_del(val, emit_id);
       }
     }
   }
 
-  function walk_add(enode, idx, route, host) {
-    for (; idx < route.length; idx++) {
-      var r = route[idx];
-      var ets = host[__ENV_EMIT__];
-      if (!ets) {
-        ets = {};
-        $defineProperty(host, __ENV_EMIT__, ets);
-      }
-      var n = ets[r];
-      if (!n) {
-        n = ets[r] = new Emitter();
-      }
-      n.add(enode, idx);
-      if (!$hasProperty(host, r) || !$isObject(host = host[r])) {
-        return;
-      }
+  function loop_add(obj, emitter) {
+    var props = obj[__ENV_EMIT__];
+    if (!props) {
+      props = {};
+      $defineProperty(obj, __ENV_EMIT__, props);
     }
-  }
-
-  var host_nodes = host_emitter.nodes;
-  var host_indexes = host_emitter.indexes;
-  var eid, enode, eidx;
-
-  for (eid in host_nodes) {
-    enode = host_nodes[eid];
-    eidx = host_indexes[eid];
-    if (eidx < enode.route.length - 1) {
-      if ($isObject(old_val)) {
-        walk_remove(enode.id, eidx + 1, enode.route, old_val);
+    for (var k in obj) {
+      if (k === __ENV_EMIT__) {
+        continue;
       }
-      if ($isObject(new_val)) {
-        walk_add(enode, eidx + 1, enode.route, new_val);
+      var val = obj[k];
+      var emit_map = __get_emap(props, k);
+      $assert(!$hasProperty(emit_map, emitter.id));
+      emit_map[emitter.id] = {
+        index: __ENV_DEEP__,
+        emitter: emitter
+      };
+      if ($isArray(val)) {
+        val = new JArray(val);
+      }
+      environment_define_obj_prop(obj, k, val);
+      if ($isObject(val)) {
+        loop_add(val, emitter);
       }
     }
   }
@@ -108,25 +191,10 @@ function environment_define_arr_prop(p, idx) {
 
 }
 
-function environment_watch_items(env, var_array, is_deep) {
-  /*
-   * build emit tree
-   */
-  var i, v, n, env_props = env[__ENV_INNER__];
-  var e_node = env_props.nodes;
-  var ch = e_node.children;
-  for (i = 0; i < var_array.length; i++) {
-    v = var_array[i];
-    n = ch[v];
-    if (!n) {
-      n = ch[v] = new EmitNode(v, e_node, env);
-    }
-    e_node = n;
-    ch = e_node.children;
-  }
+function environment_watch_items(env, var_array, emitter) {
 
-  var val, emitter, is_array;
-  var props;
+  var i, v, val, is_array;
+  var props, emit_map;
   var p = env;
 
   for (i = 0; i < var_array.length; i++) {
@@ -147,12 +215,19 @@ function environment_watch_items(env, var_array, is_deep) {
       props = {};
       $defineProperty(p, __ENV_EMIT__, props);
     }
-    emitter = props[v];
-    if (!emitter) {
-      emitter = props[v] = new Emitter();
+    emit_map = props[v];
+    if (!emit_map) {
+      emit_map = props[v] = {};
     }
 
-    emitter.add(e_node, i);
+    if ($isArray(val)) {
+      jarray_emit_map(val, emit_map, true);
+    }
+
+    emit_map[emitter.id] = {
+      index: i,
+      emitter: emitter
+    };
 
     if (is_array) {
       environment_define_arr_prop(p, v);
@@ -163,7 +238,8 @@ function environment_watch_items(env, var_array, is_deep) {
     p = val;
   }
 
-  return e_node;
+  emitter._init();
+
 }
 
 /*
@@ -183,14 +259,14 @@ $defineProperty(__env_prototype, '$unwatch', function (listener_id) {
   //environment_unwatch_listener(listener);
 });
 
-$defineProperty(__env_prototype, '$watch', function (var_name, callback, data, is_deep) {
+$defineProperty(__env_prototype, '$watch', function (var_name, callback, is_deep, data) {
 
   if (typeof callback !== 'function') {
     throw new Error('$watch need function');
   }
 
   if ($isObject(var_name)) {
-    return environment_watch_expression(this, var_name, callback, data);
+    return environment_watch_expression(this, var_name, callback, is_deep, data);
   }
 
   if (!$isString(var_name) || !__jing_regex_var.test(var_name)) {
@@ -213,13 +289,10 @@ $defineProperty(__env_prototype, '$watch', function (var_name, callback, data, i
     throw new Error('variable ' + v_items[0] + ' not found!');
   }
 
-  var listener = new Listener(callback, data);
-  env[__ENV_INNER__].listeners[listener.id] = listener;
-  var emit_node = environment_watch_items(this, v_items, is_deep);
-  emit_node.pv = emit_node.cv = emit_node._val(); //initialize value
-  emit_node.addListener(listener);
+  var emitter = new Emitter(env, v_items, callback, is_deep ? true : false, data);
+  environment_watch_items(this, v_items, emitter);
 
-  return listener;
+  return emitter;
 });
 
 function environment_unwatch_listener(listener) {

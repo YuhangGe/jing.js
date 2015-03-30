@@ -14,33 +14,54 @@ describe('test', function () {
     env.$watch('a', function () {
       log('a:', arguments);
     });
-    env.$watch('a.q.p', function () {
-      log('a.q.p:', arguments);
-    });
     env.$watch('a.q', function () {
-      log('a.q:', arguments);
-    });
-    env2.$watch('t.q.p', function () {
-      log('t.q.p:', arguments);
-    });
+      log('deep a.q', arguments);
+    }, true);
+
+    //env.$watch('a.t.y', function () {
+    //  log('a.t.y', arguments);
+    //});
+    //env.$watch('a.q.p', function () {
+    //  log('a.q.p:', arguments);
+    //});
+    //env.$watch('a.q', function () {
+    //  log('a.q:', arguments);
+    //});
+    //env2.$watch('t.q.p', function () {
+    //  log('t.q.p:', arguments);
+    //});
+
 
     setTimeout(function () {
       env.a = 4323;
       log('----')
       setTimeout(function () {
-        env.a = 898;
-        env2.t.q.p = 323;
-
-        log('-----')
-        setTimeout(function () {
-          env.a = {
-            q : {
-              p : 999
-            }
+        env.a = {
+          q : {
+            p : 323,
+            oo : 323
+          }
+        };
+        log('----')
+        setTimeout(function() {
+          env.a.q.p = {
+            r : 323
           };
-          log('-----')
+          log('----');
+          setTimeout(function() {
+            env.a.q.oo.r = 39;
+          })
+        });
+        //env.a = {
+        //  q : {
+        //    p : 434
+        //  }
+        //};
+        //env2.t.q.p = 323;
+        //
+        //log(env);
+        //log('----')
 
-        })
       });
 
     });
@@ -65,37 +86,28 @@ describe('test', function () {
     };
     env2.a = arr;
 
-    env.$watch('o.m[1]', function () {
-      log('o.m[1]', arguments);
-    });
-    env.$watch('o.m[5].k', function () {
-      log('o.m[5].k', arguments);
-    });
-    env.$watch('o.m[2].k', function () {
-      log('o.m[2].k', arguments);
-    });
-    env.$watch('o.m[2].t[2]', function () {
-      log('o.m[2].t[2]', arguments);
-    });
-    env2.$watch('a[2].t[2]', function () {
-      log('a[2].t[2]', arguments);
+    env.$watch('o.m[3].k', function () {
+      log('o.m[3].k', arguments);
     });
 
-    log(env2.a === env.o.m);
-
-    env.o.m[5] = {
-      k : 3232
-    };
+    var a = {
+      k : 323
+    }
+    env.o.m.push(a);
+    log(env);
 
     setTimeout(function () {
-      log('----')
+      log('----');
+      a.k = 332;
+      setTimeout(function () {
+        log('----');
+        env.o.m.splice(3, 1);
 
-      env2.a[5] = {
-        k : 323,
-        t : [6,7,8]
-      }
-
-    }, 800);
+        setTimeout(function() {
+          a.k = 32323;
+        })
+      })
+    });
 
 
   })

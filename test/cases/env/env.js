@@ -84,17 +84,23 @@ describe('test', function () {
     env.o = {
       m : arr
     };
-    env2.a = arr;
+    env2.a = [1,2,3];
 
+    env.$watch('o.m', function () {
+      log('o.m', arguments);
+    });
     env.$watch('o.m[3].k', function () {
       log('o.m[3].k', arguments);
     });
-
+    env2.$watch('a[3].k', function() {
+      log('a[3].k', arguments);
+    })
     var a = {
       k : 323
     }
     env.o.m.push(a);
-    log(env);
+    env2.a.push(a);
+    //log(env);
 
     setTimeout(function () {
       log('----');
@@ -104,6 +110,7 @@ describe('test', function () {
         env.o.m.splice(3, 1);
 
         setTimeout(function() {
+          log('----')
           a.k = 32323;
         })
       })

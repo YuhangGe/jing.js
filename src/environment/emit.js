@@ -5,6 +5,7 @@ function Emitter(env, route, handler, is_deep, data) {
   this.path = route.join('.');
   this.env = env;
   this.deep = is_deep;
+  this.array = false;
   this.handler = handler;
   this.tm = null;
   this.deal = $bind(this, this._deal);
@@ -34,7 +35,7 @@ Emitter.prototype = {
   },
   _deal: function () {
     this.cv = this._val();
-    if (!this.deep && this.cv === this.pv) {
+    if (!this.deep && !this.array && this.cv === this.pv) {
       return;
     }
     if ($isFunction(this.handler)) {

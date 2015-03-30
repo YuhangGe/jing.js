@@ -220,7 +220,7 @@ function environment_watch_items(env, var_array, emitter) {
       emit_map = props[v] = {};
     }
 
-    if ($isArray(val)) {
+    if ($isJArray(val)) {
       jarray_emit_map(val, emit_map, true);
     }
 

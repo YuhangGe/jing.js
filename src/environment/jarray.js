@@ -30,6 +30,20 @@ function jarray_emit_map(jarray, emit_map, is_add) {
   } else if (idx >=0 && !is_add) {
     ets.splice(idx, 1);
   }
+  for (var eid in emit_map) {
+    emit_map[eid].emitter.array = is_add;
+  }
+}
+
+function jarray_emit_self(jarray) {
+  jarray.__.ets.forEach(function (emit_map) {
+    for (var eid in emit_map) {
+      var item = emit_map[eid];
+      if (item.index === item.emitter.route.length - 1) {
+        item.emitter.notify();
+      }
+    }
+  });
 }
 
 function JArray(array) {
@@ -85,6 +99,8 @@ $defineProperty(__jarray_prototype, 'push', function () {
       }
     }
   }
+
+  jarray_emit_self(this);
 });
 
 $defineProperty(__jarray_prototype, 'removeAt', function () {
@@ -180,6 +196,8 @@ $defineProperty(__jarray_prototype, 'splice', function () {
   for (i = 0; i < add_count; i++) {
     walk(i + idx, arguments[i + 2], true);
   }
+
+  jarray_emit_self(this);
 
   var items = __array_prototype.splice.apply(arr, arguments);
 

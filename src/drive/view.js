@@ -1,74 +1,118 @@
 var __drive_view_expr_REG = /\{\{(.+?)\}\}/g;
 
 function drive_get_view_expr(txt) {
-    var piece_start = 0;
-    var piece_array = [];
-    var piece;
-
-    while ((piece = __drive_view_expr_REG.exec(txt)) !== null) {
-        if (piece.index > piece_start) {
-            piece_array.push(new ConstantGrammarNode(txt.substring(piece_start, piece.index)));
-        }
-        piece_start = piece.index + piece[0].length;
-        piece_array.push(parse_expression(piece[1], true));
+  var piece_start = 0;
+  var piece_array = [];
+  var piece;
+  var expr;
+  var is_str_expr = true;
+  while ((piece = __drive_view_expr_REG.exec(txt)) !== null) {
+    if (piece.index > piece_start) {
+      piece_array.push(txt.substring(piece_start, piece.index));
     }
-
-    if (piece_array.length === 0) {
-        return null;
+    piece_start = piece.index + piece[0].length;
+    expr = piece[1];
+    if (__jing_regex_var.test(expr)) {
+      var v_str = environment_var2format(expr);
+      var v_items = $map(v_str.split('.'), function (item) {
+        item = item.trim();
+        return /^\d+$/.test(item) ? parseInt(item) : item;
+      });
+      piece_array.push(v_items);
     } else {
-        if(piece_start < txt.length) {
-            piece_array.push(new ConstantGrammarNode(txt.substring(piece_start)));
-        }
-        if (piece_array.length === 1) {
-            return piece_array[0];
-        }
+      is_str_expr = false;
+      piece_array.push(parse_expression(piece[1], true));
     }
+  }
 
-    var ea = piece_array[0], eb;
-    /*
-     * 当前的处理方式，是把内容转成相加的表达式，
-     *   比如<p>hello {{name}}</p>会转成  "Hello" + name。
-     *   这样会存在一个小问题，比如<p>{{age}}{{year}}</p>
-     *   转成  age + year，如果age和year都是数字，就会被以数学的方式加起来。
-     *   为了简单起见，采取的解决方法是，在最左边添加一个空字符串，
-     *   这样相加的时候会从左往右计算，javascript会以字符串形式链接 '' + age + year
-     */
-    if (ea.type !== 'constant' || !$isString(ea.value)) {
-        piece_array.unshift(new ConstantGrammarNode(''));
-        ea = piece_array[0];
+  if (piece_array.length === 0) {
+    return null;
+  } else {
+    if (piece_start < txt.length) {
+      piece_array.push(txt.substring(piece_start));
     }
+  }
 
-    for (var i = 1; i < piece_array.length; i++) {
-        eb = piece_array[i];
-        if (ea.type === 'constant' && eb.type === 'constant') {
-            ea = new ConstantGrammarNode(ea.value + eb.value);
-        } else {
-            ea = new CalcGrammarNode("#+", ea, eb);
-        }
+  if (is_str_expr) {
+    return piece_array;
+  }
+  if (piece_array.length === 1) {
+    return piece_array[0];
+  }
+
+  function get_piece_expr(i) {
+    var ea = piece_array[i];
+    if ($isArray(ea)) {
+      throw 'todo'
     }
-
     return ea;
+  }
+  var ea = get_piece_expr(0), eb;
+  /*
+   * 当前的处理方式，是把内容转成相加的表达式，
+   *   比如<p>hello {{name}}</p>会转成  "Hello" + name。
+   *   这样会存在一个小问题，比如<p>{{age}}{{year}}</p>
+   *   转成  age + year，如果age和year都是数字，就会被以数学的方式加起来。
+   *   为了简单起见，采取的解决方法是，在最左边添加一个空字符串，
+   *   这样相加的时候会从左往右计算，javascript会以字符串形式链接 '' + age + year
+   */
+  if (ea.type !== 'constant' || !$isString(ea.value)) {
+    piece_array.unshift(new ConstantGrammarNode(''));
+    ea = piece_array[0];
+  }
+
+  for (var i = 1; i < piece_array.length; i++) {
+    eb = get_piece_expr(i);
+    if (ea.type === 'constant' && eb.type === 'constant') {
+      ea = new ConstantGrammarNode(ea.value + eb.value);
+    } else {
+      ea = new CalcGrammarNode("#+", ea, eb);
+    }
+  }
+
+  return ea;
 }
 
 function drive_render_view(ele, env) {
-    var txt = ele.textContent;
+  var txt = ele.textContent;
 
-    var expr = drive_get_view_expr(txt);
-
-    if (expr === null) {
-        return;
-    } else if (expr.type === 'constant') {
-        ele.textContent = expr.value;
-        return;
-    }
-
-    var listener = environment_watch_expression(env, expr, drive_view_observer, {
-        ele: ele
-    }, 10);
-
-    ele.textContent = listener.cur_value;
+  var expr = drive_get_view_expr(txt);
+  var listener;
+  if (!expr) {
+    return;
+  } else if ($isArray(expr)) {
+    listener = new StrListener(null, null, drive_view_observer, ele);
+    var e_items = [];
+    var e_cache = {};
+    expr.forEach(function (ex) {
+      if ($isString(ex)) {
+        e_items.push({
+          is_var: false,
+          value: ex
+        });
+      } else {
+        var p = ex.join('.');
+        e_items.push({
+          is_var: true,
+          value: p
+        });
+        var emitter = new Emitter(env, ex, listener);
+        environment_watch_items(env, ex, emitter);
+        e_cache[p] = emitter.cv;
+      }
+    });
+    listener.cache = e_cache;
+    listener.items = e_items;
+    listener._init();
+  } else if (expr.type === 'constant') {
+    ele.textContent = expr.value;
+    return;
+  } else {
+    listener = environment_watch_expression(env, expr, drive_view_observer, ele);
+  }
+  ele.textContent = listener.cv;
 }
 
-function drive_view_observer(change_list, data) {
-    data.ele.textContent = change_list[0].cur_value;
+function drive_view_observer(cur_value, pre_value, ele) {
+  ele.textContent = cur_value;
 }

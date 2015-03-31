@@ -248,7 +248,8 @@ function environment_watch_items(env, var_array, emitter) {
  * 将a.b[4][3][7].c.d[9]转成a.b.4.3.7.c.d.9的形式。
  */
 function environment_var2format(var_name) {
-  return var_name.replace('][', '.', 'g').replace('].', '.', 'g').replace('[', '.', 'g').replace(']', '');
+  return var_name.replace(/\]\s*\[/g, '.')
+    .replace(/\]\s*\./g, '.').replace('[', '.', 'g').replace(']', '');
 }
 
 $defineProperty(__env_prototype, '$unwatch', function (listener_id) {
@@ -277,6 +278,7 @@ $defineProperty(__env_prototype, '$watch', function (var_name, callback, is_deep
 
   var v_str = environment_var2format(var_name);
   var v_items = $map(v_str.split('.'), function (item) {
+    item = item.trim();
     return /^\d+$/.test(item) ? parseInt(item) : item;
   });
 

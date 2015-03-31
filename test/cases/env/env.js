@@ -88,23 +88,26 @@ describe('test', function () {
 
     env.$watch('o.m', function () {
       log('o.m', arguments);
-    });
-    env.$watch('o.m[3].k', function () {
-      log('o.m[3].k', arguments);
-    });
-    env2.$watch('a[3].k', function() {
-      log('a[3].k', arguments);
-    })
-    var a = {
-      k : 323
-    }
-    env.o.m.push(a);
-    env2.a.push(a);
-    //log(env);
-
+    }, true);
+    //env.$watch('o.m[3].k', function () {
+    //  log('o.m[3].k', arguments);
+    //});
+    //env2.$watch('a[3].k', function() {
+    //  log('a[3].k', arguments);
+    //})
+    //var a = {
+    //  k : 323
+    //}
+    //env.o.m.push(a);
+    //env2.a.push(a);
+    env.o.m[2].k = {
+      t : 32
+    };
+    log(env);
+    return;
     setTimeout(function () {
       log('----');
-      a.k = 332;
+
       setTimeout(function () {
         log('----');
         env.o.m.splice(3, 1);

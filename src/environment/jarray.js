@@ -16,14 +16,14 @@
 
 function jarray_define_prop(jarray, idx) {
   $defineGetterSetter(jarray, idx, function () {
-    return this.__.arr[idx];
+    return this[__ENV_INNER__].arr[idx];
   }, function (val) {
-    this.__.arr[idx] = val;
+    this[__ENV_INNER__].arr[idx] = val;
   }, true, true);
 }
 
 function jarray_emit_map(jarray, emit_map, is_add) {
-  var ets = jarray.__.ets;
+  var ets = jarray[__ENV_INNER__].ets;
   var idx = ets.indexOf(emit_map);
   if (idx < 0 && is_add) {
     ets.push(emit_map);
@@ -34,9 +34,25 @@ function jarray_emit_map(jarray, emit_map, is_add) {
     emit_map[eid].emitter.array = is_add;
   }
 }
-
+function jarray_deep_add_or_rm_emitter(jarray, val, is_add) {
+  if (!$isObject(val)) {
+    return;
+  }
+  jarray[__ENV_INNER__].ets.forEach(function (emit_map) {
+    for(var eid in emit_map) {
+      var item = emit_map[eid];
+      if (item.index === item.emitter.route.length - 1 && item.emitter.deep) {
+        if (is_add) {
+          environment_deep_add_emitter(val, item.emitter);
+        } else {
+          environment_deep_rm_emitter(val, item.emitter.id);
+        }
+      }
+    }
+  });
+}
 function jarray_emit_self(jarray) {
-  jarray.__.ets.forEach(function (emit_map) {
+  jarray[__ENV_INNER__].ets.forEach(function (emit_map) {
     for (var eid in emit_map) {
       var item = emit_map[eid];
       if (item.index === item.emitter.route.length - 1) {
@@ -48,11 +64,11 @@ function jarray_emit_self(jarray) {
 
 function JArray(array) {
   if ($isJArray(array)) {
-    array = array.__.arr;
+    array = array[__ENV_INNER__].arr;
   } else if (!$isArray(array)) {
     array = [];
   }
-  $defineProperty(this, '__', {
+  $defineProperty(this, __ENV_INNER__, {
     arr: array,
     ets: []
   });
@@ -69,7 +85,7 @@ $defineProperty(__jarray_prototype, 'push', function () {
     return;
   }
   var fn = __array_prototype.push;
-  var arr = this.__.arr;
+  var arr = this[__ENV_INNER__].arr;
   var old_len = arr.length;
   var new_len = old_len + arguments.length;
   var props = this[__ENV_EMIT__];
@@ -97,6 +113,10 @@ $defineProperty(__jarray_prototype, 'push', function () {
       if (item.index < item.emitter.route.length - 1) {
         environment_walk_add_or_delete_emitter(item.emitter, item.index + 1, item.emitter.route, val, true);
       }
+      if (item.emitter.deep) {
+        environment_deep_add_emitter(val, item.emitter);
+      }
+      jarray_deep_add_or_rm_emitter(this[__ENV_INNER__].ets, val, true);
     }
   }
 
@@ -111,7 +131,7 @@ $defineProperty(__jarray_prototype, 'splice', function () {
   var idx = arguments[0];
   var del_count = arguments[1];
   var add_count = arguments.length - 2;
-  var arr = this.__.arr;
+  var arr = this[__ENV_INNER__].arr;
   var len = arr.length;
   if (len - idx < del_count) {
     del_count = len - idx;
@@ -191,10 +211,12 @@ $defineProperty(__jarray_prototype, 'splice', function () {
 
   for (i = idx; i < idx + del_count; i++) {
     walk(i, arr[i], false);
+    jarray_deep_add_or_rm_emitter(this, arr[i], false);
     notify(i);
   }
   for (i = 0; i < add_count; i++) {
     walk(i + idx, arguments[i + 2], true);
+    jarray_deep_add_or_rm_emitter(this, arr[i], true);
   }
 
   jarray_emit_self(this);
@@ -204,47 +226,38 @@ $defineProperty(__jarray_prototype, 'splice', function () {
   return new JArray(items);
 });
 
-$each(['join', 'indexOf', 'fill', 'find'], function (med) {
+['join', 'indexOf', 'fill', 'find'].forEach(function (med) {
   $defineProperty(__jarray_prototype, med, function () {
-    return Array.prototype[med].apply(this.__.array, arguments);
+    return __array_prototype[med].apply(this[__ENV_INNER__].arr, arguments);
   });
 });
 
 $defineProperty(__jarray_prototype, 'slice', function () {
-  return new JArray(Array.prototype.slice.apply(this.__.array, arguments));
+  return new JArray(__array_prototype.slice.apply(this[__ENV_INNER__].arr, arguments));
 });
 
 $defineGetterSetter(__jarray_prototype, 'length', function () {
-  return this.__.array.length;
+  return this[__ENV_INNER__].arr.length;
 }, function (len) {
-  this.__.array.length = len;
-  jarray_up(this, true);
+  throw 'todo';
+  //this[__ENV_INNER__].arr.length = len;
+  //jarray_up(this, true);
 });
 $defineProperty(__jarray_prototype, 'filter', function (fn) {
-  var src = this.__.array;
-  if (!fn || src.length === 0) {
-    return this;
-  }
-  var dst = $filter(src, fn);
-  if (dst.length === src.length) {
-    return this;
-  }
-  return new JArray(dst, this.__.en);
+  var arr = this[__ENV_INNER__].arr;
+  var items = __array_prototype.filter.apply(arr, arguments);
+  return items.length === arr.length ? this : new JArray(items);
 });
 
 $defineProperty(__jarray_prototype, 'sort', function (fn) {
-  var dst = this.__.array.sort(fn);
+  var dst = __array_prototype.sort.apply(this[__ENV_INNER__].arr, arguments);
   return new JArray(dst);
 });
 
 $defineProperty(__jarray_prototype, 'destroy', function () {
-  this.__.array.length = 0;
-  this.__.emit_map = null;
+  this[__ENV_INNER__].arr.length = 0;
 });
 
 $defineProperty(__jarray_prototype, 'forEach', function (fn) {
-  var i, arr = this.__.array, len = arr.length;
-  for (i = 0; i < len; i++) {
-    fn(arr[i], i);
-  }
+  __array_prototype.forEach.apply(this[__ENV_INNER__].arr, arguments);
 });

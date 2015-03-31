@@ -97,8 +97,49 @@ function __get_ets(obj) {
 }
 
 
+function environment_deep_add_emitter(obj, emitter) {
+  var props = obj[__ENV_EMIT__];
+  if (!props) {
+    props = {};
+    $defineProperty(obj, __ENV_EMIT__, props);
+  }
+  var is_array = $isJArray(obj);
+  for (var k in obj) {
+    if (k === __ENV_EMIT__ || k === __ENV_INNER__ || (is_array && !/^\d+$/.test(k))) {
+      continue;
+    }
+    var val = obj[k];
+    var emit_map = __get_emap(props, k);
+    $assert(!$hasProperty(emit_map, emitter.id));
+    emit_map[emitter.id] = {
+      index: __ENV_DEEP__,
+      emitter: emitter
+    };
+    if ($isArray(val)) {
+      val = new JArray(val);
+    }
+    environment_define_obj_prop(obj, k, val);
+    if ($isObject(val)) {
+      environment_deep_add_emitter(val, emitter);
+    }
+  }
+}
 
-
+function environment_deep_rm_emitter(obj, emit_id) {
+  var props = obj[__ENV_EMIT__];
+  if (props) {
+    delete props[emit_id];
+  }
+  for (var k in obj) {
+    if (k === __ENV_EMIT__) {
+      continue;
+    }
+    var val = obj[k];
+    if ($isObject(val)) {
+      environment_deep_rm_emitter(val, emit_id);
+    }
+  }
+}
 function environment_update_prop(emit_index, host_emitter, old_val, new_val) {
 
 
@@ -115,63 +156,21 @@ function environment_update_prop(emit_index, host_emitter, old_val, new_val) {
   }
 
   if (host_emitter.deep && $isObject(old_val)) {
-    loop_del(old_val, host_emitter.id);
+    environment_deep_rm_emitter(old_val, host_emitter.id);
   }
 
   if (host_emitter.deep && $isObject(obj)) {
-    loop_add(obj, host_emitter);
+    environment_deep_add_emitter(obj, host_emitter);
   }
 
-  function loop_del(obj, emit_id) {
-    var props = obj[__ENV_EMIT__];
-    if (props) {
-      delete props[emit_id];
-    }
-    for (var k in obj) {
-      if (k === __ENV_EMIT__) {
-        continue;
-      }
-      var val = obj[k];
-      if ($isObject(val)) {
-        loop_del(val, emit_id);
-      }
-    }
-  }
-
-  function loop_add(obj, emitter) {
-    var props = obj[__ENV_EMIT__];
-    if (!props) {
-      props = {};
-      $defineProperty(obj, __ENV_EMIT__, props);
-    }
-    for (var k in obj) {
-      if (k === __ENV_EMIT__) {
-        continue;
-      }
-      var val = obj[k];
-      var emit_map = __get_emap(props, k);
-      $assert(!$hasProperty(emit_map, emitter.id));
-      emit_map[emitter.id] = {
-        index: __ENV_DEEP__,
-        emitter: emitter
-      };
-      if ($isArray(val)) {
-        val = new JArray(val);
-      }
-      environment_define_obj_prop(obj, k, val);
-      if ($isObject(val)) {
-        loop_add(val, emitter);
-      }
-    }
-  }
 }
 
 function environment_define_arr_prop(p, idx) {
 
   $defineGetterSetter(p, idx, function () {
-    return this.__.arr[idx];
+    return this[__ENV_INNER__].arr[idx];
   }, function (new_val) {
-    var pv = this.__.arr[idx];
+    var pv = this[__ENV_INNER__].arr[idx];
     if (pv === new_val) {
       return;
     }
@@ -185,7 +184,7 @@ function environment_define_arr_prop(p, idx) {
 
     environment_update_prop(emitter, pv, new_val, idx, true);
 
-    this.__.arr[idx] = new_val;
+    this[__ENV_INNER__].arr[idx] = new_val;
 
   }, true, true);
 
@@ -203,11 +202,11 @@ function environment_watch_items(env, var_array, emitter) {
     }
     v = var_array[i];
     is_array = $isJArray(p);
-    val = is_array ? p.__.arr[v] : p[v];
+    val = is_array ? p[__ENV_INNER__].arr[v] : p[v];
     if ($isArray(val)) {
       val = new JArray(val);
       if (is_array) {
-        p.__.arr[v] = val;
+        p[__ENV_INNER__].arr[v] = val;
       }
     }
     props = p[__ENV_EMIT__];
@@ -238,6 +237,9 @@ function environment_watch_items(env, var_array, emitter) {
     p = val;
   }
 
+  if (i === var_array.length && emitter.deep && $isObject(p)) {
+      environment_deep_add_emitter(p, emitter);
+  }
   emitter._init();
 
 }
@@ -250,7 +252,7 @@ function environment_var2format(var_name) {
 }
 
 $defineProperty(__env_prototype, '$unwatch', function (listener_id) {
-  //var lt = this.__.listeners,
+  //var lt = this[__ENV_INNER__].listeners,
   //    listener = lt[listener_id];
   //if(!listener) {
   //    return;
@@ -354,7 +356,7 @@ function environment_watch_expression(env, expr, callback, data, lazy_time) {
     environment_watch_items(env, watch_array[i], listener);
   }
 
-  env.__.listeners[listener.id] = listener;
+  env[__ENV_INNER__].listeners[listener.id] = listener;
 
   listener.cur_value = listener.pre_value = expr.exec(env);
 

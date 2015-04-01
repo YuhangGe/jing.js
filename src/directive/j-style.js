@@ -61,13 +61,11 @@ directive_create('j-style', function() {
         }
 
 
-        var listener = environment_watch_expression(env, expr, function(change_list, data) {
-            apply_style(data.ele, change_list[0].cur_value);
-        }, {
-            ele : element
-        }, 10);
+        var listener = environment_watch_expression(env, expr, function(new_value, pre_value, ele) {
+            apply_style(ele, new_value);
+        }, element);
 
-        apply_style(element, listener.cur_value);
+        apply_style(element, listener.cv);
 
     }
 });

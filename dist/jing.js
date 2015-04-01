@@ -769,9 +769,31 @@ function jarray_define_prop(jarray, idx) {
 function jarray_up_bound(jarray) {
   var arr = jarray[__ENV_INNER__].arr;
   var up = jarray[__ENV_INNER__].up;
+  var props = jarray[__ENV_EMIT__];
+  var deep_emitters = [];
+  jarray[__ENV_INNER__].ets.forEach(function (emit_map) {
+    for(var eid in emit_map) {
+      var item = emit_map[eid];
+      if (item.index === item.emitter.route.length - 1 && item.emitter.deep) {
+        deep_emitters.push(item.emitter);
+      }
+    }
+  });
   for (var i = arr.length - 1; i >= up; i--) {
-    jarray_define_prop(jarray, i);
+    //jarray_define_prop(jarray, i);
+    if (props && deep_emitters.length > 0 && !$hasProperty(props, i)) {
+      var em = props[i] = {};
+      deep_emitters.forEach(function (emitter) {
+        em[emitter.id] = {
+          index: __ENV_DEEP__,
+          emitter: emitter
+        };
+      });
+    }
+    environment_define_arr_prop(jarray, i);
   }
+
+
   jarray[__ENV_INNER__].up = arr.length;
 }
 
@@ -787,7 +809,7 @@ function jarray_emit_map(jarray, emit_map, is_add) {
     emit_map[eid].emitter.array = is_add;
   }
 }
-function jarray_deep_add_or_rm_emitter(jarray, val, is_add) {
+function jarray_deep_add_or_rm_emitter(jarray, idx, val, is_add) {
   if (!$isObject(val)) {
     return;
   }
@@ -848,45 +870,47 @@ $defineProperty(__jarray_prototype, 'push', function () {
   if (arguments.length === 0) {
     return;
   }
-  var fn = __array_prototype.push;
-  var arr = this[__ENV_INNER__].arr;
-  var old_len = arr.length;
-  var new_len = old_len + arguments.length;
-  var props = this[__ENV_EMIT__];
-
-  fn.apply(arr, arguments);
-
-  var val, emit_map, eid, item;
-  for (var i = old_len; i < new_len; i++) {
-    val = arr[i];
-    if (!$isObject(val)) {
-      continue;
-    }
-    emit_map = props[i];
-    if (!emit_map) {
-      continue;
-    } else {
-      jarray_notify(this, i);
-    }
-    if ($isArray(val)) {
-      val = new JArray(val);
-    }
-    if ($isJArray(val)) {
-      jarray_emit_map(val, emit_map, true);
-    }
-    for (eid in emit_map) {
-      item = emit_map[eid];
-      if (item.index < item.emitter.route.length - 1) {
-        environment_walk_add_or_delete_emitter(item.emitter, item.index + 1, item.emitter.route, val, true);
-      }
-      if (item.emitter.deep) {
-        environment_deep_add_emitter(val, item.emitter);
-      }
-      jarray_deep_add_or_rm_emitter(this, val, true);
-    }
-  }
-  jarray_up_bound(this);
-  jarray_emit_self(this);
+  //var fn = __array_prototype.push;
+  //var arr = this[__ENV_INNER__].arr;
+  //var old_len = arr.length;
+  //var new_len = old_len + arguments.length;
+  //var props = this[__ENV_EMIT__];
+  //
+  //fn.apply(arr, arguments);
+  //
+  //var val, emit_map, eid, item;
+  //for (var i = old_len; i < new_len; i++) {
+  //  val = arr[i];
+  //  if (!$isObject(val)) {
+  //    continue;
+  //  }
+  //  emit_map = props[i];
+  //  if (!emit_map) {
+  //    continue;
+  //  } else {
+  //    jarray_notify(this, i);
+  //  }
+  //  if ($isArray(val)) {
+  //    val = new JArray(val);
+  //  }
+  //  if ($isJArray(val)) {
+  //    jarray_emit_map(val, emit_map, true);
+  //  }
+  //  for (eid in emit_map) {
+  //    item = emit_map[eid];
+  //    if (item.index < item.emitter.route.length - 1) {
+  //      environment_walk_add_or_delete_emitter(item.emitter, item.index + 1, item.emitter.route, val, true);
+  //    }
+  //    if (item.emitter.deep) {
+  //      environment_deep_add_emitter(val, item.emitter);
+  //    }
+  //    jarray_deep_add_or_rm_emitter(this, i, val, true);
+  //  }
+  //}
+  //jarray_up_bound(this);
+  //jarray_emit_self(this);
+  var args = [this.length, 0].concat(__array_prototype.slice.call(arguments));
+  __jarray_prototype.splice.apply(this, args);
 });
 
 $defineProperty(__jarray_prototype, 'removeAt', function () {
@@ -959,7 +983,7 @@ $defineProperty(__jarray_prototype, 'splice', function () {
 
 
   if (delta !== 0) {
-    for (i = idx + del_count - 1; i<len; i++) {
+    for (i = idx + del_count; i<len; i++) {
       walk(i, arr[i], false);
       walk(i + delta, arr[i], true);
       jarray_notify(this, i);
@@ -968,17 +992,18 @@ $defineProperty(__jarray_prototype, 'splice', function () {
 
   for (i = idx; i < idx + del_count; i++) {
     walk(i, arr[i], false);
-    jarray_deep_add_or_rm_emitter(this, arr[i], false);
+    jarray_deep_add_or_rm_emitter(this, i, arr[i], false);
     jarray_notify(this, i);
   }
   for (i = 0; i < add_count; i++) {
     walk(i + idx, arguments[i + 2], true);
-    jarray_deep_add_or_rm_emitter(this, arr[i], true);
+    jarray_deep_add_or_rm_emitter(this, i + idx, arguments[i + 2], true);
   }
 
-  jarray_emit_self(this);
-
   var items = __array_prototype.splice.apply(arr, arguments);
+
+  jarray_up_bound(this);
+  jarray_emit_self(this);
 
   return new JArray(items);
 });
@@ -1002,8 +1027,8 @@ $defineGetterSetter(__jarray_prototype, 'length', function () {
 });
 $defineProperty(__jarray_prototype, 'filter', function (fn) {
   var arr = this[__ENV_INNER__].arr;
-  var items = __array_prototype.filter.apply(arr, arguments);
-  return items.length === arr.length ? this : new JArray(items);
+  var items = $filter(arr, fn);
+  return new JArray(items);
 });
 
 $defineProperty(__jarray_prototype, 'sort', function (fn) {
@@ -1292,6 +1317,10 @@ function environment_deep_add_emitter(obj, emitter) {
     $defineProperty(obj, __ENV_EMIT__, props);
   }
   var is_array = $isJArray(obj);
+  if (is_array) {
+    //todo 深层次的Array的deep watch需要完善 !important
+    //jarray_emit_map(obj, )
+  }
   for (var k in obj) {
     if (k === __ENV_EMIT__ || k === __ENV_INNER__ || (is_array && !/^\d+$/.test(k))) {
       continue;
@@ -1316,7 +1345,10 @@ function environment_deep_add_emitter(obj, emitter) {
 function environment_deep_rm_emitter(obj, emit_id) {
   var props = obj[__ENV_EMIT__];
   if (props) {
-    delete props[emit_id];
+    for (var v in props) {
+      var em = props[v];
+      delete em[emit_id];
+    }
   }
   for (var k in obj) {
     if (k === __ENV_EMIT__) {
@@ -1366,11 +1398,13 @@ function environment_define_arr_prop(p, idx) {
       new_val = new JArray(new_val);
     }
     $assert($hasProperty(this, __ENV_EMIT__));
-    var emitter = this[__ENV_EMIT__][idx];
-    $assert(emitter);
-    emitter.notify();
 
-    environment_update_prop(emitter, pv, new_val, idx, true);
+    if ($hasProperty(this[__ENV_EMIT__], idx)) {
+      var emitter = this[__ENV_EMIT__][idx];
+      $assert(emitter);
+      emitter.notify();
+      environment_update_prop(emitter, pv, new_val, idx, true);
+    }
 
     this[__ENV_INNER__].arr[idx] = new_val;
 
@@ -2231,9 +2265,6 @@ function JRepeat(ele, attr, drive_module, key, env, expr) {
   this.items = [];
   this.index_map = new Map();
 
-  this.et = {};
-  $defineProperty(this, __env_emit_name, this.et);
-
   $$before(this.cmt, ele);
   $$remove(ele);
 
@@ -2267,8 +2298,8 @@ __jrepeate_prototype.update = function (new_value) {
     }
   }
 
-  var map = this.index_map,
-    new_map = new Map();
+  var map = this.index_map;
+  var new_map = new Map();
 
   var idx, item;
 
@@ -2394,7 +2425,7 @@ __jrepeate_prototype.render = function (val) {
   if (!$isJArray(val)) {
     throw new Error('only support Array in j-repeat.');
   }
-  var array = val.__.arr;
+  var array = val[__ENV_INNER__].arr;
   var r_ele, r_env;
   var frag = document.createDocumentFragment();
   for (var i = 0; i < array.length; i++) {
@@ -2438,44 +2469,43 @@ function directive_deal_j_repeat(ele, attr, drive_module, env) {
 }
 
 
-(function() {
+(function () {
 
-    function apply_show_hide(ele, show) {
-        ele.style.setProperty('display', show ? '' : 'none', '');
+  function apply_show_hide(ele, show) {
+    ele.style.setProperty('display', show ? '' : 'none', '');
+  }
+
+  function directive_show_hide(drive_module, directive_module, env, element, attr_value, show) {
+    var listener;
+    if (__jing_regex_var.test(attr_value)) {
+      listener = env.$watch(attr_value, on_change, false, element);
+    } else {
+      var expr = parse_expression(attr_value, true);
+      listener = environment_watch_expression(env, expr, on_change, element);
     }
 
-    function directive_show_hide(drive_module, directive_module, env, element, attr_value, show) {
-        var expr = parse_expression(attr_value);
 
-
-
-        var listener = environment_watch_expression(env, expr, (show ? function(change_list, data) {
-            apply_show_hide(data.ele, change_list[0].cur_value ? true : false);
-        } : function(change_list, data) {
-            apply_show_hide(data.ele, change_list[0].cur_value ? false : true);
-        }), {
-            ele : element
-        }, 10);
-
-        var val = listener.cur_value,
-            is_show = show ? (val ? true : false) : (val ? false : true);
-
-        apply_show_hide(element, is_show);
-
-
+    function on_change(val, pre_value, ele) {
+      apply_show_hide(ele,  show ? (val ? true : false) : (val ? false : true));
     }
+    var val = listener.cv;
 
-    directive_create('j-show', function() {
-        return function(drive_module, directive_module, env, element, attr_value) {
-            directive_show_hide(drive_module, directive_module, env, element, attr_value, true);
-        }
-    });
+    apply_show_hide(element,  show ? (val ? true : false) : (val ? false : true));
 
-    directive_create('j-hide', function() {
-        return function(drive_module, directive_module, env, element, attr_value) {
-            directive_show_hide(drive_module, directive_module, env, element, attr_value, false);
-        }
-    })
+
+  }
+
+  directive_create('j-show', function () {
+    return function (drive_module, directive_module, env, element, attr_value) {
+      directive_show_hide(drive_module, directive_module, env, element, attr_value, true);
+    }
+  });
+
+  directive_create('j-hide', function () {
+    return function (drive_module, directive_module, env, element, attr_value) {
+      directive_show_hide(drive_module, directive_module, env, element, attr_value, false);
+    }
+  })
 })();
 
 /**
@@ -2541,13 +2571,11 @@ directive_create('j-style', function() {
         }
 
 
-        var listener = environment_watch_expression(env, expr, function(change_list, data) {
-            apply_style(data.ele, change_list[0].cur_value);
-        }, {
-            ele : element
-        }, 10);
+        var listener = environment_watch_expression(env, expr, function(new_value, pre_value, ele) {
+            apply_style(ele, new_value);
+        }, element);
 
-        apply_style(element, listener.cur_value);
+        apply_style(element, listener.cv);
 
     }
 });

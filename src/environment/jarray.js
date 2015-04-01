@@ -283,8 +283,8 @@ $defineGetterSetter(__jarray_prototype, 'length', function () {
 });
 $defineProperty(__jarray_prototype, 'filter', function (fn) {
   var arr = this[__ENV_INNER__].arr;
-  var items = __array_prototype.filter.apply(arr, arguments);
-  return items.length === arr.length ? this : new JArray(items);
+  var items = $filter(arr, fn);
+  return new JArray(items);
 });
 
 $defineProperty(__jarray_prototype, 'sort', function (fn) {

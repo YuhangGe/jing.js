@@ -165,7 +165,7 @@ $defineProperty(__env_prototype, '$set', function (var_name, value) {
  *   }
  */
 $defineGetterSetter(__env_prototype, '$prop', function () {
-  return this.__.prop;
+  return this[__ENV_INNER__].prop;
 }, function () {
   environment_reg_props.apply(this, arguments);
 });
@@ -246,7 +246,7 @@ function environment_reg_props(name, value) {
 //}
 
 function environment_create_child(env, c_name) {
-  var cd = env.__.children;
+  var cd = env[__ENV_INNER__].children;
   var cs = new Environment(c_name, env);
   /*
    * 这里的第4个参数一定要为true，才能覆盖。
@@ -266,12 +266,12 @@ function environment_create_child(env, c_name) {
 //}
 
 function environment_remove_listeners(env) {
-  var ls = env.__.listeners, k;
+  var ls = env[__ENV_INNER__].listeners, k;
   for (k in ls) {
     environment_unwatch_listener(ls[k]);
     delete ls[k];
   }
-  for (k in env.__.children) {
-    environment_remove_listeners(env.__.children[k]);
+  for (k in env[__ENV_INNER__].children) {
+    environment_remove_listeners(env[__ENV_INNER__].children[k]);
   }
 }

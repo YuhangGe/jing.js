@@ -1,24 +1,24 @@
 <!DOCTYPE html>
 <html>
 <head data-framework="jingjs">
-    <meta charset="UTF-8">
-    <title>Test</title>
-    <link rel="stylesheet" href="../bower_components/mocha/mocha.css">
+  <meta charset="UTF-8">
+  <title>Test</title>
+  <link rel="stylesheet" href="../bower_components/mocha/mocha.css">
 </head>
-<body>
+<body j-app="MyApp">
 <div id="mocha">
 </div>
-<script type="text/javascript" src="../bower_components/jquery/dist/jquery.min.js"></script>
-<script type="text/javascript" src="../bower_components/mocha/mocha.js"></script>
-<script type="text/javascript" src="../bower_components/chai/chai.js"></script>
-<script>mocha.setup('bdd')</script>
-<script type="text/javascript">
-    for(var kn in chai) {
-        if(!window[kn]) {
-            window[kn] = chai[kn];
-        }
-    }
-</script>
+<!--<script type="text/javascript" src="../bower_components/jquery/dist/jquery.min.js"></script>-->
+<!--<script type="text/javascript" src="../bower_components/mocha/mocha.js"></script>-->
+<!--<script type="text/javascript" src="../bower_components/chai/chai.js"></script>-->
+<!--<script>mocha.setup('bdd')</script>-->
+<!--<script type="text/javascript">-->
+<!--for (var kn in chai) {-->
+<!--if (!window[kn]) {-->
+<!--window[kn] = chai[kn];-->
+<!--}-->
+<!--}-->
+<!--</script>-->
 
 <script type="text/javascript" src="../src/util/util.js"></script>
 <script type="text/javascript" src="../src/util/array.js"></script>
@@ -70,15 +70,108 @@
 <script type="text/javascript" src="../src/jing/init.js"></script>
 <script type="text/javascript" src="../src/jing/regex.js"></script>
 
-<script type="text/javascript" src="cases/env/env.js"></script>
+<!--<script type="text/javascript" src="cases/env/env.js"></script>-->
 <!--<script type="text/javascript" src="cases/env/watch/array.js"></script>-->
 
 
 <script>
-    mocha.checkLeaks();
-    mocha.globals(['jQuery']);
-    mocha.run();
+  //  mocha.checkLeaks();
+  //  mocha.globals(['jQuery']);
+  //  mocha.run();
+
+
+  jing.module('MyApp').factory('S1', function () {
+    var list = [];
+    for (var i = 0; i < 50; i++) {
+      list.push({
+        name: 'xiaoge:' + i,
+        age: 24 + i,
+        girls: [{
+          name: 'jing:' + i + ':1',
+          age: 24 + i
+        }, {
+          name: 'jing:' + i + ':2',
+          age: 24 + i
+        }]
+      })
+    }
+    return list;
+  }).env('Ctrl', function (module, env) {
+
+    this.list1 = module.require('S1');
+    this.list = this.list1.slice(0, 3);
+
+    this.index = 0;
+
+    this.append = function (name, idx) {
+      this.list.push({
+        name: name + idx,
+        age: 888,
+        girls: [{
+          name: 'Push Girl 0',
+          age: 34
+        }, {
+          name: 'Push Girl 0',
+          age: 34
+        }]
+      });
+    };
+
+    this.unshift = function (name) {
+      this.list.unshift({
+        name: 'Shift Boy',
+        age: 323,
+        girls: [{
+          name: 'Shift Girl 0',
+          age: 34
+        }, {
+          name: 'Shift Girl 1',
+          age: 323
+        }]
+      });
+    };
+
+    env.test = function () {
+      env.list[0].name = 'changed name'
+    }
+
+
+  });
 </script>
+<div j-env="Ctrl">
+  <p>这个Demo展示了jing.js的j-repeat指令的用法。</p>
+  <h4>Simple</h4>
+  <ul>
+    <li j-repeat="boy in list1.slice(index, index+5)">
+      <p>{{boy.name}}, {{boy.age}}</p>
+    </li>
+  </ul>
+  <p>
+    <button j-click="test()">Test</button>
+    <button j-click="index-=5">上一页</button>
+    <button j-click="index+=5">下一页</button>
+    <span>直接在j-click指令里赋值，来更加简单地实现分页效果。angularjs不支持index+=5这样的用法。</span>
+  </p>
+  <!--<h4>Complex</h4>-->
+  <!--<ul>-->
+  <!--<li>-->
+  <!--<p>First Boy: {{list[0].name}}, {{list[0].age}}</p>-->
+  <!--</li>-->
+  <!--<li j-repeat="boy in list.slice(1, list.length-1)">-->
+  <!--<p>{{boy.name}}, {{boy.age}}</p>-->
+  <!--<ul>-->
+  <!--<li j-repeat="girl in boy.girls">{{girl.name}}, {{girl.age * 100}}</li>-->
+  <!--</ul>-->
+  <!--</li>-->
+  <!--<li>-->
+  <!--<p>Last Boy: {{list[list.length-1].name}}, {{list[list.length-1].age}}</p>-->
+  <!--</li>-->
+  <!--</ul>-->
+  <div>
+    <button j-click="unshift('shift')">Shift</button>
+    <button j-click="append('jing', list.length)">Append</button>
+  </div>
+</div>
 </body>
 
 </html>

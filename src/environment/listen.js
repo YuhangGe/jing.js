@@ -94,7 +94,7 @@ StrListener.prototype = {
     this.cache = null;
   }
 };
-$inherit(StrListener, Listener);
+$inherit(StrListener, LazyListener);
 
 function ExprListener(var_tree, expr, env, handler, data, lazy_time) {
   this.base(handler, data, lazy_time);

@@ -3,11 +3,11 @@ function JInputModel(ele, env, expr, two_way) {
     this.env = env;
     this.expr = expr;
 
-    var listener = environment_watch_expression(env, expr, function(change_list, j_model) {
-        j_model.update(change_list[0].cur_value);
-    }, this, 10);
+    var listener = environment_watch_expression(env, expr, function(cur_value, pre_value, j_model) {
+        j_model.update(cur_value);
+    }, this);
 
-    this.val = listener.cur_value;
+    this.val = listener.cv;
     this.val_key = 'value';
     this.val_event = 'input';
 

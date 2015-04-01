@@ -22,6 +22,37 @@ function jarray_define_prop(jarray, idx) {
   }, true, true);
 }
 
+function jarray_up_bound(jarray) {
+  var arr = jarray[__ENV_INNER__].arr;
+  var up = jarray[__ENV_INNER__].up;
+  var props = jarray[__ENV_EMIT__];
+  var deep_emitters = [];
+  jarray[__ENV_INNER__].ets.forEach(function (emit_map) {
+    for(var eid in emit_map) {
+      var item = emit_map[eid];
+      if (item.index === item.emitter.route.length - 1 && item.emitter.deep) {
+        deep_emitters.push(item.emitter);
+      }
+    }
+  });
+  for (var i = arr.length - 1; i >= up; i--) {
+    //jarray_define_prop(jarray, i);
+    if (props && deep_emitters.length > 0 && !$hasProperty(props, i)) {
+      var em = props[i] = {};
+      deep_emitters.forEach(function (emitter) {
+        em[emitter.id] = {
+          index: __ENV_DEEP__,
+          emitter: emitter
+        };
+      });
+    }
+    environment_define_arr_prop(jarray, i);
+  }
+
+
+  jarray[__ENV_INNER__].up = arr.length;
+}
+
 function jarray_emit_map(jarray, emit_map, is_add) {
   var ets = jarray[__ENV_INNER__].ets;
   var idx = ets.indexOf(emit_map);
@@ -34,7 +65,7 @@ function jarray_emit_map(jarray, emit_map, is_add) {
     emit_map[eid].emitter.array = is_add;
   }
 }
-function jarray_deep_add_or_rm_emitter(jarray, val, is_add) {
+function jarray_deep_add_or_rm_emitter(jarray, idx, val, is_add) {
   if (!$isObject(val)) {
     return;
   }
@@ -62,6 +93,18 @@ function jarray_emit_self(jarray) {
   });
 }
 
+function jarray_notify(jarray, idx) {
+  var props = jarray[__ENV_EMIT__];
+  var emit_map = props[idx];
+  if (!emit_map) {
+    return;
+  }
+  for (var eid in emit_map) {
+    var item = emit_map[eid];
+    item.emitter.notify();
+  }
+}
+
 function JArray(array) {
   if ($isJArray(array)) {
     array = array[__ENV_INNER__].arr;
@@ -70,11 +113,10 @@ function JArray(array) {
   }
   $defineProperty(this, __ENV_INNER__, {
     arr: array,
-    ets: []
+    ets: [],
+    up: 0
   });
-  for (var i = 0; i < array.length; i++) {
-    jarray_define_prop(this, i);
-  }
+  jarray_up_bound(this);
   $defineProperty(this, __ENV_EMIT__, {});
 }
 var __jarray_prototype = JArray.prototype;
@@ -84,43 +126,47 @@ $defineProperty(__jarray_prototype, 'push', function () {
   if (arguments.length === 0) {
     return;
   }
-  var fn = __array_prototype.push;
-  var arr = this[__ENV_INNER__].arr;
-  var old_len = arr.length;
-  var new_len = old_len + arguments.length;
-  var props = this[__ENV_EMIT__];
-
-  fn.apply(arr, arguments);
-
-  var val, emit_map, eid, item;
-  for (var i = old_len; i < new_len; i++) {
-    val = arr[i];
-    if (!$isObject(val)) {
-      continue;
-    }
-    emit_map = props[i];
-    if (!emit_map) {
-      continue;
-    }
-    if ($isArray(val)) {
-      val = new JArray(val);
-    }
-    if ($isJArray(val)) {
-      jarray_emit_map(val, emit_map, true);
-    }
-    for (eid in emit_map) {
-      item = emit_map[eid];
-      if (item.index < item.emitter.route.length - 1) {
-        environment_walk_add_or_delete_emitter(item.emitter, item.index + 1, item.emitter.route, val, true);
-      }
-      if (item.emitter.deep) {
-        environment_deep_add_emitter(val, item.emitter);
-      }
-      jarray_deep_add_or_rm_emitter(this[__ENV_INNER__].ets, val, true);
-    }
-  }
-
-  jarray_emit_self(this);
+  //var fn = __array_prototype.push;
+  //var arr = this[__ENV_INNER__].arr;
+  //var old_len = arr.length;
+  //var new_len = old_len + arguments.length;
+  //var props = this[__ENV_EMIT__];
+  //
+  //fn.apply(arr, arguments);
+  //
+  //var val, emit_map, eid, item;
+  //for (var i = old_len; i < new_len; i++) {
+  //  val = arr[i];
+  //  if (!$isObject(val)) {
+  //    continue;
+  //  }
+  //  emit_map = props[i];
+  //  if (!emit_map) {
+  //    continue;
+  //  } else {
+  //    jarray_notify(this, i);
+  //  }
+  //  if ($isArray(val)) {
+  //    val = new JArray(val);
+  //  }
+  //  if ($isJArray(val)) {
+  //    jarray_emit_map(val, emit_map, true);
+  //  }
+  //  for (eid in emit_map) {
+  //    item = emit_map[eid];
+  //    if (item.index < item.emitter.route.length - 1) {
+  //      environment_walk_add_or_delete_emitter(item.emitter, item.index + 1, item.emitter.route, val, true);
+  //    }
+  //    if (item.emitter.deep) {
+  //      environment_deep_add_emitter(val, item.emitter);
+  //    }
+  //    jarray_deep_add_or_rm_emitter(this, i, val, true);
+  //  }
+  //}
+  //jarray_up_bound(this);
+  //jarray_emit_self(this);
+  var args = [this.length, 0].concat(__array_prototype.slice.call(arguments));
+  __jarray_prototype.splice.apply(this, args);
 });
 
 $defineProperty(__jarray_prototype, 'removeAt', function () {
@@ -191,37 +237,29 @@ $defineProperty(__jarray_prototype, 'splice', function () {
 
   }
 
-  function notify(idx) {
-    var emit_map = props[idx];
-    if (!emit_map) {
-      return;
-    }
-    for (var eid in emit_map) {
-      var item = emit_map[eid];
-      item.emitter.notify();
-    }
-  }
+
   if (delta !== 0) {
-    for (i = idx + del_count - 1; i<len; i++) {
+    for (i = idx + del_count; i<len; i++) {
       walk(i, arr[i], false);
       walk(i + delta, arr[i], true);
-      notify(i);
+      jarray_notify(this, i);
     }
   }
 
   for (i = idx; i < idx + del_count; i++) {
     walk(i, arr[i], false);
-    jarray_deep_add_or_rm_emitter(this, arr[i], false);
-    notify(i);
+    jarray_deep_add_or_rm_emitter(this, i, arr[i], false);
+    jarray_notify(this, i);
   }
   for (i = 0; i < add_count; i++) {
     walk(i + idx, arguments[i + 2], true);
-    jarray_deep_add_or_rm_emitter(this, arr[i], true);
+    jarray_deep_add_or_rm_emitter(this, i + idx, arguments[i + 2], true);
   }
 
-  jarray_emit_self(this);
-
   var items = __array_prototype.splice.apply(arr, arguments);
+
+  jarray_up_bound(this);
+  jarray_emit_self(this);
 
   return new JArray(items);
 });

@@ -40,13 +40,23 @@ function drive_get_view_expr(txt) {
     return piece_array[0];
   }
 
-  function get_piece_expr(i) {
-    var ea = piece_array[i];
-    if ($isArray(ea)) {
-      throw 'todo'
+  function get_piece_expr(idx) {
+
+    function create_node(arr, i) {
+      return i === 0 ? new VariableGrammarNode(arr[i]) : new PropertyGrammarNode(create_node(arr, i - 1), new ConstantGrammarNode(arr[i]));
     }
-    return ea;
+    var ea = piece_array[idx];
+    var node;
+    if ($isArray(ea)) {
+      node = create_node(ea, ea.length - 1);
+    } else if ($isObject(ea)) {
+      node = ea;
+    } else {
+      node = new ConstantGrammarNode(ea);
+    }
+    return node;
   }
+
   var ea = get_piece_expr(0), eb;
   /*
    * 当前的处理方式，是把内容转成相加的表达式，
@@ -75,35 +85,49 @@ function drive_get_view_expr(txt) {
 
 function drive_render_view(ele, env) {
   var txt = ele.textContent;
-
+  /*
+   * 下面这一段代码有些丑
+   * todo 重新梳理逻辑整理代码。
+   */
   var expr = drive_get_view_expr(txt);
   var listener;
   if (!expr) {
     return;
   } else if ($isArray(expr)) {
-    listener = new StrListener(null, null, drive_view_observer, ele);
-    var e_items = [];
-    var e_cache = {};
-    expr.forEach(function (ex) {
-      if ($isString(ex)) {
-        e_items.push({
-          is_var: false,
-          value: ex
-        });
-      } else {
-        var p = ex.join('.');
-        e_items.push({
-          is_var: true,
-          value: p
-        });
-        var emitter = new Emitter(env, ex, listener);
-        environment_watch_items(env, ex, emitter);
-        e_cache[p] = emitter.cv;
+    if (expr.length === 1) {
+      var v_items = expr[0];
+      env = env.$find(v_items[0]);
+      if (!env) {
+        debugger;
+        throw new Error('variable ' + v_items[0] + ' not found!');
       }
-    });
-    listener.cache = e_cache;
-    listener.items = e_items;
-    listener._init();
+      listener = new Emitter(env, v_items, drive_view_observer, false, ele);
+      environment_watch_items(env, v_items, listener);
+    } else {
+      listener = new StrListener(null, null, drive_view_observer, ele);
+      var e_items = [];
+      var e_cache = {};
+      expr.forEach(function (ex) {
+        if ($isString(ex)) {
+          e_items.push({
+            is_var: false,
+            value: ex
+          });
+        } else {
+          var p = ex.join('.');
+          e_items.push({
+            is_var: true,
+            value: p
+          });
+          var emitter = new Emitter(env, ex, listener);
+          environment_watch_items(env, ex, emitter);
+          e_cache[p] = emitter.cv;
+        }
+      });
+      listener.cache = e_cache;
+      listener.items = e_items;
+      listener._init();
+    }
   } else if (expr.type === 'constant') {
     ele.textContent = expr.value;
     return;

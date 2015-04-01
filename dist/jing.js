@@ -563,7 +563,7 @@ $defineProperty(__env_prototype, '$set', function (var_name, value) {
  *   }
  */
 $defineGetterSetter(__env_prototype, '$prop', function () {
-  return this.__.prop;
+  return this[__ENV_INNER__].prop;
 }, function () {
   environment_reg_props.apply(this, arguments);
 });
@@ -644,7 +644,7 @@ function environment_reg_props(name, value) {
 //}
 
 function environment_create_child(env, c_name) {
-  var cd = env.__.children;
+  var cd = env[__ENV_INNER__].children;
   var cs = new Environment(c_name, env);
   /*
    * 这里的第4个参数一定要为true，才能覆盖。
@@ -664,13 +664,13 @@ function environment_create_child(env, c_name) {
 //}
 
 function environment_remove_listeners(env) {
-  var ls = env.__.listeners, k;
+  var ls = env[__ENV_INNER__].listeners, k;
   for (k in ls) {
     environment_unwatch_listener(ls[k]);
     delete ls[k];
   }
-  for (k in env.__.children) {
-    environment_remove_listeners(env.__.children[k]);
+  for (k in env[__ENV_INNER__].children) {
+    environment_remove_listeners(env[__ENV_INNER__].children[k]);
   }
 }
 
@@ -740,49 +740,7 @@ Emitter.prototype = {
     this.env = null;
   }
 };
-//
-//
-//function Emitter(deep) {
-//  this.deep = deep ? true : false;
-//  this.nodes = {};
-//  this.indexes = {};
-//}
-//Emitter.prototype = {
-//  add: function (emit_node, index) {
-//    var id = emit_node.id;
-//    if (!$hasProperty(this.nodes, id)) {
-//      this.nodes[id] = emit_node;
-//      this.indexes[id] = index;
-//    }
-//    else {
-//      /*
-//       * 单个emit_node对于某个节点而言，是唯一的。
-//       * 如果出现不唯一，说明逻辑上有问题。这里捕获这种异常，供调试。
-//       */
-//      $assert($hasProperty(this.indexes, id) && this.indexes[id] === index);
-//    }
-//  },
-//  remove: function (e_id) {
-//    if ($hasProperty(this.nodes, e_id)) {
-//      $assert($hasProperty(this.indexes, e_id));
-//      delete this.nodes[e_id];
-//      delete this.indexes[e_id];
-//    }
-//  },
-//  merge: function (another_emitter) {
-//    for (var eid in another_emitter.nodes) {
-//
-//    }
-//  },
-//  notify: function () {
-//    //for (var env_id in this.map) {
-//    //  this.map[env_id].notify();
-//    //}
-//    for (var emit_node_id in this.nodes) {
-//      this.nodes[emit_node_id].notify();
-//    }
-//  }
-//};
+
 
 /*
  * 目前对于数组的处理方式为：
@@ -806,6 +764,15 @@ function jarray_define_prop(jarray, idx) {
   }, function (val) {
     this[__ENV_INNER__].arr[idx] = val;
   }, true, true);
+}
+
+function jarray_up_bound(jarray) {
+  var arr = jarray[__ENV_INNER__].arr;
+  var up = jarray[__ENV_INNER__].up;
+  for (var i = arr.length - 1; i >= up; i--) {
+    jarray_define_prop(jarray, i);
+  }
+  jarray[__ENV_INNER__].up = arr.length;
 }
 
 function jarray_emit_map(jarray, emit_map, is_add) {
@@ -848,6 +815,18 @@ function jarray_emit_self(jarray) {
   });
 }
 
+function jarray_notify(jarray, idx) {
+  var props = jarray[__ENV_EMIT__];
+  var emit_map = props[idx];
+  if (!emit_map) {
+    return;
+  }
+  for (var eid in emit_map) {
+    var item = emit_map[eid];
+    item.emitter.notify();
+  }
+}
+
 function JArray(array) {
   if ($isJArray(array)) {
     array = array[__ENV_INNER__].arr;
@@ -856,11 +835,10 @@ function JArray(array) {
   }
   $defineProperty(this, __ENV_INNER__, {
     arr: array,
-    ets: []
+    ets: [],
+    up: 0
   });
-  for (var i = 0; i < array.length; i++) {
-    jarray_define_prop(this, i);
-  }
+  jarray_up_bound(this);
   $defineProperty(this, __ENV_EMIT__, {});
 }
 var __jarray_prototype = JArray.prototype;
@@ -887,6 +865,8 @@ $defineProperty(__jarray_prototype, 'push', function () {
     emit_map = props[i];
     if (!emit_map) {
       continue;
+    } else {
+      jarray_notify(this, i);
     }
     if ($isArray(val)) {
       val = new JArray(val);
@@ -902,10 +882,10 @@ $defineProperty(__jarray_prototype, 'push', function () {
       if (item.emitter.deep) {
         environment_deep_add_emitter(val, item.emitter);
       }
-      jarray_deep_add_or_rm_emitter(this[__ENV_INNER__].ets, val, true);
+      jarray_deep_add_or_rm_emitter(this, val, true);
     }
   }
-
+  jarray_up_bound(this);
   jarray_emit_self(this);
 });
 
@@ -977,28 +957,19 @@ $defineProperty(__jarray_prototype, 'splice', function () {
 
   }
 
-  function notify(idx) {
-    var emit_map = props[idx];
-    if (!emit_map) {
-      return;
-    }
-    for (var eid in emit_map) {
-      var item = emit_map[eid];
-      item.emitter.notify();
-    }
-  }
+
   if (delta !== 0) {
     for (i = idx + del_count - 1; i<len; i++) {
       walk(i, arr[i], false);
       walk(i + delta, arr[i], true);
-      notify(i);
+      jarray_notify(this, i);
     }
   }
 
   for (i = idx; i < idx + del_count; i++) {
     walk(i, arr[i], false);
     jarray_deep_add_or_rm_emitter(this, arr[i], false);
-    notify(i);
+    jarray_notify(this, i);
   }
   for (i = 0; i < add_count; i++) {
     walk(i + idx, arguments[i + 2], true);
@@ -1048,180 +1019,169 @@ $defineProperty(__jarray_prototype, 'forEach', function (fn) {
   __array_prototype.forEach.apply(this[__ENV_INNER__].arr, arguments);
 });
 
-function Listener(handler, data) {
-    this.id = $uid();
-    this.handler = handler;
-    this.data = data;
-    this.emitters = {};
-}
-Listener.prototype = {
-    destroy : function() {
-        this.handler = null;
-        this.data = null;
-        for(var k in this.emitters) {
-            this.emitters[k] = null;
-        }
-        this.emitters = null;
-    },
-    notify : function(var_path, cur_value, pre_value) {
-        this.handler(cur_value, pre_value);
-    }
-};
-
-
-function LazyListener(handler, data, lazy_time) {
-    this.base(handler, data);
-    this.lazy = $isUndefined(lazy_time) ? 0 : lazy_time;
-
-    this.pv = null;
-    this.cv = null;
-
-    this.tm = null;
-    this.dg = $bind(this, this._deal);
-    this.changes = [];
+function LazyListener(handler, data) {
+  this.id = $uid();
+  this.handler = handler;
+  this.data = data;
+  this.emitters = {};
+  this.pv = null;
+  this.cv = null;
+  this.tm = null;
+  this.dg = $bind(this, this._deal);
+  this.changes = [];
 }
 LazyListener.prototype = {
-    _ctm : function() {
-        if(this.tm !== null) {
-            clearTimeout(this.tm);
-            this.tm = null;
-        }
-    },
-    notify : function(var_path, cur_value, pre_value) {
-        this._ctm();
-        this.tm = setTimeout(this.dg, this.lazy);
-        this._notify(var_path, cur_value, pre_value);
-    },
-    destroy : function() {
-        this.callBase('destroy');
-        this._ctm();
-        this.dg = null;
-        this.pv = null;
-        this.cv = null;
-    },
-    _deal : function() {
-        //abstract method
+  _ctm: function () {
+    if (this.tm !== null) {
+      clearTimeout(this.tm);
+      this.tm = null;
     }
+  },
+  notify: function (cur_value, pre_value, var_path) {
+    this._ctm();
+    this.tm = setTimeout(this.dg, 0);
+    this._notify(cur_value, pre_value, var_path);
+  },
+  destroy: function () {
+    this.handler = null;
+    this.data = null;
+    for (var k in this.emitters) {
+      this.emitters[k] = null;
+    }
+    this.emitters = null;
+    this._ctm();
+    this.dg = null;
+    this.pv = null;
+    this.cv = null;
+  },
+  _deal: function () {
+    //abstract method
+  },
+  _notify: function () {
+    //abstract method
+  }
 };
-$inherit(LazyListener, Listener);
 
 /*
  * StrListener用于连接只带属性访问的字符串的监听。比如 <p>{{boy.name}},{{boy.age}}</p>
  * 但对于更复杂的情况比如带函数调用的情况，需要使用ExprListener，比如<p>boys.slice(3,4)[0].name</p>
  */
-function StrListener(var_cache, str_items, handler, data, lazy_time) {
-    this.base(handler, data);
-    this.lazy = $isUndefined(lazy_time) ? 0 : lazy_time;
-    this.cache = var_cache;
-    this.items = str_items;
-    this.vc = false;
+function StrListener(var_cache, str_items, handler, data) {
+  this.base(handler, data);
+  this.cache = var_cache;
+  this.items = str_items;
+  this.vc = false;
 }
 StrListener.prototype = {
-    notify : function(var_path, cur_value, pre_value) {
-        if(!$hasProperty(this.cache, var_path) || this.cache[var_path] === cur_value) {
-            return;
-        }
-        this.callBase('notify', var_path, cur_value, pre_value);
-    },
-    _notify : function(var_path, cur_value, pre_value) {
-        this.cache[var_path] = cur_value;
-        this.vc = true;
-    },
-    _val : function() {
-        var text = '', me = this;
-        this.items.forEach(function(it) {
-            text += it.type === 'var' ? me.cache[it.value] : it.value;
-        });
-        return text;
-    },
-    _deal : function() {
-        if(!this.vc) {
-            return;
-        }
-        this.vc = false;
-        this.cv = this._val();
-        if(this.cv === this.pv) {
-            return;
-        }
-        this.handler(this.cv, this.pv, this.data);
-        this.pv = this.cv;
-    },
-    destroy : function() {
-        this.callBase('destroy');
-        this.items.length = 0;
-        for(var k in this.cache) {
-            this.cache[k] = null;
-        }
-        this.cache = null;
+  notify: function (cur_value, pre_value, var_path) {
+    if(this.cache[var_path] === cur_value) {
+      return;
     }
+    this.callBase('notify', cur_value, pre_value, var_path);
+  },
+  _notify: function (cur_value, pre_value, var_path) {
+    this.cache[var_path] = cur_value;
+    this.vc = true;
+  },
+  _val: function () {
+    var text = '', me = this;
+    this.items.forEach(function (it) {
+      var val = it.is_var ? me.cache[it.value] : it.value;
+      text += val ? val : '';
+    });
+    return text;
+  },
+  _init: function () {
+    this.cv = this.pv = this._val();
+  },
+  _deal: function () {
+    if (!this.vc) {
+      return;
+    }
+    this.vc = false;
+    this.cv = this._val();
+    if (this.cv === this.pv) {
+      return;
+    }
+    this.handler(this.cv, this.pv, this.data);
+    this.pv = this.cv;
+  },
+  destroy: function () {
+    this.callBase('destroy');
+    this.items.length = 0;
+    for (var k in this.cache) {
+      this.cache[k] = null;
+    }
+    this.cache = null;
+  }
 };
-$inherit(StrListener, Listener);
+$inherit(StrListener, LazyListener);
 
 function ExprListener(var_tree, expr, env, handler, data, lazy_time) {
-    this.base(handler, data, lazy_time);
-    this.expr = expr;
-    this.var_tree = var_tree;
-    this.env = env;
-    this.changes = [];
+  this.base(handler, data, lazy_time);
+  this.expr = expr;
+  this.var_tree = var_tree;
+  this.env = env;
+  this.changes = [];
 }
 
 ExprListener.prototype = {
-    _notify : function() {
-        this.changes.push(new EmitChange(var_path, cur_value, pre_value));
-    },
-    _deal : function() {
-        var i, c, n_arr, j;
-        for(i=0;i<this.changes.length;i++) {
-            c = this.changes[i].pa;
-            n_arr = this.var_tree[c];
-            if(!n_arr) {
-                continue;
-            }
-            for(j=0;j<n_arr.length;j++) {
-                n_arr[j].cached = false;
-                listen_refresh_expr_node(n_arr[j]);
-            }
-        }
-
-        this.changes.length = 0;
-        this.cv = this.expr.exec(this.env);
-        if(!$isJArray(this.cv) && this.cv === this.pv) {
-            return;
-        }
-        this.handler(this.cv, this.pv, this.data);
-
-        this.pv = this.cv;
-
-    },
-    destroy : function() {
-        this.callBase('destroy');
-        this.changes.length = 0;
-        this.expr.destroy();
-        this.expr = null;
-        this.env = null;
-        for(var k in this.var_tree) {
-            delete this.var_tree[k];
-        }
-        this.var_tree = null;
+  _notify: function (cur_value, pre_value, var_path) {
+    this.changes.push(var_path);
+  },
+  _deal: function () {
+    var i, c, n_arr, j;
+    for (i = 0; i < this.changes.length; i++) {
+      c = this.changes[i];
+      n_arr = this.var_tree[c];
+      if (!n_arr) {
+        continue;
+      }
+      for (j = 0; j < n_arr.length; j++) {
+        n_arr[j].cached = false;
+        listen_refresh_expr_node(n_arr[j]);
+      }
     }
+
+    this.changes.length = 0;
+    this.cv = this.expr.exec(this.env);
+    if (!$isJArray(this.cv) && this.cv === this.pv) {
+      return;
+    }
+    this.handler(this.cv, this.pv, this.data);
+
+    this.pv = this.cv;
+
+  },
+  destroy: function () {
+    this.callBase('destroy');
+    this.changes.length = 0;
+    this.expr.destroy();
+    this.expr = null;
+    this.env = null;
+    for (var k in this.var_tree) {
+      delete this.var_tree[k];
+    }
+    this.var_tree = null;
+  }
 };
 $inherit(ExprListener, LazyListener);
 
 function listen_refresh_expr_node(node) {
-    /*
-     * 如果node.cached===false，说明当前node及其父亲树都已经被refresh过了，
-     *   不需要再次遍历。这是一个简单的优化。
-     */
-    function re_loop(node) {
-        if(!node || node.cached === false) {
-            return;
-        }
-        node.cached = false;
-        re_loop(node.parent);
+  /*
+   * 如果node.cached===false，说明当前node及其父亲树都已经被refresh过了，
+   *   不需要再次遍历。这是一个简单的优化。
+   */
+  function re_loop(node) {
+    if (!node || node.cached === false) {
+      return;
     }
-
     node.cached = false;
     re_loop(node.parent);
+  }
+
+  node.cached = false;
+  re_loop(node.parent);
 
 }
 
@@ -1447,14 +1407,14 @@ function environment_watch_items(env, var_array, emitter) {
       emit_map = props[v] = {};
     }
 
-    if ($isJArray(val)) {
-      jarray_emit_map(val, emit_map, true);
-    }
-
     emit_map[emitter.id] = {
       index: i,
       emitter: emitter
     };
+
+    if ($isJArray(val)) {
+      jarray_emit_map(val, emit_map, true);
+    }
 
     if (is_array) {
       environment_define_arr_prop(p, v);
@@ -1476,7 +1436,8 @@ function environment_watch_items(env, var_array, emitter) {
  * 将a.b[4][3][7].c.d[9]转成a.b.4.3.7.c.d.9的形式。
  */
 function environment_var2format(var_name) {
-  return var_name.replace('][', '.', 'g').replace('].', '.', 'g').replace('[', '.', 'g').replace(']', '');
+  return var_name.replace(/\s*\]\s*\[\s*/g, '.')
+    .replace(/\s*\]\s*\.\s*/g, '.').replace(/\s*\[\s*/g, '.').replace(/\s*\]\s*/g, '');
 }
 
 $defineProperty(__env_prototype, '$unwatch', function (listener_id) {
@@ -1505,6 +1466,7 @@ $defineProperty(__env_prototype, '$watch', function (var_name, callback, is_deep
 
   var v_str = environment_var2format(var_name);
   var v_items = $map(v_str.split('.'), function (item) {
+    item = item.trim();
     return /^\d+$/.test(item) ? parseInt(item) : item;
   });
 
@@ -1536,14 +1498,21 @@ function environment_unwatch_listener(listener) {
 }
 
 function environment_watch_expr_loop(expr_node, watch_array, var_tree) {
+  //代码有些丑
+  //todo 梳理逻辑和代码。
+
   function expr_prop(expr, v_arr) {
     var nb = expr.nodes[1];
     if (nb.type === 'constant') {
       v_arr.push(nb.value);
       if (expr.parent && expr.parent.type === 'property') {
         expr_prop(expr.parent, v_arr);
+        return;
       }
     }
+
+    watch_array.push(vn);
+
   }
 
   if (expr_node.type === 'variable') {
@@ -1577,16 +1546,23 @@ function environment_watch_expression(env, expr, callback, data, lazy_time) {
     return;
   }
 
-  var is_lazy = lazy_time !== false;
-  var listener = new ExprListener(var_tree, expr, env, callback, data, lazy_time);
+  var listener = new ExprListener(var_tree, expr, env, callback, data);
 
+  var emitter;
   for (var i = 0; i < watch_array.length; i++) {
-    environment_watch_items(env, watch_array[i], listener);
+    var v_items = watch_array[i];
+    env = env.$find(v_items[0]);
+    if (!env) {
+      debugger;
+      throw new Error('variable ' + v_items[0] + ' not found!');
+    }
+    emitter = new Emitter(env, v_items, listener);
+    environment_watch_items(env, v_items, emitter);
   }
 
-  env[__ENV_INNER__].listeners[listener.id] = listener;
+  //env[__ENV_INNER__].listeners[listener.id] = listener;
 
-  listener.cur_value = listener.pre_value = expr.exec(env);
+  listener.cv = listener.pv = expr.exec(env);
 
   return listener;
 }
@@ -1946,20 +1922,24 @@ function directive_deal_j_async_env(ele, drive_module, env) {
 
 }
 
-directive_create('j-class', function() {
-    function apply_class(ele, pre, cur) {
-        ele.className = (ele.className.replace(pre.trim(), '') + ' ' + cur).trim();
+directive_create('j-class', function () {
+  function apply_class(ele, pre, cur) {
+    ele.className = (ele.className.replace(pre.trim(), '') + ' ' + cur).trim();
+  }
+
+  return function (drive_module, directive_module, env, element, attr_value) {
+    var listener;
+    if (__jing_regex_var.test(attr_value)) {
+      listener = env.$watch(attr_value, on_change, false, element);
+    } else {
+      var expr = parse_expression(attr_value, true);
+      listener = environment_watch_expression(env, expr, on_change, element);
     }
-    return function(drive_module, directive_module, env, element, attr_value) {
-
-        var expr = parse_expression(attr_value, true);
-
-        var listener = environment_watch_expression(env, expr, function(change_list, ele) {
-            apply_class(ele, change_list[0].pre_value, change_list[0].cur_value);
-        }, element, 10);
-
-        apply_class(element, '', listener.cur_value);
+    function on_change(cur_value, pre_value, ele) {
+      apply_class(ele, pre_value, cur_value);
     }
+    apply_class(element, '', listener.cv);
+  }
 });
 
 /*
@@ -2090,11 +2070,11 @@ function JInputModel(ele, env, expr, two_way) {
     this.env = env;
     this.expr = expr;
 
-    var listener = environment_watch_expression(env, expr, function(change_list, j_model) {
-        j_model.update(change_list[0].cur_value);
-    }, this, 10);
+    var listener = environment_watch_expression(env, expr, function(cur_value, pre_value, j_model) {
+        j_model.update(cur_value);
+    }, this);
 
-    this.val = listener.cur_value;
+    this.val = listener.cv;
     this.val_key = 'value';
     this.val_event = 'input';
 
@@ -2228,286 +2208,235 @@ directive_create('j-change', function() {
     }
 });
 
-function j_repeat_env(env, key, jarray, index) {
-
-    env.__.jarray = jarray;
-    env.__.index = index;
-
-    var jen = jarray.__.en.children[index];
-    if(!jen) {
-        //log('destroy child node:', index);
-        //log(jen);
-        //jen.destroy();
-        jen = jarray.__.en.children[index] = new EmitNode(index, jarray.__.en);
-    }
-    //log(jen);
-    env.__.emit_tree.children[key] = jen;
-
-    env[__env_prop_name][key] = null;
-    env[__env_emit_name][key] = jen;
-
-    $defineGetterSetter(env, key, function () {
-        return this.__.jarray[this.__.index];
-    }, function (val) {
-        this.__.jarray[this.__.index] = val;
-    }, false, true);
-}
-
-function JRepeatReuseItem(ele, env) {
-    this.ele = ele;
-    this.used = false;
-    this.env = env;
+function JRepeatReuseItem(ele, env, val) {
+  this.ele = ele;
+  this.used = false;
+  this.env = env;
+  this.val = val;
 }
 
 function JRepeat(ele, attr, drive_module, key, env, expr) {
-    this.ele = ele;
-    this.cmt = document.createComment(ele.outerHTML);
-    this.env = env;
-    this.expr = expr;
-    this.attr = attr;
-    this.key = key;
-    this.module = drive_module;
-    this.frag = document.createDocumentFragment();
-    var listener = environment_watch_expression(env, expr, function (change_list, repeater) {
-        var c = change_list[0];
-        if (c.type !== 'child') {
-            repeater.update(change_list[0].cur_value);
-        }
-    }, this, 10);
-    listener.compare = false;
+  this.ele = ele;
+  this.cmt = document.createComment(ele.outerHTML);
+  this.env = env;
+  this.expr = expr;
+  this.attr = attr;
+  this.key = key;
+  this.module = drive_module;
+  this.frag = document.createDocumentFragment();
+  var listener = environment_watch_expression(env, expr, function (cur_value, pre_value, repeater) {
+    repeater.update(cur_value);
+  }, this);
 
-    this.items = [];
-    this.index_map = new Map();
+  this.items = [];
+  this.index_map = new Map();
 
-    this.et = {};
-    $defineProperty(this, __env_emit_name, this.et);
+  this.et = {};
+  $defineProperty(this, __env_emit_name, this.et);
 
-    $$before(this.cmt, ele);
-    $$remove(ele);
+  $$before(this.cmt, ele);
+  $$remove(ele);
 
-    this.render(listener.cur_value);
+  this.render(listener.cv);
 }
 var __jrepeate_prototype = JRepeat.prototype;
 __jrepeate_prototype.update = function (new_value) {
 
-    if (!$isJArray(new_value)) {
-        throw new Error('only support Array in j-repeat.');
-    }
-    var _array = new_value.__.array;
-    var i;
-    var old_items = this.items;
-    if(new_value.length === 0 && old_items.length === 0) {
-        return;
-    }
+  if (!$isJArray(new_value)) {
+    throw new Error('only support Array in j-repeat.');
+  }
+  var _array = new_value.__.arr;
+  var i;
+  var old_items = this.items;
+  if (new_value.length === 0 && old_items.length === 0) {
+    return;
+  }
 
-    var old_array, _same;
-    if(old_items.length > 0 &&_array.length === old_items.length) {
-        old_array = old_items[0].env.__.jarray.__.array;
-        _same = true;
-        for (i = 0; i < _array.length; i++) {
-            if(_array[i] !== old_array[i]) {
-                _same = false;
-                break;
-            }
-        }
-        if(_same) {
-            return;
-        }
-    }
-
-    var map = this.index_map,
-        new_map = new Map();
-
-    var idx, item;
-
-    function get_index(item) {
-        var index_array = map.get(item);
-        if (!index_array || index_array.length === 0) {
-            return -1;
-        }
-        return index_array.pop();
-    }
-
-
-    var items_tip = new Int32Array(_array.length);
-
-
+  var old_array, _same;
+  if (old_items.length > 0 && _array.length === old_items.length) {
+    old_array = old_items[0].env.__.jarray.__.array;
+    _same = true;
     for (i = 0; i < _array.length; i++) {
-        idx = get_index(_array[i]);
-        if (idx >= 0) {
-            //可复用元素
-            items_tip[i] = idx + 1;
-            old_items[idx].used = true;
-        }
+      if (_array[i] !== old_array[i]) {
+        _same = false;
+        break;
+      }
     }
-
-
-    for (i = 0; i < old_items.length; i++) {
-        item = old_items[i];
-        if (!item.used) {
-            $$remove(item.ele);
-            item.env.$destroy();
-            item.ele = null;
-            item.env = null;
-
-            delete old_items[i];
-        }
+    if (_same) {
+      return;
     }
+  }
 
+  var map = this.index_map,
+    new_map = new Map();
 
-    function get_old_idx(pre) {
-        for (var i = pre + 1; i < old_items.length; i++) {
-            if (old_items[i]) {
-                return i;
-            }
-        }
-        return -1;
+  var idx, item;
+
+  function get_index(item) {
+    var index_array = map.get(item);
+    if (!index_array || index_array.length === 0) {
+      return -1;
     }
+    return index_array.pop();
+  }
 
 
+  var items_tip = new Int32Array(_array.length);
 
-    function swap(idx, old_idx) {
-        var i1 = old_items[idx],
-            i2 = old_items[old_idx];
-        $$swap(i1.ele, i2.ele);
-        old_items[idx] = i2;
-        old_items[old_idx] = i1;
+
+  for (i = 0; i < _array.length; i++) {
+    idx = get_index(_array[i]);
+    if (idx >= 0) {
+      //可复用元素
+      items_tip[i] = idx + 1;
+      old_items[idx].used = true;
     }
+  }
 
-    var env, ele;
-    var old_idx = get_old_idx(-1);
-    var pos_ele = old_idx < 0 ? this.cmt : old_items[old_idx].ele;
-    var new_items = new Array(_array.length);
-    var frag = null;
 
-    for (i = 0; i < _array.length; i++) {
-        idx = items_tip[i] - 1;
-        if (idx < 0) {
-            env = environment_create_child(this.env, i);
-            ele = this.ele.cloneNode(true);
-            item = new JRepeatReuseItem(ele, env);
-            j_repeat_set_prop(env, i, _array.length);
-            j_repeat_env(env, this.key, new_value, i);
+  for (i = 0; i < old_items.length; i++) {
+    item = old_items[i];
+    if (!item.used) {
+      $$remove(item.ele);
+      item.env.$destroy();
+      item.ele = null;
+      item.env = null;
 
-            drive_render_element(ele, this.attr, this.module, env);
-            drive_insert_before();
-
-            j_repeat_replace_env_listener_var_key(env, this.key, new RegExp('^' + this.key + '\\.'), new_value.__.en.children[i].path);
-            log(env);
-            /*
-             * 将多个连续的插入，使用Fragment合并后再insert，可以提升性能。
-             */
-            frag = frag ? frag : document.createDocumentFragment();
-            frag.appendChild(ele);
-        } else {
-            if(frag) {
-                $$before(frag, pos_ele);
-                frag = null;
-            }
-            if (idx > old_idx) {
-                swap(idx, old_idx);
-            }
-            old_idx = get_old_idx(old_idx);
-            pos_ele = old_idx < 0 ? this.cmt : old_items[old_idx].ele;
-            item = old_items[idx];
-            item.env.__.index = i;
-            item.env.__.jarray = new_value;
-            j_repeat_set_prop(item.env, i, _array.length);
-        }
-        item.used = false;
-        new_items[i] = item;
-        j_repeat_set_index(new_map, _array[i], i);
+      delete old_items[i];
     }
-    if(frag) {
+  }
+
+
+  function get_old_idx(pre) {
+    for (var i = pre + 1; i < old_items.length; i++) {
+      if (old_items[i]) {
+        return i;
+      }
+    }
+    return -1;
+  }
+
+
+  function swap(idx, old_idx) {
+    var i1 = old_items[idx],
+      i2 = old_items[old_idx];
+    $$swap(i1.ele, i2.ele);
+    old_items[idx] = i2;
+    old_items[old_idx] = i1;
+  }
+
+  var env, ele;
+  var old_idx = get_old_idx(-1);
+  var pos_ele = old_idx < 0 ? this.cmt : old_items[old_idx].ele;
+  var new_items = new Array(_array.length);
+  var frag = null;
+
+  for (i = 0; i < _array.length; i++) {
+    idx = items_tip[i] - 1;
+    if (idx < 0) {
+      env = environment_create_child(this.env, i);
+      ele = this.ele.cloneNode(true);
+      item = new JRepeatReuseItem(ele, env);
+      j_repeat_set_prop(env, i, _array.length);
+      j_repeat_env(env, this.key, new_value, i);
+
+      drive_render_element(ele, this.attr, this.module, env);
+      drive_insert_before();
+
+      j_repeat_replace_env_listener_var_key(env, this.key, new RegExp('^' + this.key + '\\.'), new_value.__.en.children[i].path);
+      log(env);
+      /*
+       * 将多个连续的插入，使用Fragment合并后再insert，可以提升性能。
+       */
+      frag = frag ? frag : document.createDocumentFragment();
+      frag.appendChild(ele);
+    } else {
+      if (frag) {
         $$before(frag, pos_ele);
         frag = null;
+      }
+      if (idx > old_idx) {
+        swap(idx, old_idx);
+      }
+      old_idx = get_old_idx(old_idx);
+      pos_ele = old_idx < 0 ? this.cmt : old_items[old_idx].ele;
+      item = old_items[idx];
+      item.env.__.index = i;
+      item.env.__.jarray = new_value;
+      j_repeat_set_prop(item.env, i, _array.length);
     }
-    map.clear();
-    old_items.length = 0;
-    this.items = new_items;
-    this.index_map = new_map;
+    item.used = false;
+    new_items[i] = item;
+    j_repeat_set_index(new_map, _array[i], i);
+  }
+  if (frag) {
+    $$before(frag, pos_ele);
+    frag = null;
+  }
+  map.clear();
+  old_items.length = 0;
+  this.items = new_items;
+  this.index_map = new_map;
 
 };
 
 function j_repeat_set_prop(env, i, len) {
-    env.$prop = {
-        '$index': i,
-        '$first': i === 0,
-        '$odd': i % 2 !== 0,
-        '$even': i % 2 === 0,
-        '$last': i === len - 1,
-        '$middle': i !== 0 && i !== len - 1
-    };
+  env.$prop = {
+    '$index': i,
+    '$first': i === 0,
+    '$odd': i % 2 !== 0,
+    '$even': i % 2 === 0,
+    '$last': i === len - 1,
+    '$middle': i !== 0 && i !== len - 1
+  };
 }
 __jrepeate_prototype.render = function (val) {
-    if (!$isJArray(val)) {
-        throw new Error('only support Array in j-repeat.');
-    }
-    var array = val.__.array;
-    var r_ele, r_env;
-    var frag = document.createDocumentFragment();
-    for (var i = 0; i < array.length; i++) {
-        r_ele = this.ele.cloneNode(true);
-        r_env = environment_create_child(this.env, i);
-        j_repeat_set_prop(r_env, i, array.length);
-        j_repeat_env(r_env, this.key, val, i);
+  if (!$isJArray(val)) {
+    throw new Error('only support Array in j-repeat.');
+  }
+  var array = val.__.arr;
+  var r_ele, r_env;
+  var frag = document.createDocumentFragment();
+  for (var i = 0; i < array.length; i++) {
+    r_ele = this.ele.cloneNode(true);
+    r_env = environment_create_child(this.env, i);
+    j_repeat_set_prop(r_env, i, array.length);
+    r_env[this.key] = array[i];
 
-        drive_render_element(r_ele, this.attr, this.module, r_env);
+    drive_render_element(r_ele, this.attr, this.module, r_env);
 
-        j_repeat_replace_env_listener_var_key(r_env, this.key, new RegExp('^' + this.key + '\\.'), val.__.en.children[i].path);
+    frag.appendChild(r_ele);
+    this.items.push(new JRepeatReuseItem(r_ele, r_env, array[i]));
+    j_repeat_set_index(this.index_map, array[i], i);
+  }
 
-        frag.appendChild(r_ele);
-        this.items.push(new JRepeatReuseItem(r_ele, r_env));
-        j_repeat_set_index(this.index_map, array[i], i);
-    }
-
-    __drive_insert_b.push({
-        ele: frag,
-        pos: this.cmt
-    });
+  __drive_insert_b.push({
+    ele: frag,
+    pos: this.cmt
+  });
 };
 
 function j_repeat_set_index(map, item, idx) {
-    var index_array = map.get(item);
-    if (!index_array) {
-        index_array = [];
-        map.set(item, index_array);
-    }
-    index_array.push(idx);
+  var index_array = map.get(item);
+  if (!index_array) {
+    index_array = [];
+    map.set(item, index_array);
+  }
+  index_array.push(idx);
 }
 
 function directive_deal_j_repeat(ele, attr, drive_module, env) {
-    var item = attr.removeNamedItem('j-repeat'),
-        expr_str = item.value;
+  var item = attr.removeNamedItem('j-repeat'),
+    expr_str = item.value;
 
-    var expr = parse_expression(expr_str, true);
-    if (expr.type !== 'in') {
-        throw 'j-repeat format wrong!';
-    }
+  var expr = parse_expression(expr_str, true);
+  if (expr.type !== 'in') {
+    throw 'j-repeat format wrong!';
+  }
 
-    new JRepeat(ele, attr, drive_module, expr.nodes[0], env, expr.nodes[1]);
+  new JRepeat(ele, attr, drive_module, expr.nodes[0], env, expr.nodes[1]);
 }
 
-function j_repeat_replace_env_listener_var_key(env, org_key, org_reg, dst_key) {
-    /*
-     * todo 检查<li j-repeat><p j-env><li j-repeat><p j-env></p></li></p></li>这种复杂的嵌套情况，
-     *
-     */
-    var ls = env.__.listeners, k, var_tree, t;
-    for (k in ls) {
-        var_tree = ls[k].var_tree;
-        for (t in var_tree) {
-            if (t === org_key) {
-                var_tree[dst_key] = var_tree[t];
-            } else if (org_reg.test(t)) {
-                var_tree[t.replace(org_key, dst_key)] = var_tree[t];
-            }
-        }
-    }
-    for (var c in env.__.children) {
-        j_repeat_replace_env_listener_var_key(env.__.children[c], org_key, dst_key);
-    }
-}
 
 (function() {
 
@@ -3293,30 +3222,30 @@ parse_inherit_node(InGrammarNode, function() {
 });
 
 function PropertyGrammarNode(var_node, prop_node) {
-    this.base('property', [var_node, prop_node]);
+  this.base('property', [var_node, prop_node]);
 }
-parse_inherit_node(PropertyGrammarNode, function(scope) {
-    var variable = this.nodes[0].exec(scope),
-        prop_name = this.nodes[1].exec(scope);
-    return !variable ? null : variable[prop_name];
+parse_inherit_node(PropertyGrammarNode, function (scope) {
+  var variable = this.nodes[0].exec(scope);
+  var prop_name = this.nodes[1].exec(scope);
+  return $isObject(variable) ? variable[prop_name] : undefined;
 }, {
-    increment : function(scope, is_add, is_prefix) {
-        var variable = this.nodes[0].exec(scope),
-            prop_name = this.nodes[1].exec(scope);
-        if(variable === null || !$hasProperty(variable, prop_name)) {
-            return null
-        } else {
-            var val = variable[prop_name],
-                new_val = val+(is_add ? 1 : -1);
-            variable[prop_name] = new_val;
-            return is_prefix ? new_val : val;
-        }
-    },
-    set : function(scope, value) {
-        var variable = this.nodes[0].exec(scope),
-            prop_name = this.nodes[1].exec(scope);
-        variable[prop_name] = value;
+  increment: function (scope, is_add, is_prefix) {
+    var variable = this.nodes[0].exec(scope),
+      prop_name = this.nodes[1].exec(scope);
+    if (variable === null || !$hasProperty(variable, prop_name)) {
+      return null
+    } else {
+      var val = variable[prop_name],
+        new_val = val + (is_add ? 1 : -1);
+      variable[prop_name] = new_val;
+      return is_prefix ? new_val : val;
     }
+  },
+  set: function (scope, value) {
+    var variable = this.nodes[0].exec(scope),
+      prop_name = this.nodes[1].exec(scope);
+    variable[prop_name] = value;
+  }
 });
 
 function SetGrammarNode(op, left_node, right_node) {
@@ -3698,76 +3627,144 @@ function drive_parse_element(ele, drive_module, env) {
 var __drive_view_expr_REG = /\{\{(.+?)\}\}/g;
 
 function drive_get_view_expr(txt) {
-    var piece_start = 0;
-    var piece_array = [];
-    var piece;
-
-    while ((piece = __drive_view_expr_REG.exec(txt)) !== null) {
-        if (piece.index > piece_start) {
-            piece_array.push(new ConstantGrammarNode(txt.substring(piece_start, piece.index)));
-        }
-        piece_start = piece.index + piece[0].length;
-        piece_array.push(parse_expression(piece[1], true));
+  var piece_start = 0;
+  var piece_array = [];
+  var piece;
+  var expr;
+  var is_str_expr = true;
+  while ((piece = __drive_view_expr_REG.exec(txt)) !== null) {
+    if (piece.index > piece_start) {
+      piece_array.push(txt.substring(piece_start, piece.index));
     }
-
-    if (piece_array.length === 0) {
-        return null;
+    piece_start = piece.index + piece[0].length;
+    expr = piece[1];
+    if (__jing_regex_var.test(expr)) {
+      var v_str = environment_var2format(expr);
+      var v_items = $map(v_str.split('.'), function (item) {
+        item = item.trim();
+        return /^\d+$/.test(item) ? parseInt(item) : item;
+      });
+      piece_array.push(v_items);
     } else {
-        if(piece_start < txt.length) {
-            piece_array.push(new ConstantGrammarNode(txt.substring(piece_start)));
-        }
-        if (piece_array.length === 1) {
-            return piece_array[0];
-        }
+      is_str_expr = false;
+      piece_array.push(parse_expression(piece[1], true));
     }
+  }
 
-    var ea = piece_array[0], eb;
-    /*
-     * 当前的处理方式，是把内容转成相加的表达式，
-     *   比如<p>hello {{name}}</p>会转成  "Hello" + name。
-     *   这样会存在一个小问题，比如<p>{{age}}{{year}}</p>
-     *   转成  age + year，如果age和year都是数字，就会被以数学的方式加起来。
-     *   为了简单起见，采取的解决方法是，在最左边添加一个空字符串，
-     *   这样相加的时候会从左往右计算，javascript会以字符串形式链接 '' + age + year
-     */
-    if (ea.type !== 'constant' || !$isString(ea.value)) {
-        piece_array.unshift(new ConstantGrammarNode(''));
-        ea = piece_array[0];
+  if (piece_array.length === 0) {
+    return null;
+  } else {
+    if (piece_start < txt.length) {
+      piece_array.push(txt.substring(piece_start));
     }
+  }
 
-    for (var i = 1; i < piece_array.length; i++) {
-        eb = piece_array[i];
-        if (ea.type === 'constant' && eb.type === 'constant') {
-            ea = new ConstantGrammarNode(ea.value + eb.value);
-        } else {
-            ea = new CalcGrammarNode("#+", ea, eb);
-        }
+  if (is_str_expr) {
+    return piece_array;
+  }
+  if (piece_array.length === 1) {
+    return piece_array[0];
+  }
+
+  function get_piece_expr(idx) {
+
+    function create_node(arr, i) {
+      return i === 0 ? new VariableGrammarNode(arr[i]) : new PropertyGrammarNode(create_node(arr, i - 1), new ConstantGrammarNode(arr[i]));
     }
+    var ea = piece_array[idx];
+    var node;
+    if ($isArray(ea)) {
+      node = create_node(ea, ea.length - 1);
+    } else if ($isObject(ea)) {
+      node = ea;
+    } else {
+      node = new ConstantGrammarNode(ea);
+    }
+    return node;
+  }
 
-    return ea;
+  var ea = get_piece_expr(0), eb;
+  /*
+   * 当前的处理方式，是把内容转成相加的表达式，
+   *   比如<p>hello {{name}}</p>会转成  "Hello" + name。
+   *   这样会存在一个小问题，比如<p>{{age}}{{year}}</p>
+   *   转成  age + year，如果age和year都是数字，就会被以数学的方式加起来。
+   *   为了简单起见，采取的解决方法是，在最左边添加一个空字符串，
+   *   这样相加的时候会从左往右计算，javascript会以字符串形式链接 '' + age + year
+   */
+  if (ea.type !== 'constant' || !$isString(ea.value)) {
+    piece_array.unshift(new ConstantGrammarNode(''));
+    ea = piece_array[0];
+  }
+
+  for (var i = 1; i < piece_array.length; i++) {
+    eb = get_piece_expr(i);
+    if (ea.type === 'constant' && eb.type === 'constant') {
+      ea = new ConstantGrammarNode(ea.value + eb.value);
+    } else {
+      ea = new CalcGrammarNode("#+", ea, eb);
+    }
+  }
+
+  return ea;
 }
 
 function drive_render_view(ele, env) {
-    var txt = ele.textContent;
-
-    var expr = drive_get_view_expr(txt);
-
-    if (expr === null) {
-        return;
-    } else if (expr.type === 'constant') {
-        ele.textContent = expr.value;
-        return;
+  var txt = ele.textContent;
+  /*
+   * 下面这一段代码有些丑
+   * todo 重新梳理逻辑整理代码。
+   */
+  var expr = drive_get_view_expr(txt);
+  var listener;
+  if (!expr) {
+    return;
+  } else if ($isArray(expr)) {
+    if (expr.length === 1) {
+      var v_items = expr[0];
+      env = env.$find(v_items[0]);
+      if (!env) {
+        debugger;
+        throw new Error('variable ' + v_items[0] + ' not found!');
+      }
+      listener = new Emitter(env, v_items, drive_view_observer, false, ele);
+      environment_watch_items(env, v_items, listener);
+    } else {
+      listener = new StrListener(null, null, drive_view_observer, ele);
+      var e_items = [];
+      var e_cache = {};
+      expr.forEach(function (ex) {
+        if ($isString(ex)) {
+          e_items.push({
+            is_var: false,
+            value: ex
+          });
+        } else {
+          var p = ex.join('.');
+          e_items.push({
+            is_var: true,
+            value: p
+          });
+          var emitter = new Emitter(env, ex, listener);
+          environment_watch_items(env, ex, emitter);
+          e_cache[p] = emitter.cv;
+        }
+      });
+      listener.cache = e_cache;
+      listener.items = e_items;
+      listener._init();
     }
-
-    var listener = environment_watch_expression(env, expr, drive_view_observer, {
-        ele: ele
-    }, 10);
-
-    ele.textContent = listener.cur_value;
+  } else if (expr.type === 'constant') {
+    ele.textContent = expr.value;
+    return;
+  } else {
+    listener = environment_watch_expression(env, expr, drive_view_observer, ele);
+  }
+  ele.textContent = listener.cv;
 }
 
-function drive_view_observer(change_list, data) {
-    data.ele.textContent = change_list[0].cur_value;
+function drive_view_observer(cur_value, pre_value, ele) {
+  ele.textContent = cur_value;
 }
 
 
@@ -3807,6 +3804,7 @@ jing.map = $map;
 jing.filter = $filter;
 jing.defineProperty = $defineProperty;
 jing.defineGetterSetter = $defineGetterSetter;
+jing.JArray = JArray;
 
 (function() {
     var __jing_style = document.createElement('style');
@@ -3817,7 +3815,7 @@ jing.defineGetterSetter = $defineGetterSetter;
 
 
 
-var __jing_regex_var = /^[\w\d\$\_]+(?:(?:\.[\w\$\_]+)|(?:\[\s*\d+\s*\]))*$/;
+var __jing_regex_var = /^\s*[\w\d\$\_]+\s*(?:(?:\.[\w\d\$\_]+\s*)|(?:\[\s*\d+\s*\]\s*))*\s*$/;
 
 
 })();

@@ -104,6 +104,10 @@ function environment_deep_add_emitter(obj, emitter) {
     $defineProperty(obj, __ENV_EMIT__, props);
   }
   var is_array = $isJArray(obj);
+  if (is_array) {
+    //todo 深层次的Array的deep watch需要完善 !important
+    //jarray_emit_map(obj, )
+  }
   for (var k in obj) {
     if (k === __ENV_EMIT__ || k === __ENV_INNER__ || (is_array && !/^\d+$/.test(k))) {
       continue;
@@ -128,7 +132,10 @@ function environment_deep_add_emitter(obj, emitter) {
 function environment_deep_rm_emitter(obj, emit_id) {
   var props = obj[__ENV_EMIT__];
   if (props) {
-    delete props[emit_id];
+    for (var v in props) {
+      var em = props[v];
+      delete em[emit_id];
+    }
   }
   for (var k in obj) {
     if (k === __ENV_EMIT__) {
@@ -178,11 +185,13 @@ function environment_define_arr_prop(p, idx) {
       new_val = new JArray(new_val);
     }
     $assert($hasProperty(this, __ENV_EMIT__));
-    var emitter = this[__ENV_EMIT__][idx];
-    $assert(emitter);
-    emitter.notify();
 
-    environment_update_prop(emitter, pv, new_val, idx, true);
+    if ($hasProperty(this[__ENV_EMIT__], idx)) {
+      var emitter = this[__ENV_EMIT__][idx];
+      $assert(emitter);
+      emitter.notify();
+      environment_update_prop(emitter, pv, new_val, idx, true);
+    }
 
     this[__ENV_INNER__].arr[idx] = new_val;
 
@@ -219,14 +228,14 @@ function environment_watch_items(env, var_array, emitter) {
       emit_map = props[v] = {};
     }
 
-    if ($isJArray(val)) {
-      jarray_emit_map(val, emit_map, true);
-    }
-
     emit_map[emitter.id] = {
       index: i,
       emitter: emitter
     };
+
+    if ($isJArray(val)) {
+      jarray_emit_map(val, emit_map, true);
+    }
 
     if (is_array) {
       environment_define_arr_prop(p, v);
@@ -248,8 +257,8 @@ function environment_watch_items(env, var_array, emitter) {
  * 将a.b[4][3][7].c.d[9]转成a.b.4.3.7.c.d.9的形式。
  */
 function environment_var2format(var_name) {
-  return var_name.replace(/\]\s*\[/g, '.')
-    .replace(/\]\s*\./g, '.').replace('[', '.', 'g').replace(']', '');
+  return var_name.replace(/\s*\]\s*\[\s*/g, '.')
+    .replace(/\s*\]\s*\.\s*/g, '.').replace(/\s*\[\s*/g, '.').replace(/\s*\]\s*/g, '');
 }
 
 $defineProperty(__env_prototype, '$unwatch', function (listener_id) {
@@ -310,14 +319,21 @@ function environment_unwatch_listener(listener) {
 }
 
 function environment_watch_expr_loop(expr_node, watch_array, var_tree) {
+  //代码有些丑
+  //todo 梳理逻辑和代码。
+
   function expr_prop(expr, v_arr) {
     var nb = expr.nodes[1];
     if (nb.type === 'constant') {
       v_arr.push(nb.value);
       if (expr.parent && expr.parent.type === 'property') {
         expr_prop(expr.parent, v_arr);
+        return;
       }
     }
+
+    watch_array.push(vn);
+
   }
 
   if (expr_node.type === 'variable') {
@@ -351,16 +367,23 @@ function environment_watch_expression(env, expr, callback, data, lazy_time) {
     return;
   }
 
-  var is_lazy = lazy_time !== false;
-  var listener = new ExprListener(var_tree, expr, env, callback, data, lazy_time);
+  var listener = new ExprListener(var_tree, expr, env, callback, data);
 
+  var emitter;
   for (var i = 0; i < watch_array.length; i++) {
-    environment_watch_items(env, watch_array[i], listener);
+    var v_items = watch_array[i];
+    env = env.$find(v_items[0]);
+    if (!env) {
+      debugger;
+      throw new Error('variable ' + v_items[0] + ' not found!');
+    }
+    emitter = new Emitter(env, v_items, listener);
+    environment_watch_items(env, v_items, emitter);
   }
 
-  env[__ENV_INNER__].listeners[listener.id] = listener;
+  //env[__ENV_INNER__].listeners[listener.id] = listener;
 
-  listener.cur_value = listener.pre_value = expr.exec(env);
+  listener.cv = listener.pv = expr.exec(env);
 
   return listener;
 }

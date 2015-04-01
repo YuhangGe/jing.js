@@ -35,3 +35,4 @@ jing.map = $map;
 jing.filter = $filter;
 jing.defineProperty = $defineProperty;
 jing.defineGetterSetter = $defineGetterSetter;
+jing.JArray = JArray;

@@ -32,19 +32,18 @@ __jrepeate_prototype.update = function (new_value) {
   if (!$isJArray(new_value)) {
     throw new Error('only support Array in j-repeat.');
   }
-  var _array = new_value.__.arr;
+  var _array = new_value[__ENV_INNER__].arr;
   var i;
   var old_items = this.items;
-  if (new_value.length === 0 && old_items.length === 0) {
+  if (_array.length === 0 && old_items.length === 0) {
     return;
   }
 
   var old_array, _same;
   if (old_items.length > 0 && _array.length === old_items.length) {
-    old_array = old_items[0].env.__.jarray.__.array;
     _same = true;
     for (i = 0; i < _array.length; i++) {
-      if (_array[i] !== old_array[i]) {
+      if (_array[i] !== old_items[i].val) {
         _same = false;
         break;
       }
@@ -123,15 +122,13 @@ __jrepeate_prototype.update = function (new_value) {
     if (idx < 0) {
       env = environment_create_child(this.env, i);
       ele = this.ele.cloneNode(true);
-      item = new JRepeatReuseItem(ele, env);
+      item = new JRepeatReuseItem(ele, env, _array[i]);
       j_repeat_set_prop(env, i, _array.length);
-      j_repeat_env(env, this.key, new_value, i);
+      env[this.key] = _array[i];
 
       drive_render_element(ele, this.attr, this.module, env);
       drive_insert_before();
 
-      j_repeat_replace_env_listener_var_key(env, this.key, new RegExp('^' + this.key + '\\.'), new_value.__.en.children[i].path);
-      log(env);
       /*
        * 将多个连续的插入，使用Fragment合并后再insert，可以提升性能。
        */
@@ -148,8 +145,6 @@ __jrepeate_prototype.update = function (new_value) {
       old_idx = get_old_idx(old_idx);
       pos_ele = old_idx < 0 ? this.cmt : old_items[old_idx].ele;
       item = old_items[idx];
-      item.env.__.index = i;
-      item.env.__.jarray = new_value;
       j_repeat_set_prop(item.env, i, _array.length);
     }
     item.used = false;

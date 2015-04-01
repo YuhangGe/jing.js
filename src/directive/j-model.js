@@ -69,9 +69,3 @@ directive_create('j-model', function() {
         directive_data_bind(drive_module, directive_module, env, element, attr_value, true);
     };
 });
-
-directive_create('j-value', function() {
-    return function(drive_module, directive_module, env, element, attr_value) {
-        directive_data_bind(drive_module, directive_module, env, element, attr_value, false);
-    };
-});

@@ -76,7 +76,7 @@ function jarray_deep_add_or_rm_emitter(jarray, idx, val, is_add) {
         if (is_add) {
           environment_deep_add_emitter(val, item.emitter);
         } else {
-          environment_deep_rm_emitter(val, item.emitter.id);
+          environment_deep_rm_emitter(val, item.emitter.id, emit_map);
         }
       }
     }

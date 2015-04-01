@@ -4,8 +4,10 @@
   <meta charset="UTF-8">
   <title>Test</title>
   <link rel="stylesheet" href="../bower_components/mocha/mocha.css">
+  <link rel="stylesheet" href="../demo/todomvc/bower_components/todomvc-common/base.css">
+  <link rel="stylesheet" href="../demo/todomvc/css/index.css">
 </head>
-<body j-app="MyApp">
+<body j-app="TodoApp">
 <div id="mocha">
 </div>
 <!--<script type="text/javascript" src="../bower_components/jquery/dist/jquery.min.js"></script>-->
@@ -31,99 +33,65 @@
   //  mocha.globals(['jQuery']);
   //  mocha.run();
 
-
-  jing.module('MyApp').factory('S1', function () {
-    var list = [];
-    for (var i = 0; i < 50; i++) {
-      list.push({
-        name: 'xiaoge:' + i,
-        age: 24 + i,
-        girls: [{
-          name: 'jing:' + i + ':1',
-          age: 24 + i
-        }, {
-          name: 'jing:' + i + ':2',
-          age: 24 + i
-        }]
-      })
-    }
-    return list;
-  }).env('Ctrl', function (module, env) {
-
-    this.list1 = module.require('S1');
-    this.list = this.list1.slice(0, 3);
-
-    this.index = 0;
-
-    this.append = function (name, idx) {
-      this.list.push({
-        name: name + idx,
-        age: 888,
-        girls: [{
-          name: 'Push Girl 0',
-          age: 34
-        }, {
-          name: 'Push Girl 0',
-          age: 34
-        }]
-      });
-    };
-
-    this.unshift = function (name) {
-      this.list.unshift({
-        name: 'Shift Boy',
-        age: 323,
-        girls: [{
-          name: 'Shift Girl 0',
-          age: 34
-        }, {
-          name: 'Shift Girl 1',
-          age: 323
-        }]
-      });
-    };
-
-    env.test = function () {
-      env.list[0].name = 'changed name'
-    }
-
-
-  });
 </script>
-<div j-env="Ctrl">
-  <p>这个Demo展示了jing.js的j-repeat指令的用法。</p>
-  <h4>Simple</h4>
-  <ul>
-    <li j-repeat="boy in list1.slice(index, index+5)">
-      <p>{{boy.name}}, {{boy.age}}</p>
-    </li>
-  </ul>
-  <p>
-    <button j-click="test()">Test</button>
-    <button j-click="index-=5">上一页</button>
-    <button j-click="index+=5">下一页</button>
-    <span>直接在j-click指令里赋值，来更加简单地实现分页效果。angularjs不支持index+=5这样的用法。</span>
+
+<section id="todoapp">
+  <header id="header">
+    <h1>todos</h1>
+    <input id="new-todo" autocomplete="off" placeholder="What needs to be done?" j-model="new_todo" j-enter="addTodo()" autofocus>
+  </header>
+  <section id="main" j-show="todos.length">
+    <input id="toggle-all" type="checkbox" j-bind="all_checked" j-change="toggleCheckAll(all_checked)">
+    <label for="toggle-all">Mark all as complete</label>
+    <ul id="todo-list" j-cloak>
+      <li j-repeat="todo in todos.filter(cur_filter)" j-class="(todo.completed ? 'completed ' : '') + (todo === edited_todo ? 'editing' : '')">
+        <div class="view">
+          <input class="toggle" type="checkbox" j-model="todo.completed">
+          <label j-dblclick="editTodo(todo)">{{todo.title}}</label>
+          <button class="destroy" j-click="removeTodo(todo)"></button>
+        </div>
+        <input class="edit" j-model="todo.title" j-blur="doneEditing(todo)" todo-focus="todo === edited_todo">
+      </li>
+    </ul>
+  </section>
+  <footer id="footer" j-show="todos.length" j-cloak>
+					<span id="todo-count">
+                        <strong>{{remaining_count}}</strong>{{remaining_count>1?' items left':' item left'}}
+					</span>
+    <ul id="filters">
+      <!-- todo : 接下来完善jing.js的Parse Object功能 -->
+      <!-- 使得可以使用j-class='{selected : status==="all"}'这样的简便方式 -->
+      <li>
+        <a j-class="status === 'all' ? 'selected' : ''" href="#/all">All</a>
+      </li>
+      <li>
+        <a j-class="status === 'active' ? 'selected' : ''" href="#/active">Active</a>
+      </li>
+      <li>
+        <a j-class="status === 'completed' ? 'selected' : ''" href="#/completed">Completed</a>
+      </li>
+    </ul>
+    <button id="clear-completed" j-click="clearCompletedTodos()" j-show="completed_count > 0">Clear completed ({{completed_count}})</button>
+  </footer>
+</section>
+<footer id="info">
+  <p>Double-click to edit a todo</p>
+  <p>Written by
+    <a href="http://xiaoge.me">Yuhang Ge</a>
   </p>
-  <!--<h4>Complex</h4>-->
-  <!--<ul>-->
-  <!--<li>-->
-  <!--<p>First Boy: {{list[0].name}}, {{list[0].age}}</p>-->
-  <!--</li>-->
-  <!--<li j-repeat="boy in list.slice(1, list.length-1)">-->
-  <!--<p>{{boy.name}}, {{boy.age}}</p>-->
-  <!--<ul>-->
-  <!--<li j-repeat="girl in boy.girls">{{girl.name}}, {{girl.age * 100}}</li>-->
-  <!--</ul>-->
-  <!--</li>-->
-  <!--<li>-->
-  <!--<p>Last Boy: {{list[list.length-1].name}}, {{list[list.length-1].age}}</p>-->
-  <!--</li>-->
-  <!--</ul>-->
-  <div>
-    <button j-click="unshift('shift')">Shift</button>
-    <button j-click="append('jing', list.length)">Append</button>
-  </div>
-</div>
+  <p>Part of <a href="http://todomvc.com">TodoMVC</a></p>
+</footer>
+
+<!-- 其它js文件可以放在body的末尾 -->
+<script type="text/javascript" src="../demo/todomvc/bower_components/todomvc-common/base.js"></script>
+<script type="text/javascript" src="../demo/todomvc/bower_components/director/director.min.js"></script>
+<!-- 项目文件，以下文件可以按任意方式排列加载顺序 -->
+<script type="text/javascript" src="../demo/todomvc/js/todo-focus.js"></script>
+<script type="text/javascript" src="../demo/todomvc/js/store.js"></script>
+<script type="text/javascript" src="../demo/todomvc/js/route.js"></script>
+<script type="text/javascript" src="../demo/todomvc/js/todo.js"></script>
+<script type="text/javascript" src="../demo/todomvc/js/app.js"></script>
+
 </body>
 
 </html>

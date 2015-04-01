@@ -1,6 +1,7 @@
 directive_create('j-class', function () {
   function apply_class(ele, pre, cur) {
     ele.className = (ele.className.replace(pre.trim(), '') + ' ' + cur).trim();
+    log('j-class')
   }
 
   return function (drive_module, directive_module, env, element, attr_value) {

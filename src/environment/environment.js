@@ -25,11 +25,8 @@ function Environment(name, parent) {
     id: $uid(),
     name: name,
     children: {},
-    parent: parent ? parent : __env_Empty,
+    parent: parent ? parent : __env_Empty
 
-    //以下字段是给j-repeat的子Env用的。
-    jarray: null,
-    index: 0
   });
 
   $defineProperty(this, __ENV_EMIT__, {});
@@ -55,11 +52,6 @@ $defineGetterSetter(__env_prototype, '$root', function () {
 
 
 $defineProperty(__env_prototype, '$destroy', function () {
-  function destroy_obj(obj) {
-    for (var k in obj) {
-      obj[k] = null;
-    }
-  }
 
   var inner_p = this[__ENV_INNER__], k, cd = inner_p.children;
   for (k in cd) {
@@ -68,10 +60,23 @@ $defineProperty(__env_prototype, '$destroy', function () {
   }
   inner_p.children = null;
   inner_p.parent = null;
-  inner_p.emitters.destroy();
-  inner_p.emitters = null;
-  destroy_obj(inner_p.listeners);
-  inner_p.listeners = null;
+
+  var props = this[__ENV_EMIT__];
+  for (var v in props) {
+    var emit_map = props[v];
+    var val = this[v];
+
+      for (var eid in emit_map) {
+        var emitter = emit_map[eid];
+        if ($isObject(val)) {
+          environment_deep_rm_emitter(val, emitter.id, emit_map);
+        }
+        emit_map[eid] = null;
+      }
+
+    props[v] = null;
+  }
+
 });
 
 $defineProperty(__env_prototype, '$child', function (name) {

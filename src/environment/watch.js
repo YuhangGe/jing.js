@@ -35,7 +35,7 @@ function environment_define_obj_prop(obj, prop, val) {
     for (eid in emit_map) {
       item = emit_map[eid];
       item.emitter.notify();
-      environment_update_prop(item.index, item.emitter, val, new_val);
+      environment_update_prop(emit_map, item.index, item.emitter, val, new_val);
     }
 
     val = new_val;
@@ -123,13 +123,14 @@ function environment_deep_add_emitter(obj, emitter) {
       val = new JArray(val);
     }
     environment_define_obj_prop(obj, k, val);
+
     if ($isObject(val)) {
       environment_deep_add_emitter(val, emitter);
     }
   }
 }
 
-function environment_deep_rm_emitter(obj, emit_id) {
+function environment_deep_rm_emitter(obj, emit_id, emit_map) {
   var props = obj[__ENV_EMIT__];
   if (props) {
     for (var v in props) {
@@ -137,17 +138,20 @@ function environment_deep_rm_emitter(obj, emit_id) {
       delete em[emit_id];
     }
   }
+  if ($isJArray(obj)) {
+    jarray_emit_map(obj, emit_map, false);
+  }
   for (var k in obj) {
     if (k === __ENV_EMIT__) {
       continue;
     }
     var val = obj[k];
     if ($isObject(val)) {
-      environment_deep_rm_emitter(val, emit_id);
+      environment_deep_rm_emitter(val, emit_id, emit_map);
     }
   }
 }
-function environment_update_prop(emit_index, host_emitter, old_val, new_val) {
+function environment_update_prop(emit_map, emit_index, host_emitter, old_val, new_val) {
 
 
   var emit_route = host_emitter.route;
@@ -163,7 +167,7 @@ function environment_update_prop(emit_index, host_emitter, old_val, new_val) {
   }
 
   if (host_emitter.deep && $isObject(old_val)) {
-    environment_deep_rm_emitter(old_val, host_emitter.id);
+    environment_deep_rm_emitter(old_val, host_emitter.id, emit_map);
   }
 
   if (host_emitter.deep && $isObject(obj)) {

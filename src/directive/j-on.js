@@ -58,7 +58,7 @@ directive_create('j-change', function() {
              */
             setTimeout(function() {
                 expr.exec(env);
-            });
+            }, 0);
         });
     }
 });

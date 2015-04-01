@@ -423,11 +423,8 @@ function Environment(name, parent) {
     id: $uid(),
     name: name,
     children: {},
-    parent: parent ? parent : __env_Empty,
+    parent: parent ? parent : __env_Empty
 
-    //以下字段是给j-repeat的子Env用的。
-    jarray: null,
-    index: 0
   });
 
   $defineProperty(this, __ENV_EMIT__, {});
@@ -453,11 +450,6 @@ $defineGetterSetter(__env_prototype, '$root', function () {
 
 
 $defineProperty(__env_prototype, '$destroy', function () {
-  function destroy_obj(obj) {
-    for (var k in obj) {
-      obj[k] = null;
-    }
-  }
 
   var inner_p = this[__ENV_INNER__], k, cd = inner_p.children;
   for (k in cd) {
@@ -466,10 +458,23 @@ $defineProperty(__env_prototype, '$destroy', function () {
   }
   inner_p.children = null;
   inner_p.parent = null;
-  inner_p.emitters.destroy();
-  inner_p.emitters = null;
-  destroy_obj(inner_p.listeners);
-  inner_p.listeners = null;
+
+  var props = this[__ENV_EMIT__];
+  for (var v in props) {
+    var emit_map = props[v];
+    var val = this[v];
+
+      for (var eid in emit_map) {
+        var emitter = emit_map[eid];
+        if ($isObject(val)) {
+          environment_deep_rm_emitter(val, emitter.id, emit_map);
+        }
+        emit_map[eid] = null;
+      }
+
+    props[v] = null;
+  }
+
 });
 
 $defineProperty(__env_prototype, '$child', function (name) {
@@ -820,7 +825,7 @@ function jarray_deep_add_or_rm_emitter(jarray, idx, val, is_add) {
         if (is_add) {
           environment_deep_add_emitter(val, item.emitter);
         } else {
-          environment_deep_rm_emitter(val, item.emitter.id);
+          environment_deep_rm_emitter(val, item.emitter.id, emit_map);
         }
       }
     }
@@ -1248,7 +1253,7 @@ function environment_define_obj_prop(obj, prop, val) {
     for (eid in emit_map) {
       item = emit_map[eid];
       item.emitter.notify();
-      environment_update_prop(item.index, item.emitter, val, new_val);
+      environment_update_prop(emit_map, item.index, item.emitter, val, new_val);
     }
 
     val = new_val;
@@ -1336,13 +1341,14 @@ function environment_deep_add_emitter(obj, emitter) {
       val = new JArray(val);
     }
     environment_define_obj_prop(obj, k, val);
+
     if ($isObject(val)) {
       environment_deep_add_emitter(val, emitter);
     }
   }
 }
 
-function environment_deep_rm_emitter(obj, emit_id) {
+function environment_deep_rm_emitter(obj, emit_id, emit_map) {
   var props = obj[__ENV_EMIT__];
   if (props) {
     for (var v in props) {
@@ -1350,17 +1356,20 @@ function environment_deep_rm_emitter(obj, emit_id) {
       delete em[emit_id];
     }
   }
+  if ($isJArray(obj)) {
+    jarray_emit_map(obj, emit_map, false);
+  }
   for (var k in obj) {
     if (k === __ENV_EMIT__) {
       continue;
     }
     var val = obj[k];
     if ($isObject(val)) {
-      environment_deep_rm_emitter(val, emit_id);
+      environment_deep_rm_emitter(val, emit_id, emit_map);
     }
   }
 }
-function environment_update_prop(emit_index, host_emitter, old_val, new_val) {
+function environment_update_prop(emit_map, emit_index, host_emitter, old_val, new_val) {
 
 
   var emit_route = host_emitter.route;
@@ -1376,7 +1385,7 @@ function environment_update_prop(emit_index, host_emitter, old_val, new_val) {
   }
 
   if (host_emitter.deep && $isObject(old_val)) {
-    environment_deep_rm_emitter(old_val, host_emitter.id);
+    environment_deep_rm_emitter(old_val, host_emitter.id, emit_map);
   }
 
   if (host_emitter.deep && $isObject(obj)) {
@@ -2276,19 +2285,18 @@ __jrepeate_prototype.update = function (new_value) {
   if (!$isJArray(new_value)) {
     throw new Error('only support Array in j-repeat.');
   }
-  var _array = new_value.__.arr;
+  var _array = new_value[__ENV_INNER__].arr;
   var i;
   var old_items = this.items;
-  if (new_value.length === 0 && old_items.length === 0) {
+  if (_array.length === 0 && old_items.length === 0) {
     return;
   }
 
   var old_array, _same;
   if (old_items.length > 0 && _array.length === old_items.length) {
-    old_array = old_items[0].env.__.jarray.__.array;
     _same = true;
     for (i = 0; i < _array.length; i++) {
-      if (_array[i] !== old_array[i]) {
+      if (_array[i] !== old_items[i].val) {
         _same = false;
         break;
       }
@@ -2367,14 +2375,13 @@ __jrepeate_prototype.update = function (new_value) {
     if (idx < 0) {
       env = environment_create_child(this.env, i);
       ele = this.ele.cloneNode(true);
-      item = new JRepeatReuseItem(ele, env);
+      item = new JRepeatReuseItem(ele, env, _array[i]);
       j_repeat_set_prop(env, i, _array.length);
-      j_repeat_env(env, this.key, new_value, i);
+      env[this.key] = _array[i];
 
       drive_render_element(ele, this.attr, this.module, env);
       drive_insert_before();
 
-      j_repeat_replace_env_listener_var_key(env, this.key, new RegExp('^' + this.key + '\\.'), new_value.__.en.children[i].path);
       log(env);
       /*
        * 将多个连续的插入，使用Fragment合并后再insert，可以提升性能。
@@ -2392,8 +2399,6 @@ __jrepeate_prototype.update = function (new_value) {
       old_idx = get_old_idx(old_idx);
       pos_ele = old_idx < 0 ? this.cmt : old_items[old_idx].ele;
       item = old_items[idx];
-      item.env.__.index = i;
-      item.env.__.jarray = new_value;
       j_repeat_set_prop(item.env, i, _array.length);
     }
     item.used = false;

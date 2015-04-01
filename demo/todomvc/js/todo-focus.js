@@ -12,11 +12,11 @@ jing.module('TodoApp').directive('todo-focus', function() {
     return function(drive_module, directive_module, env, element, attr_value) {
         var expr = env.$parse(attr_value, true);
 
-        var listener = env.$watch(expr, function(change_list, ele) {
-            apply_focus(ele, change_list[0].cur_value);
-        }, element, 10);
+        var listener = env.$watch(expr, function(cv, pv, ele) {
+            apply_focus(ele, cv);
+        }, element);
 
-        apply_focus(element, listener.cur_value);
+        apply_focus(element, listener.cv);
 
     }
 });

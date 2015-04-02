@@ -1,205 +1,228 @@
 (function(){
+__jing_config = {
+  debug: false
+};
+
+function $config(options) {
+  $merge(__jing_config, options);
+}
+
 function $inherit(inheritClass, baseClass) {
-    if(typeof inheritClass === 'undefined' || typeof baseClass ==='undefined'){
-        console.trace();
-        throw "inherit error!";
+  if (typeof inheritClass === 'undefined' || typeof baseClass === 'undefined') {
+    console.trace();
+    throw "inherit error!";
+  }
+  //首先把父类的prototype中的函数继承到子类中
+  for (var pFunc in baseClass.prototype) {
+    var sp = inheritClass.prototype[pFunc];
+    //如果子类中没有这个函数，添加
+    if (typeof sp === 'undefined') {
+      inheritClass.prototype[pFunc] = baseClass.prototype[pFunc];
     }
-    //首先把父类的prototype中的函数继承到子类中
-    for(var pFunc in baseClass.prototype) {
-        var sp = inheritClass.prototype[pFunc];
-        //如果子类中没有这个函数，添加
-        if( typeof sp === 'undefined') {
-            inheritClass.prototype[pFunc] = baseClass.prototype[pFunc];
-        }
-        //如果子类已经有这个函数，则忽略。以后可使用下面的callBase函数调用父类的方法
+    //如果子类已经有这个函数，则忽略。以后可使用下面的callBase函数调用父类的方法
 
+  }
+  //保存继承树，当有多级继承时要借住继承树对父类进行访问
+  inheritClass.__base_objects__ = [];
+  inheritClass.__base_objects__.push(baseClass);
+
+  if (typeof baseClass.__base_objects__ !== 'undefined') {
+    for (var i = 0; i < baseClass.__base_objects__.length; i++)
+      inheritClass.__base_objects__.push(baseClass.__base_objects__[i]);
+  }
+
+  /**
+   * 执行父类构造函数，相当于java中的this.super()
+   * 不使用super是因为super是ECMAScript保留关键字.
+   * @param {arguments} args 参数，可以不提供
+   */
+  inheritClass.prototype.base = function (args) {
+
+    var baseClass = null, rtn = undefined;
+    if (typeof this.__inherit_base_deep__ === 'undefined') {
+      this.__inherit_base_deep__ = 0;
+    } else {
+      this.__inherit_base_deep__++;
     }
-    //保存继承树，当有多级继承时要借住继承树对父类进行访问
-    inheritClass.__base_objects__ = [];
-    inheritClass.__base_objects__.push(baseClass);
 
-    if( typeof baseClass.__base_objects__ !== 'undefined') {
-        for(var i = 0; i < baseClass.__base_objects__.length; i++)
-            inheritClass.__base_objects__.push(baseClass.__base_objects__[i]);
+    baseClass = inheritClass.__base_objects__[this.__inherit_base_deep__];
+
+    if (typeof args === "undefined" || args == null) {
+      rtn = baseClass.call(this);
+    } else if (args instanceof Array === true) {
+      rtn = baseClass.apply(this, args);
+    } else {
+      // arguments 是Object而不是Array，需要转换。
+      rtn = baseClass.apply(this, [].slice.call(arguments));
     }
 
-    /**
-     * 执行父类构造函数，相当于java中的this.super()
-     * 不使用super是因为super是ECMAScript保留关键字.
-     * @param {arguments} args 参数，可以不提供
-     */
-    inheritClass.prototype.base = function(args) {
+    this.__inherit_base_deep__--;
 
-        var baseClass = null, rtn = undefined;
-        if( typeof this.__inherit_base_deep__ === 'undefined') {
-            this.__inherit_base_deep__ = 0;
-        } else {
-            this.__inherit_base_deep__++;
-        }
+    //$.dprint("d-:"+this.__inherit_deep__);
+    return rtn;
+  };
+  /**
+   * 给继承的子类添加调用父函数的方法
+   * @param {string} method 父类的函数的名称
+   * @param {arguments} args 参数，可以不提供
+   */
+  inheritClass.prototype.callBase = function (method, args) {
 
-        baseClass = inheritClass.__base_objects__[this.__inherit_base_deep__];
+    var baseClass = null, rtn = undefined;
 
-        if( typeof args === "undefined" || args == null) {
-            rtn = baseClass.call(this);
-        } else if( args instanceof Array === true) {
-            rtn = baseClass.apply(this, args);
-        } else {
-            // arguments 是Object而不是Array，需要转换。
-            rtn = baseClass.apply(this, [].slice.call(arguments));
-        }
+    if (typeof this.__inherit_deep__ === 'undefined') {
+      this.__inherit_deep__ = 0;
 
-        this.__inherit_base_deep__--;
+    } else {
+      this.__inherit_deep__++;
+      //$.dprint("d+:"+this.__inherit_deep__);
+    }
 
-        //$.dprint("d-:"+this.__inherit_deep__);
-        return rtn;
-    };
-    /**
-     * 给继承的子类添加调用父函数的方法
-     * @param {string} method 父类的函数的名称
-     * @param {arguments} args 参数，可以不提供
-     */
-    inheritClass.prototype.callBase = function(method, args) {
+    //$.dprint(this.__inherit_deep__);
+    baseClass = inheritClass.__base_objects__[this.__inherit_deep__];
 
-        var baseClass = null, rtn = undefined;
+    var med = baseClass.prototype[method];
+    if (typeof med === 'function') {
+      if (typeof args === "undefined" || args === null) {
+        rtn = med.call(this);
+      } else if (args instanceof Array === true) {
+        rtn = med.apply(this, args);
+      } else {
+        rtn = med.apply(this, [].slice.call(arguments, 1));
+      }
+    } else {
+      throw "There is no method:" + method + " in baseClass";
+    }
 
-        if( typeof this.__inherit_deep__ === 'undefined') {
-            this.__inherit_deep__ = 0;
-
-        } else {
-            this.__inherit_deep__++;
-            //$.dprint("d+:"+this.__inherit_deep__);
-        }
-
-        //$.dprint(this.__inherit_deep__);
-        baseClass = inheritClass.__base_objects__[this.__inherit_deep__];
-
-        var med = baseClass.prototype[method];
-        if( typeof med === 'function') {
-            if( typeof args === "undefined" || args === null) {
-                rtn = med.call(this);
-            } else if( args instanceof Array === true) {
-                rtn = med.apply(this, args);
-            } else {
-                rtn = med.apply(this, [].slice.call(arguments, 1));
-            }
-        } else {
-            throw "There is no method:" + method + " in baseClass";
-        }
-
-        this.__inherit_deep__--;
-        return rtn;
-    };
+    this.__inherit_deep__--;
+    return rtn;
+  };
 }
 
 function $extend(dst, src) {
-    for(var kn in src) {
-        dst[kn] = src[kn];
-    }
+  for (var kn in src) {
+    dst[kn] = src[kn];
+  }
 }
 function $bind(instance, func) {
-    return function() {
-        func.apply(instance, arguments);
-    };
+  return function () {
+    func.apply(instance, arguments);
+  };
 }
 
 function $defineProperty(obj, prop, value, writable, enumerable) {
-    //Object.defineProperty(obj, prop, {
-    //    value : value,
-    //    writable : writable ? true : false,
-    //    enumerable : enumerable ? true : false
-    //});
-    //开发阶段enumerable都为true，方便调试
-    //todo remove enumerable [true]
-    Object.defineProperty(obj, prop, {
-        value : value,
-        writable : writable ? true : false,
-        enumerable : true
-    });
+  //debug模式下enumerable都为true，方便调试。
+  Object.defineProperty(obj, prop, {
+      value : value,
+      writable : writable ? true : false,
+      enumerable : __jing_config.debug ? true : (enumerable ? true : false)
+  });
 }
 function $hasProperty(obj, prop) {
-    return obj.hasOwnProperty(prop);
+  return obj.hasOwnProperty(prop);
 }
 
 function $defineGetterSetter(obj, prop, getter, setter, configurable, enumerable) {
-    var desc = {
-        configurable : configurable ? true : false,
-        enumerable : enumerable ? true : false
-    };
-    if(getter) {
-        desc['get'] = getter;
-    }
-    if(setter) {
-        desc['set'] = setter;
-    }
-    Object.defineProperty(obj, prop, desc);
+  var desc = {
+    configurable: configurable ? true : false,
+    enumerable: enumerable ? true : false
+  };
+  if (getter) {
+    desc['get'] = getter;
+  }
+  if (setter) {
+    desc['set'] = setter;
+  }
+  Object.defineProperty(obj, prop, desc);
 }
 
 
 function $timeout(func, time) {
-    setTimeout(func, time);
+  setTimeout(func, time);
 }
 function log() {
-    console.log.apply(console, arguments);
+  console.log.apply(console, arguments);
 }
 
 
 function $ready(fn) {
-    if (document.readyState === 'complete') {
-        fn();
-    } else {
-        document.addEventListener('DOMContentLoaded', fn);
-    }
+  if (document.readyState === 'complete') {
+    fn();
+  } else {
+    document.addEventListener('DOMContentLoaded', fn);
+  }
 }
 /*
  * 在部署时，所有$assert的调用都应该删除。
  */
 function $assert(condition) {
-    if(!condition) {
-        console.trace();
-        debugger;
-        throw '$assert failure!';
-    }
+  if (!condition) {
+    console.trace();
+    debugger;
+    throw '$assert failure!';
+  }
 }
 
 
-function $JSONStringify(obj) {
+function $JSONStringify(obj, replacer, number) {
 
-    function get_origin_obj(obj) {
-        var rtn_obj = obj;
-        var i, k, tmp;
-        if($isJArray(obj) || $isArray(obj)) {
-            rtn_obj = [];
-            tmp = $isArray(obj) ? obj : obj.__.array;
-            for(i=0;i<tmp.length;i++) {
-                rtn_obj.push(get_origin_obj(tmp[i]));
-            }
-        } else if($isObject(obj)) {
-            rtn_obj = {};
-            for(k in obj) {
-                if(k !== __env_emit_name && k !== __env_prop_name) {
-                    rtn_obj[k] = get_origin_obj(obj[k]);
-                }
-            }
+  function get_origin_obj(obj) {
+    var rtn_obj = obj;
+    var i, k, tmp;
+    if ($isJArray(obj) || $isArray(obj)) {
+      rtn_obj = [];
+      tmp = $isArray(obj) ? obj : obj[__ENV_INNER__].arr;
+      for (i = 0; i < tmp.length; i++) {
+        rtn_obj.push(get_origin_obj(tmp[i]));
+      }
+    } else if ($isObject(obj)) {
+      rtn_obj = {};
+      for (k in obj) {
+        if (k !== __ENV_EMIT__ && k !== __ENV_INNER__) {
+          rtn_obj[k] = get_origin_obj(obj[k]);
         }
-
-        return rtn_obj;
+      }
     }
 
-    return JSON.stringify(get_origin_obj(obj));
+    return rtn_obj;
+  }
+
+  function get_obj(obj) {
+    if ($isJArray(obj)) {
+      obj = obj[__ENV_INNER__].arr;
+    }
+    if ($isArray(obj)) {
+      for (var i = 0; i < obj.length; i++) {
+        obj[i] = get_obj(obj[i]);
+      }
+    } else if ($isObject(obj)) {
+      for (var k in obj) {
+        obj[k] = get_obj(obj[k]);
+      }
+    }
+    return obj;
+  }
+
+  obj = __jing_config.debug ? get_origin_obj(obj) : get_obj(obj);
+
+  return __origin_stringify(obj, replacer, number);
 
 }
+//替换掉原来的stringify
+var __origin_stringify = JSON.stringify;
+JSON.stringify = $JSONStringify;
 
 function $JSONParse(str) {
-    return JSON.parse(str);
+  return JSON.parse(str);
 }
 
 function $ajax(options) {
-    var ops = $merge(options, {
-        method : 'get',
-        type : 'json',
-        data : {}
-    });
-    var xhr = new XMLHttpRequest();
+  var ops = $merge(options, {
+    method: 'get',
+    type: 'json',
+    data: {}
+  });
+  var xhr = new XMLHttpRequest();
 
 }
 
@@ -918,8 +941,16 @@ $defineProperty(__jarray_prototype, 'push', function () {
   __jarray_prototype.splice.apply(this, args);
 });
 
-$defineProperty(__jarray_prototype, 'removeAt', function () {
+$defineProperty(__jarray_prototype, 'unshift', function () {
+  var args = [0, 0].concat(__array_prototype.slice.call(arguments));
+  __jarray_prototype.splice.apply(this, args);
+});
 
+$defineProperty(__jarray_prototype, 'remove', function (item) {
+  var i = this[__ENV_INNER__].arr.indexOf(item);
+  if (i >= 0) {
+    __jarray_prototype.splice.call(this, i, 1);
+  }
 });
 
 $defineProperty(__jarray_prototype, 'splice', function () {
@@ -1492,21 +1523,27 @@ $defineProperty(__env_prototype, '$unwatch', function (listener_id) {
   //delete lt[listener_id];
   //environment_unwatch_listener(listener);
 });
-
-$defineProperty(__env_prototype, '$watch', function (var_name, callback, is_deep, data) {
+$defineProperty(__env_prototype, '$watch', function (expression, callback, is_deep, data) {
 
   if (typeof callback !== 'function') {
     throw new Error('$watch need function');
   }
 
-  if ($isObject(var_name)) {
-    return environment_watch_expression(this, var_name, callback, is_deep, data);
-  }
-
-  if (!$isString(var_name) || !__jing_regex_var.test(var_name)) {
+  if ($isObject(expression)) {
+    return environment_watch_expression(this, expression, callback, data);
+  } else if ($isString(expression)) {
+    if (__jing_regex_var.test(expression)) {
+      return environment_watch_var_str(this, expression, callback, is_deep, data);
+    } else if (__drive_view_expr_REG.test(expression)){
+      //todo
+    }
+  } else {
     throw new Error('$watch wrong format');
   }
 
+});
+
+function environment_watch_var_str(env, var_name, callback, is_deep, data) {
   var v_str = environment_var2format(var_name);
   var v_items = $map(v_str.split('.'), function (item) {
     item = item.trim();
@@ -1518,17 +1555,17 @@ $defineProperty(__env_prototype, '$watch', function (var_name, callback, is_deep
     throw new Error('$watch wrong format');
   }
 
-  var env = this.$find(v_items[0]);
+  env = env.$find(v_items[0]);
   if (!env) {
     debugger;
     throw new Error('variable ' + v_items[0] + ' not found!');
   }
 
   var emitter = new Emitter(env, v_items, callback, is_deep ? true : false, data);
-  environment_watch_items(this, v_items, emitter);
+  environment_watch_items(env, v_items, emitter);
 
   return emitter;
-});
+}
 
 function environment_unwatch_listener(listener) {
   //$each(listener.emitters, function(emitter) {
@@ -1579,7 +1616,7 @@ function environment_watch_expr_loop(expr_node, watch_array, var_tree) {
 
 }
 
-function environment_watch_expression(env, expr, callback, data, lazy_time) {
+function environment_watch_expression(env, expr, callback, data) {
   var watch_array = [];
   var var_tree = {};
 
@@ -1591,16 +1628,16 @@ function environment_watch_expression(env, expr, callback, data, lazy_time) {
 
   var listener = new ExprListener(var_tree, expr, env, callback, data);
 
-  var emitter;
+  var emitter, act_env;
   for (var i = 0; i < watch_array.length; i++) {
     var v_items = watch_array[i];
-    env = env.$find(v_items[0]);
-    if (!env) {
+    act_env = env.$find(v_items[0]);
+    if (!act_env) {
       debugger;
       throw new Error('variable ' + v_items[0] + ' not found!');
     }
-    emitter = new Emitter(env, v_items, listener);
-    environment_watch_items(env, v_items, emitter);
+    emitter = new Emitter(act_env, v_items, listener);
+    environment_watch_items(act_env, v_items, emitter);
   }
 
   //env[__ENV_INNER__].listeners[listener.id] = listener;
@@ -1965,6 +2002,14 @@ function directive_deal_j_async_env(ele, drive_module, env) {
 
 }
 
+
+directive_create('j-bind', function() {
+  return function(drive_module, directive_module, env, element, attr_value) {
+    //todo 支持除了<input>外的单向绑定
+    directive_data_bind(drive_module, directive_module, env, element, attr_value, false);
+  };
+});
+
 directive_create('j-class', function () {
   function apply_class(ele, pre, cur) {
     ele.className = (ele.className.replace(pre.trim(), '') + ' ' + cur).trim();
@@ -2180,11 +2225,6 @@ directive_create('j-model', function() {
     };
 });
 
-directive_create('j-value', function() {
-    return function(drive_module, directive_module, env, element, attr_value) {
-        directive_data_bind(drive_module, directive_module, env, element, attr_value, false);
-    };
-});
 
 directive_create('j-on', function() {
     return function(drive_module, directive_module, env, element, attr_value) {
@@ -2246,7 +2286,7 @@ directive_create('j-change', function() {
              */
             setTimeout(function() {
                 expr.exec(env);
-            });
+            }, 0);
         });
     }
 });
@@ -2382,7 +2422,6 @@ __jrepeate_prototype.update = function (new_value) {
       drive_render_element(ele, this.attr, this.module, env);
       drive_insert_before();
 
-      log(env);
       /*
        * 将多个连续的插入，使用Fragment合并后再insert，可以提升性能。
        */
@@ -3657,8 +3696,6 @@ function drive_parse_element(ele, drive_module, env) {
 }
 
 
-var __drive_view_expr_REG = /\{\{(.+?)\}\}/g;
-
 function drive_get_view_expr(txt) {
   var piece_start = 0;
   var piece_array = [];
@@ -3803,9 +3840,9 @@ function drive_view_observer(cur_value, pre_value, ele) {
 
 jing = {};
 
-
 jing.module = module_create;
 jing.require = module_require;
+jing.config = $config;
 
 jing.directive = function(name) {
     var ms = module_get(name, false);
@@ -3830,8 +3867,6 @@ jing.ready = $ready;
 
 jing.env = module_get_root_env;
 
-jing.JSONStringify = $JSONStringify;
-jing.JSONParse = $JSONParse;
 jing.each = $each;
 jing.map = $map;
 jing.filter = $filter;
@@ -3849,6 +3884,8 @@ jing.JArray = JArray;
 
 
 var __jing_regex_var = /^\s*[\w\d\$\_]+\s*(?:(?:\.[\w\d\$\_]+\s*)|(?:\[\s*\d+\s*\]\s*))*\s*$/;
+var __drive_view_expr_REG = /\{\{(.+?)\}\}/g;
+
 
 
 })();

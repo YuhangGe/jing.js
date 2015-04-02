@@ -13,7 +13,6 @@
       listener = environment_watch_expression(env, expr, on_change, element);
     }
 
-
     function on_change(val, pre_value, ele) {
       apply_show_hide(ele,  show ? (val ? true : false) : (val ? false : true));
     }

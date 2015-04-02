@@ -67,9 +67,9 @@ $defineProperty(__env_prototype, '$destroy', function () {
     var val = this[v];
 
       for (var eid in emit_map) {
-        var emitter = emit_map[eid];
+        var item = emit_map[eid];
         if ($isObject(val)) {
-          environment_deep_rm_emitter(val, emitter.id, emit_map);
+          environment_deep_rm_emitter(val, item.emitter.id, item.index);
         }
         emit_map[eid] = null;
       }

@@ -24,18 +24,31 @@ function environment_define_obj_prop(obj, prop, val) {
     if ($isArray(new_val)) {
       new_val = new JArray(new_val);
     }
-    if ($isJArray(new_val)) {
-      jarray_emit_map(new_val, emit_map, true);
-    }
-    if ($isJArray(val)) {
-      jarray_emit_map(val, emit_map, false);
-    }
 
-    var eid, item;
+    var is_nj = $isJArray(new_val);
+    var is_oj = $isJArray(val);
+
+    //if ($isJArray(new_val)) {
+    //  jarray_emit_map(new_val, emit_map, true);
+    //}
+    //if ($isJArray(val)) {
+    //  jarray_emit_map(val, emit_map, false);
+    //}
+
+    var eid, item, i, emitter;
     for (eid in emit_map) {
       item = emit_map[eid];
-      item.emitter.notify();
-      environment_update_prop(emit_map, item.index, item.emitter, val, new_val);
+      i = item.index;
+      emitter = item.emitter;
+      emitter.notify();
+
+      if (is_nj) {
+        jarray_emitter(new_val, i, emitter, true);
+      }
+      if (is_oj) {
+        jarray_emitter(val, i, emitter, false);
+      }
+      environment_update_prop(i, emitter, val, new_val);
     }
 
     val = new_val;
@@ -62,7 +75,8 @@ function environment_walk_add_or_delete_emitter(emitter, idx, route, host, is_ad
         val = new JArray(val);
       }
       if ($isJArray(val)) {
-        jarray_emit_map(val, emit_map, true);
+        //jarray_emit_map(val, emit_map, true);
+        jarray_emitter(val, idx, emitter, true);
       }
       environment_define_obj_prop(host, r, val);
     } else if ((ets = host[__ENV_EMIT__])
@@ -130,16 +144,18 @@ function environment_deep_add_emitter(obj, emitter) {
   }
 }
 
-function environment_deep_rm_emitter(obj, emit_id, emit_map) {
+function environment_deep_rm_emitter(obj, emitter) {
   var props = obj[__ENV_EMIT__];
+  var eid = emitter.id;
   if (props) {
     for (var v in props) {
       var em = props[v];
-      delete em[emit_id];
+      delete em[eid];
     }
   }
   if ($isJArray(obj)) {
-    jarray_emit_map(obj, emit_map, false);
+    //jarray_emit_map(obj, emit_map, false);
+    jarray_emitter(obj, __ENV_DEEP__,  emitter, false);
   }
   for (var k in obj) {
     if (k === __ENV_EMIT__) {
@@ -147,11 +163,11 @@ function environment_deep_rm_emitter(obj, emit_id, emit_map) {
     }
     var val = obj[k];
     if ($isObject(val)) {
-      environment_deep_rm_emitter(val, emit_id, emit_map);
+      environment_deep_rm_emitter(val, emitter);
     }
   }
 }
-function environment_update_prop(emit_map, emit_index, host_emitter, old_val, new_val) {
+function environment_update_prop(emit_index, host_emitter, old_val, new_val) {
 
 
   var emit_route = host_emitter.route;
@@ -167,7 +183,7 @@ function environment_update_prop(emit_map, emit_index, host_emitter, old_val, ne
   }
 
   if (host_emitter.deep && $isObject(old_val)) {
-    environment_deep_rm_emitter(old_val, host_emitter.id, emit_map);
+    environment_deep_rm_emitter(old_val, host_emitter.id);
   }
 
   if (host_emitter.deep && $isObject(obj)) {
@@ -194,7 +210,7 @@ function environment_define_arr_prop(p, idx) {
       var emitter = this[__ENV_EMIT__][idx];
       $assert(emitter);
       emitter.notify();
-      environment_update_prop(emitter, pv, new_val, idx, true);
+      environment_update_prop(idx, emitter, pv, new_val, true);
     }
 
     this[__ENV_INNER__].arr[idx] = new_val;
@@ -238,7 +254,7 @@ function environment_watch_items(env, var_array, emitter) {
     };
 
     if ($isJArray(val)) {
-      jarray_emit_map(val, emit_map, true);
+      jarray_emitter(val, i, emitter, true);
     }
 
     if (is_array) {
@@ -274,21 +290,27 @@ $defineProperty(__env_prototype, '$unwatch', function (listener_id) {
   //delete lt[listener_id];
   //environment_unwatch_listener(listener);
 });
-
-$defineProperty(__env_prototype, '$watch', function (var_name, callback, is_deep, data) {
+$defineProperty(__env_prototype, '$watch', function (expression, callback, is_deep, data) {
 
   if (typeof callback !== 'function') {
     throw new Error('$watch need function');
   }
 
-  if ($isObject(var_name)) {
-    return environment_watch_expression(this, var_name, callback, is_deep, data);
-  }
-
-  if (!$isString(var_name) || !__jing_regex_var.test(var_name)) {
+  if ($isObject(expression)) {
+    return environment_watch_expression(this, expression, callback, data);
+  } else if ($isString(expression)) {
+    if (__jing_regex_var.test(expression)) {
+      return environment_watch_var_str(this, expression, callback, is_deep, data);
+    } else if (__drive_view_expr_REG.test(expression)){
+      //todo
+    }
+  } else {
     throw new Error('$watch wrong format');
   }
 
+});
+
+function environment_watch_var_str(env, var_name, callback, is_deep, data) {
   var v_str = environment_var2format(var_name);
   var v_items = $map(v_str.split('.'), function (item) {
     item = item.trim();
@@ -300,17 +322,17 @@ $defineProperty(__env_prototype, '$watch', function (var_name, callback, is_deep
     throw new Error('$watch wrong format');
   }
 
-  var env = this.$find(v_items[0]);
+  env = env.$find(v_items[0]);
   if (!env) {
     debugger;
     throw new Error('variable ' + v_items[0] + ' not found!');
   }
 
   var emitter = new Emitter(env, v_items, callback, is_deep ? true : false, data);
-  environment_watch_items(this, v_items, emitter);
+  environment_watch_items(env, v_items, emitter);
 
   return emitter;
-});
+}
 
 function environment_unwatch_listener(listener) {
   //$each(listener.emitters, function(emitter) {
@@ -361,7 +383,7 @@ function environment_watch_expr_loop(expr_node, watch_array, var_tree) {
 
 }
 
-function environment_watch_expression(env, expr, callback, data, lazy_time) {
+function environment_watch_expression(env, expr, callback, data) {
   var watch_array = [];
   var var_tree = {};
 
@@ -373,16 +395,16 @@ function environment_watch_expression(env, expr, callback, data, lazy_time) {
 
   var listener = new ExprListener(var_tree, expr, env, callback, data);
 
-  var emitter;
+  var emitter, act_env;
   for (var i = 0; i < watch_array.length; i++) {
     var v_items = watch_array[i];
-    env = env.$find(v_items[0]);
-    if (!env) {
+    act_env = env.$find(v_items[0]);
+    if (!act_env) {
       debugger;
       throw new Error('variable ' + v_items[0] + ' not found!');
     }
-    emitter = new Emitter(env, v_items, listener);
-    environment_watch_items(env, v_items, emitter);
+    emitter = new Emitter(act_env, v_items, listener);
+    environment_watch_items(act_env, v_items, emitter);
   }
 
   //env[__ENV_INNER__].listeners[listener.id] = listener;

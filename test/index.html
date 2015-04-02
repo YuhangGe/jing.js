@@ -40,6 +40,7 @@
 <script type="text/javascript" src="../src/directive/directive.js"></script>
 <script type="text/javascript" src="../src/directive/j-app.js"></script>
 <script type="text/javascript" src="../src/directive/j-async-env.js"></script>
+<script type="text/javascript" src="../src/directive/j-bind.js"></script>
 <script type="text/javascript" src="../src/directive/j-class.js"></script>
 <script type="text/javascript" src="../src/directive/j-cloak.js"></script>
 <script type="text/javascript" src="../src/directive/j-directive.js"></script>
@@ -102,25 +103,25 @@
       </li>
     </ul>
   </section>
-  <!--<footer id="footer" j-show="todos.length" j-cloak>-->
-					<!--<span id="todo-count">-->
-                        <!--<strong>{{remaining_count}}</strong>{{remaining_count>1?' items left':' item left'}}-->
-					<!--</span>-->
-    <!--<ul id="filters">-->
-      <!--&lt;!&ndash; todo : 接下来完善jing.js的Parse Object功能 &ndash;&gt;-->
-      <!--&lt;!&ndash; 使得可以使用j-class='{selected : status==="all"}'这样的简便方式 &ndash;&gt;-->
-      <!--<li>-->
-        <!--<a j-class="status === 'all' ? 'selected' : ''" href="#/all">All</a>-->
-      <!--</li>-->
-      <!--<li>-->
-        <!--<a j-class="status === 'active' ? 'selected' : ''" href="#/active">Active</a>-->
-      <!--</li>-->
-      <!--<li>-->
-        <!--<a j-class="status === 'completed' ? 'selected' : ''" href="#/completed">Completed</a>-->
-      <!--</li>-->
-    <!--</ul>-->
-    <!--<button id="clear-completed" j-click="clearCompletedTodos()" j-show="completed_count > 0">Clear completed ({{completed_count}})</button>-->
-  <!--</footer>-->
+  <footer id="footer" j-show="todos.length" j-cloak>
+					<span id="todo-count">
+                        <strong>{{remaining_count}}</strong>{{remaining_count>1?' items left':' item left'}}
+					</span>
+    <ul id="filters">
+      <!-- todo : 接下来完善jing.js的Parse Object功能 -->
+      <!-- 使得可以使用j-class='{selected : status==="all"}'这样的简便方式 -->
+      <li>
+        <a j-class="status === 'all' ? 'selected' : ''" href="#/all">All</a>
+      </li>
+      <li>
+        <a j-class="status === 'active' ? 'selected' : ''" href="#/active">Active</a>
+      </li>
+      <li>
+        <a j-class="status === 'completed' ? 'selected' : ''" href="#/completed">Completed</a>
+      </li>
+    </ul>
+    <button id="clear-completed" j-click="clearCompletedTodos()" j-show="completed_count > 0">Clear completed ({{completed_count}})</button>
+  </footer>
 </section>
 <footer id="info">
   <p>Double-click to edit a todo</p>

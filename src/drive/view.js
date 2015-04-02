@@ -1,5 +1,3 @@
-var __drive_view_expr_REG = /\{\{(.+?)\}\}/g;
-
 function drive_get_view_expr(txt) {
   var piece_start = 0;
   var piece_array = [];

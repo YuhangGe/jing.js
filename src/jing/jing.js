@@ -1,9 +1,9 @@
 
 jing = {};
 
-
 jing.module = module_create;
 jing.require = module_require;
+jing.config = $config;
 
 jing.directive = function(name) {
     var ms = module_get(name, false);
@@ -28,8 +28,6 @@ jing.ready = $ready;
 
 jing.env = module_get_root_env;
 
-jing.JSONStringify = $JSONStringify;
-jing.JSONParse = $JSONParse;
 jing.each = $each;
 jing.map = $map;
 jing.filter = $filter;

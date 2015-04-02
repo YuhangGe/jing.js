@@ -14,7 +14,7 @@ jing.module('TodoApp').directive('todo-focus', function() {
 
         var listener = env.$watch(expr, function(cv, pv, ele) {
             apply_focus(ele, cv);
-        }, element);
+        }, false, element);
 
         apply_focus(element, listener.cv);
 

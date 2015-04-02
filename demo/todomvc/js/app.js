@@ -1,4 +1,9 @@
-jing.module('TodoApp')
+jing.config({
+  //debug: true
+});
+
+jing
+  .module('TodoApp')
   .init(function (module, env) {
     var Todo = module.require('Model.Todo');
     var Storage = module.require('Database.Todos');
@@ -16,7 +21,7 @@ jing.module('TodoApp')
     env.$prop = {
       new_todo: '',
       all_checked: false,
-      todos: [new Todo('dsd'), new Todo('dsd')], // Storage.fetch(),
+      todos: [], //Storage.fetch(),
       edited_todo: null,
       remaining_count: 0,
       completed_count: 0,
@@ -24,20 +29,20 @@ jing.module('TodoApp')
       cur_filter: filters.all
     };
 
+    function calcCompleted() {
+      var todos = env.todos;
+      var cn = todos.filter({completed: true}).length;
+      var rn = todos.length - cn;
+      env.all_checked = rn === 0;
+      env.remaining_count = rn;
+      env.completed_count = cn;
+    }
+
     env.$prop = {
       toggleCheckAll: function (checked) {
-        log('all', checked)
         env.todos.forEach(function (todo) {
           todo.completed = !checked;
         });
-      },
-      _calcCompleted: function () {
-        var todos = this.todos;
-        var cn = todos.filter({completed: true}).length;
-        var rn = todos.length - cn;
-        this.all_checked = rn === 0;
-        this.remaining_count = rn;
-        this.completed_count = cn;
       },
       setStatus: function (status) {
         env.status = status;
@@ -54,7 +59,7 @@ jing.module('TodoApp')
       addTodo: function () {
         var tn = env.new_todo.trim();
         if (tn !== '') {
-          env.todos.push(new Todo(tn));
+          env.todos.unshift(new Todo(tn));
         }
         env.new_todo = '';
       },
@@ -78,13 +83,19 @@ jing.module('TodoApp')
       }
     };
 
-    env.$watch('todos', function (new_value) {
-      env._calcCompleted();
-      log('todos change', env.all_checked);
-
-      //Storage.save(env.todos);
+    env.$watch('todos', function () {
+      calcCompleted();
+      Storage.save(env.todos);
     }, true);
-    env._calcCompleted();
+
+    calcCompleted();
     Router.run(env, filters);
 
+    setTimeout(function () {
+      var ttt = env.todos;
+      window.__DDD = ttt;
+      //console.log(ttt instanceof jing.JArray);
+      ttt.push(new Todo('dsds'));
+      //console.log(ttt);
+    }, 200);
   });

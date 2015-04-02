@@ -1,5 +1,5 @@
 jing.config({
-  //debug: true
+  debug: true
 });
 
 jing
@@ -86,6 +86,7 @@ jing
     env.$watch('todos', function () {
       calcCompleted();
       Storage.save(env.todos);
+      log(env.todos);
     }, true);
 
     calcCompleted();
@@ -93,9 +94,7 @@ jing
 
     setTimeout(function () {
       var ttt = env.todos;
-      window.__DDD = ttt;
       //console.log(ttt instanceof jing.JArray);
       ttt.push(new Todo('dsds'));
-      //console.log(ttt);
     }, 200);
   });

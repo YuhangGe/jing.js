@@ -1,12 +1,17 @@
 jing.module('Database').factory('Todos', function () {
   var STORAGE_KEY = 'todos-jingjs';
+  var cache = '';
+
   return {
     fetch: function () {
-      return JSON.parse(localStorage.getItem(STORAGE_KEY) || '[]');
+      cache = localStorage.getItem(STORAGE_KEY) || '[]';
+      return JSON.parse(cache);
     },
     save: function (todos) {
-      console.log(JSON.stringify(todos));
-      //localStorage.setItem(STORAGE_KEY, JSON.stringify(todos));
+      var val = JSON.stringify(todos);
+      if (val !== cache) {
+        localStorage.setItem(STORAGE_KEY, val);
+      }
     }
   }
 });

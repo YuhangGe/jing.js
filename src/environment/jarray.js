@@ -25,30 +25,25 @@ function jarray_define_prop(jarray, idx) {
 function jarray_up_bound(jarray) {
   var arr = jarray[__ENV_INNER__].arr;
   var up = jarray[__ENV_INNER__].up;
+  var ets = jarray[__ENV_INNER__].ets;
   var props = jarray[__ENV_EMIT__];
-  var deep_emitters = [];
-  jarray[__ENV_INNER__].ets.forEach(function (emit_map) {
-    for(var eid in emit_map) {
-      var item = emit_map[eid];
-      if (item.index === item.emitter.route.length - 1 && item.emitter.deep) {
-        deep_emitters.push(item.emitter);
-      }
-    }
-  });
+  var has_deep = false;
+  for (var k in ets) {
+    has_deep = true;
+    break;
+  }
   for (var i = arr.length - 1; i >= up; i--) {
-    //jarray_define_prop(jarray, i);
-    if (props && deep_emitters.length > 0 && !$hasProperty(props, i)) {
+    if (props && has_deep && !$hasProperty(props, i)) {
       var em = props[i] = {};
-      deep_emitters.forEach(function (emitter) {
-        em[emitter.id] = {
+      for(var eid in ets) {
+        em[eid] = {
           index: __ENV_DEEP__,
-          emitter: emitter
+          emitter: ets[eid]
         };
-      });
+      }
     }
     environment_define_arr_prop(jarray, i);
   }
-
 
   jarray[__ENV_INNER__].up = arr.length;
 }
@@ -268,9 +263,10 @@ $defineProperty(__jarray_prototype, 'splice', function () {
     }
     for (var eid in emit_map) {
       var item = emit_map[eid];
-      if (item.index < item.emitter.route.length - 1) {
-        environment_walk_add_or_delete_emitter(item.emitter, item.index + 1, item.emitter.route, val, is_add);
-      }
+      //if (item.index < item.emitter.route.length - 1) {
+      //  environment_walk_add_or_delete_emitter(item.emitter, item.index + 1, item.emitter.route, val, is_add);
+      //}
+      environment_deep_rm_emitter(val, item.emitter);
     }
 
   }

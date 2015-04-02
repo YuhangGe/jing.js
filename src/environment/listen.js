@@ -1,11 +1,12 @@
-function LazyListener(handler, data) {
+function LazyListener(emitters, handler, data) {
   this.id = $uid();
   this.handler = handler;
+  this.emitters = emitters;
   this.data = data;
-  this.emitters = {};
   this.pv = null;
   this.cv = null;
   this.tm = null;
+  this.destroied = false;
   this.dg = $bind(this, this._deal);
   this.changes = [];
 }
@@ -22,16 +23,21 @@ LazyListener.prototype = {
     this._notify(cur_value, pre_value, var_path);
   },
   destroy: function () {
+    if (this.destroied) {
+      return;
+    }
+    this.destroied = true;
     this.handler = null;
     this.data = null;
-    for (var k in this.emitters) {
-      this.emitters[k] = null;
-    }
-    this.emitters = null;
     this._ctm();
     this.dg = null;
     this.pv = null;
     this.cv = null;
+    for(var eid in this.emitters) {
+      this.emitters[eid].destroy();
+      this.emitters[eid] = null;
+    }
+    this.emitters = null;
   },
   _deal: function () {
     //abstract method
@@ -45,8 +51,8 @@ LazyListener.prototype = {
  * StrListener用于连接只带属性访问的字符串的监听。比如 <p>{{boy.name}},{{boy.age}}</p>
  * 但对于更复杂的情况比如带函数调用的情况，需要使用ExprListener，比如<p>boys.slice(3,4)[0].name</p>
  */
-function StrListener(var_cache, str_items, handler, data) {
-  this.base(handler, data);
+function StrListener(emitters, var_cache, str_items, handler, data) {
+  this.base(emitters, handler, data);
   this.cache = var_cache;
   this.items = str_items;
   this.vc = false;
@@ -96,8 +102,8 @@ StrListener.prototype = {
 };
 $inherit(StrListener, LazyListener);
 
-function ExprListener(var_tree, expr, env, handler, data, lazy_time) {
-  this.base(handler, data, lazy_time);
+function ExprListener(emitters, var_tree, expr, env, handler, data) {
+  this.base(emitters, handler, data);
   this.expr = expr;
   this.var_tree = var_tree;
   this.env = env;
@@ -135,13 +141,14 @@ ExprListener.prototype = {
   destroy: function () {
     this.callBase('destroy');
     this.changes.length = 0;
-    this.expr.destroy();
-    this.expr = null;
     this.env = null;
     for (var k in this.var_tree) {
-      delete this.var_tree[k];
+      this.var_tree[k] = null;
     }
     this.var_tree = null;
+    this.expr.destroy();
+    this.expr = null;
+
   }
 };
 $inherit(ExprListener, LazyListener);

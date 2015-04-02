@@ -10,6 +10,7 @@ function Emitter(env, route, handler, is_deep, data) {
   this.tm = null;
   this.deal = $bind(this, this._deal);
   this.data = data;
+  this.destroied = false;
   /*
    * current_value
    * previous_value
@@ -46,6 +47,9 @@ Emitter.prototype = {
     this.pv = this.cv;
   },
   notify: function () {
+    if (this.id === '13') {
+      debugger;
+    }
     this._ctm();
     this.tm = setTimeout(this.deal, 0);
   },
@@ -56,10 +60,15 @@ Emitter.prototype = {
     }
   },
   destroy: function () {
+    if (this.destroied) {
+      return;
+    }
+    this.destroied = true;
     this._ctm();
     this.handler = null;
     this.pv = null;
     this.cv = null;
+    environment_walk_add_or_delete_emitter(this, 0, this.route, this.env, false);
     this.env = null;
   }
 };

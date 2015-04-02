@@ -22,6 +22,7 @@ function Environment(name, parent) {
   $defineProperty(this, __ENV_INNER__, {
     prop: $bind(this, environment_reg_props),
 
+    listeners: {},
     id: $uid(),
     name: name,
     children: {},
@@ -66,15 +67,19 @@ $defineProperty(__env_prototype, '$destroy', function () {
     var emit_map = props[v];
     var val = this[v];
 
-      for (var eid in emit_map) {
-        var item = emit_map[eid];
-        if ($isObject(val)) {
-          environment_deep_rm_emitter(val, item.emitter.id, item.index);
-        }
-        emit_map[eid] = null;
+    for (var eid in emit_map) {
+      var item = emit_map[eid];
+      if ($isObject(val)) {
+        environment_deep_rm_emitter(val, item.emitter);
       }
+      emit_map[eid] = null;
+    }
 
     props[v] = null;
+  }
+
+  for (var l in inner_p.listeners) {
+    environment_unwatch_listener(inner_p.listeners[l]);
   }
 
 });
@@ -112,6 +117,7 @@ $defineProperty(__env_prototype, '$get', function (var_name) {
   if ($hasProperty(this, var_name)) {
     return this[var_name];
   } else {
+    $assert(this[__ENV_INNER__].parent);
     return this[__ENV_INNER__].parent.$get(var_name);
   }
 });
@@ -253,10 +259,7 @@ function environment_reg_props(name, value) {
 function environment_create_child(env, c_name) {
   var cd = env[__ENV_INNER__].children;
   var cs = new Environment(c_name, env);
-  /*
-   * 这里的第4个参数一定要为true，才能覆盖。
-   */
-  $defineProperty(cd, c_name, cs, true, false);
+  cd[c_name] = cs;
   return cs;
 }
 

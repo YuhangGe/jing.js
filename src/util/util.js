@@ -156,8 +156,10 @@ function $ready(fn) {
  */
 function $assert(condition) {
   if (!condition) {
-    console.trace();
-    debugger;
+    if (__jing_config.debug) {
+      debugger;
+      console.trace();
+    }
     throw '$assert failure!';
   }
 }

@@ -15,7 +15,6 @@ function JRepeat(ele, attr, drive_module, key, env, expr) {
   this.module = drive_module;
   this.frag = document.createDocumentFragment();
   var listener = environment_watch_expression(env, expr, function (cur_value, pre_value, repeater) {
-    window.__TTTT = cur_value;
     repeater.update(cur_value);
   }, this);
 
@@ -41,7 +40,7 @@ __jrepeate_prototype.update = function (new_value) {
     return;
   }
 
-  var old_array, _same;
+  var _same;
   if (old_items.length > 0 && _array.length === old_items.length) {
     _same = true;
     for (i = 0; i < _array.length; i++) {

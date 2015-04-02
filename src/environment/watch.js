@@ -282,13 +282,13 @@ function environment_var2format(var_name) {
 }
 
 $defineProperty(__env_prototype, '$unwatch', function (listener_id) {
-  //var lt = this[__ENV_INNER__].listeners,
-  //    listener = lt[listener_id];
-  //if(!listener) {
-  //    return;
-  //}
-  //delete lt[listener_id];
-  //environment_unwatch_listener(listener);
+  var lt = this[__ENV_INNER__].listeners,
+      listener = lt[listener_id];
+  if(!listener) {
+      return;
+  }
+  environment_unwatch_listener(listener);
+  delete lt[listener_id];
 });
 $defineProperty(__env_prototype, '$watch', function (expression, callback, is_deep, data) {
 
@@ -330,11 +330,12 @@ function environment_watch_var_str(env, var_name, callback, is_deep, data) {
 
   var emitter = new Emitter(env, v_items, callback, is_deep ? true : false, data);
   environment_watch_items(env, v_items, emitter);
-
+  env[__ENV_INNER__].listeners[emitter.id] = emitter;
   return emitter;
 }
 
 function environment_unwatch_listener(listener) {
+  listener.destroy(); //todo $watch函数直接返回了listener，但其destroy接口不应该暴露给用户。
   //$each(listener.emitters, function(emitter) {
   //    var idx = emitter.listeners.indexOf(listener);
   //    if(idx>=0) {
@@ -386,6 +387,7 @@ function environment_watch_expr_loop(expr_node, watch_array, var_tree) {
 function environment_watch_expression(env, expr, callback, data) {
   var watch_array = [];
   var var_tree = {};
+  var emitters = {};
 
   environment_watch_expr_loop(expr, watch_array, var_tree);
 
@@ -393,7 +395,7 @@ function environment_watch_expression(env, expr, callback, data) {
     return;
   }
 
-  var listener = new ExprListener(var_tree, expr, env, callback, data);
+  var listener = new ExprListener(emitters, var_tree, expr, env, callback, data);
 
   var emitter, act_env;
   for (var i = 0; i < watch_array.length; i++) {
@@ -405,11 +407,10 @@ function environment_watch_expression(env, expr, callback, data) {
     }
     emitter = new Emitter(act_env, v_items, listener);
     environment_watch_items(act_env, v_items, emitter);
+    emitters[emitter.id] = emitter;
   }
 
-  //env[__ENV_INNER__].listeners[listener.id] = listener;
-
   listener.cv = listener.pv = expr.exec(env);
-
+  env[__ENV_INNER__].listeners[listener.id] = listener;
   return listener;
 }

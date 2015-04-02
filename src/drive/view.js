@@ -102,9 +102,11 @@ function drive_render_view(ele, env) {
       listener = new Emitter(env, v_items, drive_view_observer, false, ele);
       environment_watch_items(env, v_items, listener);
     } else {
-      listener = new StrListener(null, null, drive_view_observer, ele);
       var e_items = [];
       var e_cache = {};
+      var e_emitters = {};
+      listener = new StrListener(e_emitters, e_cache, e_items, drive_view_observer, ele);
+
       expr.forEach(function (ex) {
         if ($isString(ex)) {
           e_items.push({
@@ -120,10 +122,9 @@ function drive_render_view(ele, env) {
           var emitter = new Emitter(env, ex, listener);
           environment_watch_items(env, ex, emitter);
           e_cache[p] = emitter.cv;
+          e_emitters[emitter.id] = emitter;
         }
       });
-      listener.cache = e_cache;
-      listener.items = e_items;
       listener._init();
     }
   } else if (expr.type === 'constant') {

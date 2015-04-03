@@ -21,7 +21,7 @@ jing
     env.$prop = {
       new_todo: '',
       all_checked: false,
-      todos: [], //Storage.fetch(),
+      todos: Storage.fetch(),
       edited_todo: null,
       remaining_count: 0,
       completed_count: 0,
@@ -83,18 +83,13 @@ jing
       }
     };
 
-    env.$watch('todos', function () {
+    env.$watch('todos', function (val) {
+        log(env.todos);
       calcCompleted();
-      Storage.save(env.todos);
-      log(env.todos);
+      //Storage.save(env.todos);
     }, true);
 
     calcCompleted();
     Router.run(env, filters);
 
-    setTimeout(function () {
-      var ttt = env.todos;
-      //console.log(ttt instanceof jing.JArray);
-      ttt.push(new Todo('dsds'));
-    }, 200);
   });

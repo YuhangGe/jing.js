@@ -5,6 +5,8 @@ var __ENV_EMIT__ = '__$jing0210emit$__';
 var __ENV_DEEP__ = 0xfffffff0;
 
 function environment_define_obj_prop(obj, prop, val) {
+  $assert(!$isJArray(obj));
+  $assert(!$isArray(obj));
   /**
    * 这里我们用闭包来将数据绑定到该属性prop上。
    * 这样可以方便地处理非Object类型的数据，而不需要像【prepare】分支里使用的复杂方法。
@@ -118,30 +120,51 @@ function environment_deep_add_emitter(obj, emitter) {
     $defineProperty(obj, __ENV_EMIT__, props);
   }
   var is_array = $isJArray(obj);
+  var val, emit_map;
   if (is_array) {
     //todo 深层次的Array的deep watch需要完善 !important
-    //jarray_emit_map(obj, )
-  }
-  for (var k in obj) {
-    if (k === __ENV_EMIT__ || k === __ENV_INNER__ || (is_array && !/^\d+$/.test(k))) {
-      continue;
+    var arr = obj[__ENV_INNER__].arr;
+    for (var i = 0; i < arr.length; i++) {
+      val = arr[i];
+      emit_map = __get_emap(props, i);
+      $assert(!$hasProperty(emit_map, emitter.id));
+      emit_map[emitter.id] = {
+        index: __ENV_DEEP__,
+        emitter: emitter
+      };
+      if ($isArray(val)) {
+        val = arr[i] = new JArray(val);
+      }
+      environment_define_arr_prop(obj, i);
+      if ($isObject(val)) {
+        environment_deep_add_emitter(val, emitter);
+      }
     }
-    var val = obj[k];
-    var emit_map = __get_emap(props, k);
-    $assert(!$hasProperty(emit_map, emitter.id));
-    emit_map[emitter.id] = {
-      index: __ENV_DEEP__,
-      emitter: emitter
-    };
-    if ($isArray(val)) {
-      val = new JArray(val);
-    }
-    environment_define_obj_prop(obj, k, val);
 
-    if ($isObject(val)) {
-      environment_deep_add_emitter(val, emitter);
+  } else {
+
+    for (var k in obj) {
+      if (k === __ENV_EMIT__) {
+        continue;
+      }
+      val = obj[k];
+      emit_map = __get_emap(props, k);
+      $assert(!$hasProperty(emit_map, emitter.id));
+      emit_map[emitter.id] = {
+        index: __ENV_DEEP__,
+        emitter: emitter
+      };
+      if ($isArray(val)) {
+        val = new JArray(val);
+      }
+      environment_define_obj_prop(obj, k, val);
+
+      if ($isObject(val)) {
+        environment_deep_add_emitter(val, emitter);
+      }
     }
   }
+
 }
 
 function environment_deep_rm_emitter(obj, emitter) {

@@ -274,6 +274,7 @@ $defineProperty(__jarray_prototype, 'splice', function () {
 
   if (delta !== 0) {
     for (i = idx + del_count; i<len; i++) {
+      log('s', i, i+delta);
       walk(i, arr[i], false);
       walk(i + delta, arr[i], true);
       jarray_notify(this, i);

@@ -1,105 +1,50 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Test</title>
-    <meta charset="UTF-8">
-    <script src="../bower_components/jquery/dist/jquery.min.js"></script>
-    <script src="../bower_components/angular/angular.min.js"></script>
-    <script src="../src/util/util.js"></script>
-    <!--<script type="text/javascript" src="../dist/jing.js"></script>-->
+  <title>Test</title>
+  <meta charset="UTF-8">
+  <script src="../bower_components/jquery/dist/jquery.min.js"></script>
+  <script src="../bower_components/angular/angular.js"></script>
+  <script src="../src/util/util.js"></script>
+  <!--<script type="text/javascript" src="../dist/jing.js"></script>-->
 
-    <script type="text/javascript">
-        var app = angular.module('MyApp', []);
-        app.factory('S1', [function() {
-            var list = [];
-            for(var i=0;i<50;i++) {
-                list.push({
-                    name : 'xiaoge:' + i,
-                    age : 24 + i,
-                    girls : [{
-                        name : 'jing:' + i + ':1',
-                        age : 24 + i
-                    }, {
-                        name : 'jing:' + i + ':2',
-                        age : 24 + i
-                    }]
-                })
-            }
-            return list;
-        }]);
-        app.controller('Ctrl', ['$scope', '$rootScope', 'S1', function($scope, $rs, S1) {
-            $scope.boy = {
-                girl : {
-                    name : 'jing',
-                    say : function() {
-                        console.log(this);
-                    }
-                }
-            };
-            $scope.list = S1;
-            $scope.index = 0;
-            $scope.pp = function() {
-                this.index-=5;
-            };
-            $scope.np = function() {
-                this.index+=5;
-            };
-            $scope.append = function() {
-                this.list.unshift({
-                    name : 'unnnn',
-                    age : 32323
-                });
-            };
+  <script type="text/javascript">
+    var app = angular.module('MyApp', []);
 
-            $scope.tt = function() {
-                var t = $scope.a[0];
-                $scope.a[0] = $scope.a[1];
-                $scope.a[1].k = 888;
-//                setTimeout(function() {
-//                    t.k = 898
-//                });
-//                t.k = 898;
+    app.controller('Ctrl', ['$scope', '$rootScope', function ($scope, $rs) {
+      $scope.a = {
+        m: 323
+      };
+      $scope.b = {
+        m: 23
+      };
+      $scope.tt = function () {
+        $scope.b.m = 89;
+      }
 
-            };
+    }]);
 
-            $scope.a = [{
-                k :1
-            }, {
-                k : 2
-            }];
+    $(function () {
+      angular.bootstrap($('#a1'), ['MyApp']);
 
-            $scope.$watch('a[0].k', function(nv, ov) {
-                log('a[0].k', nv, ov);
-            })
-            $scope.$watch('a[1].k', function(nv, ov) {
-                log('a[1].k', nv, ov);
-            })
+    });
 
-        }]).run(['$rootScope', function($rs) {
-            log('run');
-            $rs.msg = 'hello';
-        }]);
-
-        $(function() {
-            console.time('ttt');
-            angular.bootstrap($('#a1'), ['MyApp']);
-
-        });
-
-        function ct() {
-            log('check change')
-        }
-    </script>
+    function ct() {
+      log('check change')
+    }
+  </script>
 </head>
 <body>
 <div id="a1">
-    <p>{{msg}}</p>
-    <div ng-controller="Ctrl">
-        <p><button ng-click="tt()">Click</button></p>
-    </div>
-</div>
 
-<input type="checkbox" id="cccc">
+  <div ng-controller="Ctrl">
+    <p>{{a.m}}</p>
+    <p>{{b.m}}</p>
+    <p>
+      <button ng-click="tt()">Click</button>
+    </p>
+  </div>
+</div>
 
 </body>
 </html>
